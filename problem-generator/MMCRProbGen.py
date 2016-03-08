@@ -25,7 +25,7 @@ def printUsage(name):
 	print "Usage " + name + " numSectors locationsPerSector vehiclesPerSector numCargoes numProblems\n"
 	print "Example: " + name + " 2 3 1 2 100"
 
-def createSectors(numSectors, numLocations, maxCapactiy):
+def createSectors(numSectors, numLocations, maxCapactiy, sampleCapacity=True):
 	locCount = 0
 	sectors = []
 	pddl = []
@@ -43,13 +43,15 @@ def createSectors(numSectors, numLocations, maxCapactiy):
 			sect["loc"] += [loc]
 			locations += [loc]
 			connectivityMap[loc] = {}
-			#Add Sampled Capacity
-			lCap = random.randint(1, maxCapactiy)
+			lCap = maxCapactiy
+			if sampleCapacity:
+				#Add Sampled Capacity
+				lCap = random.randint(1, maxCapactiy)
 			pddl += ["(= (remaining-capacity %s) %i)" %(loc, lCap)]
 		sectors += [sect]
 	return sectors, locations, connectivityMap, pddl
 
-def createVehicles(sectors, numVehicles, connectivityMap, maxCapactiy, travelTime, loadTime, unloadTime, cost):
+def createVehicles(sectors, numVehicles, connectivityMap, maxCapactiy, travelTime, loadTime, unloadTime, cost, sampleCapacity=True):
 	vehCount = 0
 	pddl = []
 	vehicles = []
@@ -61,8 +63,10 @@ def createVehicles(sectors, numVehicles, connectivityMap, maxCapactiy, travelTim
 			vehCount+=1
 			s["veh"] += [veh]
 			vehicles += [veh]
-			#Add Sampled Capacity
-			vCap = random.randint(1, maxCapactiy)
+			vCap = maxCapactiy
+			if sampleCapacity:
+				#Add Sampled Capacity
+				vCap = random.randint(1, maxCapactiy)
 			pddl += ["(= (remaining-capacity %s) %i)" %(veh, vCap)]
 			#Add Cost
 			pddl += ["(= (cost %s) %i)" %(veh, cost)]
@@ -154,7 +158,7 @@ def linkSectors(sect1, sect2, travelTime, loadTime, unloadTime, connectivityMap)
 		pddl += ["(= (unload-time %s %s) %i)" %(v, loc1, unloadTime)]
 	return pddl
 
-def determineTimeWindows(deliveryInfo, connectivityMap):
+def determineTimeWindows(deliveryInfo, connectivityMap, travelTime, tightness, sampleStartTime=True):
 	pddl = []
 	#Iterate through deliveries
 	for c in deliveryInfo:
@@ -172,15 +176,19 @@ def determineTimeWindows(deliveryInfo, connectivityMap):
 				#Add weights
 				g.add_edge(l, d, connectivityMap[l][d])
 
-		#Solve shortest path
+		#Solve shortest path for cargo delivery
 		dijkstra.dijkstra(g, g.get_vertex(origin), g.get_vertex(destination))
 		target = g.get_vertex(destination)
 		path = [target.get_id()]
 		dijkstra.shortest(target, path)
 		minWindow = target.get_distance()
-		#print 'The shortest path : %s' %(path[::-1])
-		windowStart = random.randint(0, minWindow/2)
-		windowEnd = random.randint(windowStart+minWindow, windowStart+(2*minWindow))
+		#Add time for possible pre-position
+		minWindow += travelTime
+		#Determine time window
+		windowStart = 0
+		if sampleStartTime:
+			windowStart = random.randint(0, minWindow/2)
+		windowEnd = random.randint(windowStart+minWindow, windowStart+(tightness*minWindow))
 		if windowStart == 0:
 			pddl += ["(available %s)"%c]
 		else:
