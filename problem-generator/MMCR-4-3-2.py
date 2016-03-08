@@ -1,6 +1,6 @@
 #! /usr/bin/python
 #Author: Tony Allard
-#Date: 14 May 2014
+#Date: 14 May 2016
 #Description: A Python script for generating random the MMCR problems as described below
 
 #Usage: MMCR-4-3-2.py MaxCargo NumProblems
