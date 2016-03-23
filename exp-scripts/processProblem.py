@@ -2,6 +2,7 @@
 
 import sys
 import subprocess
+import socket
 from timeit import Timer
 from shutil import move
 
@@ -21,7 +22,13 @@ probFile = probFullPath.rsplit('/', 1)[1]
 proc_probFile = PROC_FOLDER+probFile
 
 #Move problem to ensure exclusive access
-move(probFullPath, proc_probFile)
+try:
+	move(probFullPath, proc_probFile)
+except IOError:
+	print "Another Process has %s"%probFile
+	sys.exit(0)
+
+print "Processing %s on %s" %(probFile, socket.gethostname())
 
 #Ouput Logging
 logFileName = probFile + ".txt"
@@ -32,14 +39,12 @@ log = open(logFullQual, "a")
 reps=1
 stdout = log
 stderr = log
-parameters = "-Th %s %s"%(DOMAIN_FILE, proc_probFile)
+parameters = "-h %s %s"%(DOMAIN_FILE, proc_probFile)
 external_command = "(cd %s && %s && %s %s %s)"%(COLIN_LOC, MEMLIMIT_CMD, TIMEOUT_CMD, COLIN_EXEC_LOC, parameters)
 call_args = """['%s'], stdout=stdout, stderr=stderr"""%(external_command)
 
-print "Processing %s" %probFile
-
 #Run Experiment
-log.write("===Processing %s===\n"%proc_probFile)
+log.write("===Processing %s on %s===\n"%(proc_probFile, socket.gethostname()))
 log.write("===with Command %s===\n" %external_command)
 t = Timer(stmt = """subprocess.call(%s, shell=True)"""%call_args, setup="""import subprocess; stdout=open(\"%s\", 'a'); stderr=stdout"""%logFullQual)
 timeTaken = t.timeit(reps)
