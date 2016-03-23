@@ -102,7 +102,7 @@ def createCargo(numCargo, size):
 		pddl += ["(= (size %s) %i)" %(car, size)]
 	return cargoes, pddl
 
-def getCargoLocations(cargoes, locations):
+def getRandomCargoLocations(cargoes, locations):
 	pddl = []
 	goals = []
 	deliveryInfo = {}
@@ -114,6 +114,17 @@ def getCargoLocations(cargoes, locations):
 		pddl += ["(at %s %s)"%(c, origin)]
 		goals += ["(at %s %s)"%(c, destination)]
 		deliveryInfo[c] = [origin, destination]
+	return goals, deliveryInfo, pddl
+
+def getCargoLocations(cargo, originSect, destSect):
+	pddl = []
+	goals = []
+	deliveryInfo = {}
+	origin = random.choice(originSect["loc"])
+	destination = random.choice(destSect["loc"])
+	pddl = ["(at %s %s)"%(cargo, origin)]
+	goals = ["(at %s %s)"%(cargo, destination)]
+	deliveryInfo[cargo] = [origin, destination]
 	return goals, deliveryInfo, pddl
 
 def getVehicleOrigin(vehicles, sectors):
@@ -158,7 +169,7 @@ def linkSectors(sect1, sect2, travelTime, loadTime, unloadTime, connectivityMap)
 		pddl += ["(= (unload-time %s %s) %i)" %(v, loc1, unloadTime)]
 	return pddl
 
-def determineTimeWindows(deliveryInfo, connectivityMap, travelTime, tightness, sampleStartTime=True):
+def determineTimeWindows(deliveryInfo, connectivityMap, travelTime, tightness, sampleStartTime=True, sampleEndTime=True):
 	pddl = []
 	#Iterate through deliveries
 	for c in deliveryInfo:
@@ -188,19 +199,23 @@ def determineTimeWindows(deliveryInfo, connectivityMap, travelTime, tightness, s
 		windowStart = 0
 		if sampleStartTime:
 			windowStart = random.randint(0, minWindow/2)
-		windowEnd = random.randint(windowStart+minWindow, windowStart+(tightness*minWindow))
+		windowEnd = windowStart+(tightness*minWindow)
+		if sampleEndTime:
+			windowEnd = random.randint(windowStart+minWindow, windowStart+(tightness*minWindow))
 		if windowStart == 0:
 			pddl += ["(available %s)"%c]
 		else:
-			pddl += ["(at %i (available %s))"%(windowStart, c)]
-		pddl += ["(at %i (not (available %s)))"%(windowEnd, c)]
+			pddl += ["(at %f (available %s))"%(windowStart, c)]
+		pddl += ["(at %f (not (available %s)))"%(windowEnd, c)]
 	return pddl
 
 def saveProblem(name, locations, vehicles, cargoes, pddl, goals):
+	probName = name.split("/")[-1]
 	fileName = "".join([name, ".pddl"])
+	print fileName
 	f = open(fileName, 'w')
 	#Write header
-	f.write("(define (problem %s)\n"%name)
+	f.write("(define (problem %s)\n"%probName)
 	f.write("\t(:domain multi-modal-cargo-routing)\n")
 	f.write("\t(:objects\n")
 	#Write vehicle objs
