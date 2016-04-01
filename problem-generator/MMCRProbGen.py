@@ -1,4 +1,7 @@
 #! /usr/bin/python
+
+#Provides all the helper methods for creating MMCR Problems
+
 import sys
 import random
 import dijkstra
@@ -25,7 +28,7 @@ def printUsage(name):
 	print "Usage " + name + " numSectors locationsPerSector vehiclesPerSector numCargoes numProblems\n"
 	print "Example: " + name + " 2 3 1 2 100"
 
-def createSectors(numSectors, numLocations, maxCapactiy, sampleCapacity=True):
+def createSectors(numSectors, numLocations):
 	locCount = 0
 	sectors = []
 	pddl = []
@@ -43,15 +46,21 @@ def createSectors(numSectors, numLocations, maxCapactiy, sampleCapacity=True):
 			sect["loc"] += [loc]
 			locations += [loc]
 			connectivityMap[loc] = {}
-			lCap = maxCapactiy
-			if sampleCapacity:
-				#Add Sampled Capacity
-				lCap = random.randint(1, maxCapactiy)
-			pddl += ["(= (remaining-capacity %s) %i)" %(loc, lCap)]
+			
 		sectors += [sect]
 	return sectors, locations, connectivityMap, pddl
 
-def createVehicles(sectors, numVehicles, connectivityMap, maxCapactiy, travelTime, loadTime, unloadTime, cost, sampleCapacity=True):
+def addLocationCapacity(locations, maxCapactiy, sampleCapacity=False):
+	pddl = []
+	for l in locations:
+		lCap = maxCapactiy
+		if sampleCapacity:
+			#Add Sampled Capacity
+			lCap = random.randint(1, maxCapactiy)
+		pddl.append("(= (remaining-capacity %s) %i)" %(l, lCap))
+	return pddl
+
+def createVehicles(sectors, numVehicles, connectivityMap, travelTime, loadTime, unloadTime, cost):
 	vehCount = 0
 	pddl = []
 	vehicles = []
@@ -63,11 +72,6 @@ def createVehicles(sectors, numVehicles, connectivityMap, maxCapactiy, travelTim
 			vehCount+=1
 			s["veh"] += [veh]
 			vehicles += [veh]
-			vCap = maxCapactiy
-			if sampleCapacity:
-				#Add Sampled Capacity
-				vCap = random.randint(1, maxCapactiy)
-			pddl += ["(= (remaining-capacity %s) %i)" %(veh, vCap)]
 			#Add Cost
 			pddl += ["(= (cost %s) %i)" %(veh, cost)]
 			#Make Available
@@ -88,6 +92,16 @@ def createVehicles(sectors, numVehicles, connectivityMap, maxCapactiy, travelTim
 					connectivityMap[d][l] = travelTime
 				i+=1
 	return vehicles, pddl
+
+def addVehicleCapacity(vehicles, maxCapactiy, sampleCapacity=True):
+	pddl = []
+	for v in vehicles:
+		vCap = maxCapactiy
+		if sampleCapacity:
+			#Add Sampled Capacity
+			vCap = random.randint(1, maxCapactiy)
+		pddl.append("(= (remaining-capacity %s) %i)" %(v, vCap))
+	return pddl
 
 def createCargo(numCargo, size):
 	cargoes = []
@@ -129,11 +143,13 @@ def getCargoLocations(cargo, originSect, destSect):
 
 def getVehicleOrigin(vehicles, sectors):
 	pddl = []
+	vehicleOriginMap = {}
 	for s in sectors:
 		for v in s["veh"]:
 			origin = random.choice(s["loc"])
+			vehicleOriginMap[v] = origin
 			pddl += ["(at %s %s)"%(v, origin)]
-	return pddl
+	return pddl, vehicleOriginMap
 
 def linkLocations (loc1, loc2, vehicle, travelTime):
 	pddl = []
@@ -169,13 +185,27 @@ def linkSectors(sect1, sect2, travelTime, loadTime, unloadTime, connectivityMap)
 		pddl += ["(= (unload-time %s %s) %i)" %(v, loc1, unloadTime)]
 	return pddl
 
-def determineTimeWindows(deliveryInfo, connectivityMap, travelTime, tightness, sampleStartTime=True, sampleEndTime=True):
+def isVehicleAtLocation(location, vehicleOriginMap):
+	for v in vehicleOriginMap:
+		if vehicleOriginMap[v] == location:
+			return True
+	return False
+
+def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travelTime, loadTime, unloadTime, tightness, sampleStartTime=True, sampleEndTime=True, useShortestPrePosition=True):
 	pddl = []
 	#Iterate through deliveries
 	for c in deliveryInfo:
 		origin = deliveryInfo[c][0]
 		destination = deliveryInfo[c][1]
+		#solve prePosition Problem
+		isVehicleAtOrigin = isVehicleAtLocation(origin, vehicleOriginMap)
+		prePositionTime = travelTime
+		if isVehicleAtOrigin and useShortestPrePosition:
+			prePositionTime = 0
 
+		#Solve Delivery Problem
+		#This includes load/unload times for cargo
+		#exchange because of how the connectivity map is built
 		#build network
 		g = dijkstra.Graph()
 		for l in connectivityMap:
@@ -193,15 +223,18 @@ def determineTimeWindows(deliveryInfo, connectivityMap, travelTime, tightness, s
 		path = [target.get_id()]
 		dijkstra.shortest(target, path)
 		minWindow = target.get_distance()
-		#Add time for possible pre-position
-		minWindow += travelTime
+		
+		#Add time for pre-position
+		#and for inital load and final unload
+		minWindow += prePositionTime + loadTime + unloadTime
+		
 		#Determine time window
 		windowStart = 0
 		if sampleStartTime:
-			windowStart = random.randint(0, minWindow/2)
+			windowStart = random.uniform(0, minWindow/2.0)
 		windowEnd = windowStart+(tightness*minWindow)
 		if sampleEndTime:
-			windowEnd = random.randint(windowStart+minWindow, windowStart+(tightness*minWindow))
+			windowEnd = random.uniform(windowStart+minWindow, windowStart+(tightness*minWindow))
 		if windowStart == 0:
 			pddl += ["(available %s)"%c]
 		else:
@@ -254,47 +287,4 @@ def saveProblem(name, locations, vehicles, cargoes, pddl, goals):
 	#Write metric
 	f.write("\t(:metric minimize (total-cost))\n")
 	f.write(")")
-	f.close	
-
-def main(args):
-	DEFAULT_CAPACITY = 3
-	DEFAULT_CARGO_SIZE = 1
-	DEFAULT_TRAVEL_TIME = 2
-	DEFAULT_LOAD_TIME = 2
-	DEFAULT_UNLOAD_TIME = 2
-	DEFAULT_COST = 2
-	
-	output = []
-	params = dict()
-	try:
-		params = parseArgs(args[1:])
-	except:
-		printUsage(args[0])
-		sys.exit(1)
-
-	#Create Sectors
-	sectors, locations, connectivityMap, pddl = createSectors(params[0], params[1], DEFAULT_CAPACITY)
-	output += pddl
-
-	#Create Vehicles
-	vehicles, pddl2 = createVehicles(sectors, params[2], connectivityMap, DEFAULT_CAPACITY, DEFAULT_TRAVEL_TIME, DEFAULT_LOAD_TIME,	DEFAULT_UNLOAD_TIME, DEFAULT_COST)
-	pddl+=pddl2
-
-	#Create Cargo
-	cargoes, pddl2 = createCargo(params[3], DEFAULT_CARGO_SIZE)
-	pddl += pddl2
-
-	#randomly select vehicle origin
-	pddl += getVehicleOrigin(vehicles, sectors)
-
-	#randomly select origin and destination for for cargoes
-	goals, deliveryInfo, pddl2 = getCargoLocations(cargoes, locations)
-	pddl += pddl2
-
-	#Need to pick random time windows
-
-	print "\n".join(pddl)
-
-#Run Main Function
-if __name__ == "__main__":
-	main(sys.argv)
+	f.close
