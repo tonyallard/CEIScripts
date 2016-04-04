@@ -69,10 +69,10 @@ def extractStatesEvaluated(logFile):
 	return statesEvaluated, hStatesEvaluated, statesEvaluated+hStatesEvaluated
 
 def main(args):
-	csvFile = open('data.csv', 'w')
+	csvFile = open('states-data.csv', 'w')
 	noSolnProbFile = open('exp-noSoln.log', 'w')
-	csvFile.write("Problem, States, H-States, Total\n")
-	path = "/mnt/data/logs/"
+	csvFile.write("Problem, Cargo, Tightness, Label, Search States, Heuristic States, Total States\n")
+	path = "/mnt/data/160404-Colin-TRH-logs/"
 	probNoSolnCount = 0
 	avgStates = 0.0
 	avgHStates = 0.0
@@ -81,12 +81,15 @@ def main(args):
 	hStateCount = 0
 	totalCount = 0
 	for filename in os.listdir(path):
+		cargo = filename[12:13]
+		tightness = "%s.%s"%(filename[14:15], filename[16:filename.rfind("-")])
+		probDesc = "%s:%s"%(cargo, tightness)
 		f = open(path+filename, 'r')
 		states, hStates, total = extractStatesEvaluated(f)
 		if states != -1:
 			stateCount += 1
 			avgStates = (avgStates * ((stateCount - 1) / float(stateCount))) + (states / float(stateCount))
-			csvFile.write("%s, %i, %i, %i\n"%(filename, states, hStates, total))
+			csvFile.write("%s, %s, %s, %s, %i, %i, %i\n"%(filename, cargo, tightness, probDesc, states, hStates, total))
 			if hStates != -1:
 				hStateCount += 1
 				avgHStates = (avgHStates * ((hStateCount - 1) / float(hStateCount))) + (hStates / float(hStateCount))
@@ -97,7 +100,7 @@ def main(args):
 			noSolnProbFile.write("%s\n"%filename)
 		#print ("%s searched %i states and %i states in the heuristic (%i total)"%(filename, states, hStates, total))
 	print ("%i problems evaluated. Average of %f states evaluated (%f search and %f heuristic on average. %i were unsolvable)"%(stateCount, avgTotal, avgStates, avgHStates, probNoSolnCount))
-	csvFile.write("%i, %f, %f, %f\n"%(stateCount, avgTotal, avgStates, avgHStates))
+	csvFile.write("%i, , , , %f, %f, %f\n"%(stateCount, avgTotal, avgStates, avgHStates))
 	csvFile.close()
 	noSolnProbFile.close()
 #Run Main Function
