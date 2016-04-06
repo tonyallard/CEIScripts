@@ -8,6 +8,7 @@
 import sys
 import os
 import re
+import AnalysisCommon
 
 HEURISTIC_STATE_DELIM = "Heuristic States Eval:"
 STATE_DELIM = "#; States evaluated:"
@@ -70,9 +71,13 @@ def extractStatesEvaluated(logFile):
 
 def main(args):
 	csvFile = open('states-data.csv', 'w')
-	noSolnProbFile = open('exp-noSoln.log', 'w')
-	csvFile.write("Problem, Cargo, Tightness, Label, Search States, Heuristic States, Total States\n")
+	csvFile.write("Problem, Cargo, Tightness, Problem Num, Label, Search States, Heuristic States, Total States\n")
+
 	path = "/mnt/data/160404-Colin-TRH-logs/"
+	#path = "/mnt/data/160406-Colin-RPG-logs-repaired/"
+	
+	totalEvalCount = 0
+
 	probNoSolnCount = 0
 	avgStates = 0.0
 	avgHStates = 0.0
@@ -81,15 +86,26 @@ def main(args):
 	hStateCount = 0
 	totalCount = 0
 	for filename in os.listdir(path):
-		cargo = filename[12:13]
-		tightness = "%s.%s"%(filename[14:15], filename[16:filename.rfind("-")])
-		probDesc = "%s:%s"%(cargo, tightness)
+
+		#Check if this is a problem log
+		if not AnalysisCommon.isProblemLog(filename):
+			continue
+
 		f = open(path+filename, 'r')
-		states, hStates, total = extractStatesEvaluated(f)
+		totalEvalCount += 1
+
+
+		#Buffer file to iterate over many times
+		fileBuffer = AnalysisCommon.bufferFile(f)
+		
+		#Extract particular properties of file
+		cargo, tightness, probNumber, probDesc = AnalysisCommon.extractProblemProperties(filename)
+
+		states, hStates, total = extractStatesEvaluated(fileBuffer)
 		if states != -1:
 			stateCount += 1
 			avgStates = (avgStates * ((stateCount - 1) / float(stateCount))) + (states / float(stateCount))
-			csvFile.write("%s, %s, %s, %s, %i, %i, %i\n"%(filename, cargo, tightness, probDesc, states, hStates, total))
+			csvFile.write("%s, %i, %f, %i, %s, %i, %i, %i\n"%(filename, cargo, tightness, probNumber, probDesc, states, hStates, total))
 			if hStates != -1:
 				hStateCount += 1
 				avgHStates = (avgHStates * ((hStateCount - 1) / float(hStateCount))) + (hStates / float(hStateCount))
@@ -97,12 +113,15 @@ def main(args):
 				avgTotal = (avgTotal * ((totalCount - 1) / float(totalCount))) + (total / float(totalCount))
 		else:
 			probNoSolnCount += 1
-			noSolnProbFile.write("%s\n"%filename)
-		#print ("%s searched %i states and %i states in the heuristic (%i total)"%(filename, states, hStates, total))
-	print ("%i problems evaluated. Average of %f states evaluated (%f search and %f heuristic on average. %i were unsolvable)"%(stateCount, avgTotal, avgStates, avgHStates, probNoSolnCount))
-	csvFile.write("%i, , , , %f, %f, %f\n"%(stateCount, avgTotal, avgStates, avgHStates))
+			if (AnalysisCommon.checkArgs("-f", args)):
+				#Include Fails in CSV
+				csvFile.write("%s, %i, %f, %i, %s, , , \n"%(filename, cargo, tightness, probNumber, probDesc))
+
+	print "%i problems evaluated (%i were valid)."%(totalEvalCount, stateCount)
+	print "Average of %f states evaluated (%f search and %f heuristic on average. %i were not solved)"%(avgTotal, avgStates, avgHStates, probNoSolnCount)
+	csvFile.write("%i, , , , , %f, %f, %f\n"%(stateCount, avgTotal, avgStates, avgHStates))
 	csvFile.close()
-	noSolnProbFile.close()
+
 #Run Main Function
 if __name__ == "__main__":
 	main(sys.argv)

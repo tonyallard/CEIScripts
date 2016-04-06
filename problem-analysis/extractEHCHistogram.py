@@ -8,6 +8,7 @@
 import sys
 import os
 import re
+import collections
 
 EHC_DELIM = "#; EHC Performance Histogram:"
 DEPTH_DELIM = "#; "
@@ -29,7 +30,8 @@ def main(args):
 	csvFile = open('ehc-data.csv', 'w')
 	csvFile.write("Depth, Count\n")
 	histogram = {}
-	path = "/mnt/data/160404-Colin-TRH-logs/"
+	#path = "/mnt/data/160404-Colin-TRH-logs/"
+	path = "/mnt/data/160406-Colin-RPG-logs-repaired/"
 	avgDepth = 0
 	probCount = 0
 	for filename in os.listdir(path):
@@ -44,6 +46,8 @@ def main(args):
 					histogram[x] = hist[x]
 
 
+	#Sort histogram
+	histogram = collections.OrderedDict(sorted(histogram.items()))
 	#Save histogram to file
 	for x in histogram:
 		csvFile.write("%i, %i\n"%(x, histogram[x]))
