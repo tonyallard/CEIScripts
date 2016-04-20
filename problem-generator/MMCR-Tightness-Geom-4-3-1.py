@@ -47,23 +47,6 @@ import os
 import random
 import MMCRProbGen
 
-def parseArgs(args):
-	argName = ("Max Cargo", "Max Tightness", "Num Problems", "Max Geometric Enumerations", "Path")
-	if (len(args) != 5):
-		print "Error: Incorrect number of arguments."
-		raise SyntaxError
-	i = 0
-	params = dict()
-	for x in args[:-1]:
-		try:
-			params[i] = int(x)
-		except ValueError:
-			print "Error: %s must be an integer" %argName[i]
-			raise SyntaxError
-		i+=1
-	params[len(args)-1]=str(args[-1])
-	return params
-
 def printUsage(name):
 	print "Multi-Modal Cargo Routing (MMCR) Problem Generator"
 	print "By releasing this code we imply no warranty as to its reliability and its use is entirely at your own risk.\n"
@@ -90,18 +73,19 @@ def main(args):
 	DEFAULT_COST = 2
 	
 	output = []
+	argName = ("Max Cargo", "Max Tightness", "Num Problems", "Max Geometric Enumerations", "Path")
 	params = dict()
 	try:
-		params = parseArgs(args[1:])
+		params = MMCRProbGen.parseArgs(args[1:], argName)
 	except:
 		printUsage(args[0])
 		sys.exit(1)
 
-	numProblems = params[2]
-	maxCargo = params[0]
-	maxTightness = params[1]
-	maxGeom = params[3]
-	path = params[4]
+	numProblems = params[argName[2]]
+	maxCargo = params[argName[0]]
+	maxTightness = params[argName[1]]
+	maxGeom = params[argName[3]]
+	path = params[argName[4]]
 
 	numSectors = 4
 	numLocations = 3

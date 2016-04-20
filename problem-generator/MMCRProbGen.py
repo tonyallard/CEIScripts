@@ -6,27 +6,42 @@ import sys
 import random
 import dijkstra
 
-def parseArgs(args):
-	argName = ("Number of Sectors", "Locations per Sector", "Vehicles per Sector", "Number of Cargo in Problem", "Number of Problems")
-	if (len(args) != 5):
-		print "Error: Incorrect number of arguments."
+def isfloat(x):
+    try:
+        a = float(x)
+    except ValueError:
+        return False
+    else:
+        return True
+
+def isint(x):
+    try:
+        a = float(x)
+        b = int(a)
+    except ValueError:
+        return False
+    else:
+        return a == b
+
+def parseArgs(args, argsDesc):
+	if (len(args) != len(argsDesc)):
+		print "Error: Incorrect number of arguments. Requires %i given %i."%(len(argsDesc), len(args))
 		raise SyntaxError
 	i = 0
 	params = dict()
 	for x in args:
 		try:
-			params[i] = int(x)
+			if isint(x):
+				params[argsDesc[i]] = int(x)
+			elif isfloat(x):
+				params[argsDesc[i]] = float(x)
+			else:
+				params[argsDesc[i]] = str(x)
 		except ValueError:
-			print "Error: %s must be an integer" %argName[i]
+			print "Error reading parameter %i with value of %s" %(i, argName[i])
 			raise SyntaxError
 		i+=1
 	return params
-
-def printUsage(name):
-	print "Multi-Modal Cargo Routing (MMCR) Problem Generator"
-	print "By releasing this code we imply no warranty as to its reliability and its use is entirely at your own risk.\n"
-	print "Usage " + name + " numSectors locationsPerSector vehiclesPerSector numCargoes numProblems\n"
-	print "Example: " + name + " 2 3 1 2 100"
 
 def createSectors(numSectors, numLocations):
 	locCount = 0
