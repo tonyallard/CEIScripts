@@ -54,15 +54,15 @@ def printUsage(name):
 	print "Example: " + name + " 3 2 100 5 /Path/To/Problems"
 
 def linkSectors(sectors, travelTime, loadTime, unloadTime, connectivityMap):
-	pddl = []
+	pddl = [";Sector bridge connections"]
 	#link sectors 0 and 1
-	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[1], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[1], connectivityMap, travelTime, loadTime, unloadTime)
 	#link sectors 0 and 2
-	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[2], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[2], connectivityMap, travelTime, loadTime, unloadTime)
 	#link sectors 1 and 3
-	pddl += MMCRProbGen.linkSectors(sectors[1], sectors[3], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[1], sectors[3], connectivityMap, travelTime, loadTime, unloadTime)
 	#link sectors 2 and 3
-	pddl += MMCRProbGen.linkSectors(sectors[2], sectors[3], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[2], sectors[3], connectivityMap, travelTime, loadTime, unloadTime)
 	return pddl
 
 def main(args):
@@ -132,7 +132,7 @@ def main(args):
 			pddl2 += pddl		
 			tightness = 1 + ((maxTightness - 1) * (1.0 / (2 ** seq)))
 			#Create Random Time Windows
-			pddl2 += MMCRProbGen.determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, DEFAULT_TRAVEL_TIME, DEFAULT_LOAD_TIME, DEFAULT_LOAD_TIME, tightness, False, False)
+			pddl2 += MMCRProbGen.determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, DEFAULT_TRAVEL_TIME, DEFAULT_LOAD_TIME, DEFAULT_UNLOAD_TIME, tightness, False, False)
 
 			#Save problem to file
 			name = "Prob-%i-%i-%i-%i-%s-%i"%(len(sectors), len(locations), len(vehicles), len(cargoes), str(tightness).replace('.', '_'), p)
