@@ -1,0 +1,84 @@
+#!/bin/bash
+#This script runs the colin2 Planner with a series of test problems from the logistics domain
+
+#Initialise global constants
+TODAY=`date  +%y%m%d_%H:%M:%S` #Now
+
+MAIN_FOLDER=/home/tony/dev #Root Folder
+
+#Location of log files
+SYS_LOG_FILE_NAME="${TODAY}_COLIN_SYS_LOG.log"
+EXP_LOG_FILE_NAME="${TODAY}_COLIN_EXP_LOG.log"
+OUTPUT_LOC="${MAIN_FOLDER}/exp-output/colin"
+SYS_LOG_FILE_LOC="${OUTPUT_LOC}/${SYS_LOG_FILE_NAME}"
+EXP_LOG_FILE_LOC="${OUTPUT_LOC}/${EXP_LOG_FILE_NAME}"
+
+#Location of input files
+PDDL_FILE_LOC="${MAIN_FOLDER}/PDDL/1-Full-Specification"
+DOMAIN_FILE="${PDDL_FILE_LOC}/LogisticsDomain.pddl"
+
+#Location of Planner
+PLANNER_LOC="${MAIN_FOLDER}/Planners/colin2/release/colin"
+PLANNER="${PLANNER_LOC}/colin-clp"
+
+typeset -i NUM_ITR=10
+
+#Run the Planner to solve one instance of the problem
+solveTime=0
+solve() {
+	typeset -i begins ends	
+	let begins=0 ends=0
+	begin=`date  +%y/%m/%d_%H:%M:%S`
+	begins=$(date +%s)
+	#Actually run the current problem on the planner
+	{TIMEFORMAT="%U,%S"; time $1 -T $2 $3 >> sys.txt 2>>&1 } >> a.txt 2>>&1
+	end=`date  +%y/%m/%d_%H:%M:%S` 
+	ends=$(date +%s)
+	diff=$(($ends-$begins))
+	solveTime=$diff
+}
+
+#Run a test problem through a number of iterations
+runTest() {
+	echo "$3" >> ${EXP_LOG_FILE_LOC}	
+	typeset -i i avgProblemTime
+	let i=1 avgProblemTime=0
+	while ((i <= $4)); 
+	do
+		echo "-------------------iteration $i-------------------"
+		solve $1 $2 $3
+		echo ""
+		echo "$end Problem iteration complete. ${solveTime}s to solve"
+		let avgProblemTime=$((avgProblemTime+solveTime))
+		let i++;
+	done
+	echo "---"
+	let avgProblemTime=$(($avgProblemTime/$4))
+	echo "Average computation time for $3 was ${avgProblemTime}s"
+}
+
+#Runs Planner through problem scenarios for specified iterations. 
+runPlanner() {
+	echo "Using domain file $2"
+	for PROBLEM_FILE in $3/p*.pddl
+	do
+		echo "---------------Running Problem ${PROBLEM_FILE}---------------"
+		runTest $1 $2 ${PROBLEM_FILE} $4
+	done
+	echo "--------------------------------------------------"	
+}
+
+#Main Function
+#Pipe stdout and stderr to log file
+exec > "${SYS_LOG_FILE_LOC}" 2>&1
+start=`date  +%y/%m/%d_%H:%M:%S`
+starts=$(date +%s)
+
+#Begin Sim
+echo "$start Beginning Simulation"
+runPlanner ${PLANNER} ${DOMAIN_FILE} ${PDDL_FILE_LOC} ${NUM_ITR}
+
+stop=`date  +%y/%m/%d_%H:%M:%S`
+stops=$(date +%s)
+diff=$(( $stops - $starts ))
+echo "$stop Simulation Complete. Total simulation time ${diff}s"
