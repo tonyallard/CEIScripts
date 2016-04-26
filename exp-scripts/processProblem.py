@@ -41,7 +41,10 @@ log = open(logFullQual, "a", bufsize)
 reps=1
 stdout = log
 stderr = log
-parameters = "-3 %s %s"%(DOMAIN_FILE, proc_probFile)
+#Colin-TRH
+parameters = "-h %s %s"%(DOMAIN_FILE, proc_probFile)
+#Colin-RPG
+#parameters = "-3 %s %s"%(DOMAIN_FILE, proc_probFile)
 external_command = "(cd %s && %s && %s %s %s)"%(COLIN_LOC, MEMLIMIT_CMD, TIMEOUT_CMD, COLIN_EXEC_LOC, parameters)
 call_args = """['%s'], stdout=stdout, stderr=stderr"""%(external_command)
 
