@@ -5,6 +5,7 @@
 import sys
 import random
 import dijkstra
+from RouteSearch import BreadthFirst
 
 def isfloat(x):
     try:
@@ -61,7 +62,8 @@ def createSectors(numSectors, numLocations):
 			sect["loc"].append(loc)
 			locations.append(loc)
 			connectivityMap[loc] = {}
-			
+
+		#Add sector to list
 		sectors.append(sect)
 	return sectors, locations, connectivityMap, pddl
 
@@ -101,10 +103,7 @@ def createVehicles(sectors, numVehicles, connectivityMap, travelTime, loadTime, 
 				pddl.append("(= (unload-time %s %s) %i)" %(veh, l, unloadTime))
 				#Add Travel Times
 				for d in s["loc"][i+1:]:
-					pddl += linkLocations(l, d, veh, travelTime)
-					#Add conectivity
-					connectivityMap[l][d] = travelTime
-					connectivityMap[d][l] = travelTime
+					pddl += linkLocations(l, d, veh, connectivityMap, travelTime)
 				i+=1
 	return vehicles, pddl
 
@@ -166,31 +165,32 @@ def getVehicleOrigin(vehicles, sectors):
 			pddl.append("(at %s %s)"%(v, origin))
 	return pddl, vehicleOriginMap
 
-def linkLocations (loc1, loc2, vehicle, travelTime):
+def linkLocations (loc1, loc2, vehicle, connectivityMap, travelTime, bridge=False, loadTime=0, unloadTime=0):
 	pddl = []
 	pddl.append("(= (travel-time %s %s %s) %i)" %(vehicle, loc1, loc2, travelTime))
 	pddl.append("(= (travel-time %s %s %s) %i)" %(vehicle, loc2, loc1, travelTime))
+<<<<<<< HEAD
+=======
+	#Add conectivity
+	connectivityMap[loc1][loc2] = [travelTime]
+	connectivityMap[loc2][loc1] = [travelTime]
+	if (bridge):
+		connectivityMap[loc1][loc2].append(loadTime)
+		connectivityMap[loc1][loc2].append(unloadTime)
+		connectivityMap[loc2][loc1].append(loadTime)
+		connectivityMap[loc2][loc1].append(unloadTime)
+>>>>>>> 20310f19cd750a067cbc414f6843fe0b3eda6ee1
 	return pddl
 
-def linkSectors(sect1, sect2, travelTime, loadTime, unloadTime, connectivityMap):
+def linkSectors(sect1, sect2, connectivityMap, travelTime, loadTime, unloadTime):
 	pddl = []
 	#Randomly select a location to link
 	loc1 = random.choice(sect1["loc"])
 	loc2 = random.choice(sect2["loc"])
 	#link sectors
 	for v in (sect1["veh"] + sect2["veh"]):
-		pddl += linkLocations(loc1, loc2, v, travelTime)
-		#create dummy locations to take load/unload into account
-		loc1_a = loc1 + "-%i"%len(connectivityMap)
-		loc2_a = loc2 + "-%i"%len(connectivityMap)
-		connectivityMap[loc1_a] = {}
-		connectivityMap[loc2_a] = {}
-		connectivityMap[loc1][loc1_a] = loadTime
-		connectivityMap[loc1_a][loc1] = unloadTime
-		connectivityMap[loc1_a][loc2_a] = travelTime
-		connectivityMap[loc2_a][loc1_a] = travelTime
-		connectivityMap[loc2][loc2_a] = loadTime
-		connectivityMap[loc2_a][loc2] = unloadTime
+		pddl += linkLocations(loc1, loc2, v, connectivityMap, travelTime, True, loadTime, unloadTime)
+
 	#add load and unload times
 	for v in sect1["veh"]:
 		pddl.append("(= (load-time %s %s) %i)" %(v, loc2, loadTime))
@@ -206,6 +206,11 @@ def isVehicleAtLocation(location, vehicleOriginMap):
 			return True
 	return False
 
+def isBridgeLocation(location, bridgeLocations):
+	if location in bridgeLocations:
+		return True
+	return False
+
 def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travelTime, loadTime, unloadTime, tightness, sampleStartTime=True, sampleEndTime=True, useShortestPrePosition=True):
 	pddl = []
 	#Iterate through deliveries
@@ -216,33 +221,28 @@ def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travel
 		isVehicleAtOrigin = isVehicleAtLocation(origin, vehicleOriginMap)
 		prePositionTime = travelTime
 		if isVehicleAtOrigin and useShortestPrePosition:
+			print "No Preposition Required"
 			prePositionTime = 0
+		else:
+			print "Prepositon Required"
 
 		#Solve Delivery Problem
 		#This includes load/unload times for cargo
 		#exchange because of how the connectivity map is built
 		#build network
-		g = dijkstra.Graph()
-		for l in connectivityMap:
-			if g.get_vertex(l) == None:
-				g.add_vertex(l)
-			for d in connectivityMap[l]:
-				if g.get_vertex(d) == None:
-					g.add_vertex(d)
-				#Add weights
-				g.add_edge(l, d, connectivityMap[l][d])
-
-		#Solve shortest path for cargo delivery
-		dijkstra.dijkstra(g, g.get_vertex(origin), g.get_vertex(destination))
-		target = g.get_vertex(destination)
-		path = [target.get_id()]
-		dijkstra.shortest(target, path)
-		minWindow = target.get_distance()
+		route = BreadthFirst.search(origin, destination, connectivityMap)
+		minWindow = route.cost
+		print "Route Cost: %i"%route.cost
+		#Remove supurfulous load/unload if traversed a bridge
+		#in the final leg of the journey
+		if route.fromBridge:
+			print "Bridge Required %i - (%i + %i) = %i"%(minWindow, loadTime, unloadTime, (minWindow - (loadTime + unloadTime)))
+			minWindow -= loadTime + unloadTime
 		
 		#Add time for pre-position
 		#and for inital load and final unload
+		print "Time Window: %i + %i + %i + %i = %i"%(minWindow, prePositionTime, loadTime, unloadTime, (minWindow + prePositionTime + loadTime + unloadTime))
 		minWindow += prePositionTime + loadTime + unloadTime
-		
 		#Determine time window
 		windowStart = 0
 		if sampleStartTime:
