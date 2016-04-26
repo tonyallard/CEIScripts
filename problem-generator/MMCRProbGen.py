@@ -58,11 +58,11 @@ def createSectors(numSectors, numLocations):
 			#Create Location
 			loc = "L" + str(locCount)
 			locCount += 1
-			sect["loc"] += [loc]
-			locations += [loc]
+			sect["loc"].append(loc)
+			locations.append(loc)
 			connectivityMap[loc] = {}
 			
-		sectors += [sect]
+		sectors.append(sect)
 	return sectors, locations, connectivityMap, pddl
 
 def addLocationCapacity(locations, maxCapactiy, sampleCapacity=False):
@@ -85,20 +85,20 @@ def createVehicles(sectors, numVehicles, connectivityMap, travelTime, loadTime, 
 			#Create Vehicle
 			veh = "V" + str(vehCount)
 			vehCount+=1
-			s["veh"] += [veh]
-			vehicles += [veh]
+			s["veh"].append(veh)
+			vehicles.append(veh)
 			#Add Cost
-			pddl += ["(= (cost %s) %i)" %(veh, cost)]
+			pddl.append("(= (cost %s) %i)" %(veh, cost))
 			#Make Available
-			pddl += ["(available %s)" %veh]
+			pddl.append("(available %s)" %veh)
 			#Make Ready
-			pddl += ["(ready-loading %s)" %veh]
+			pddl.append("(ready-loading %s)" %veh)
 			#Add to Sector
 			i = 0
 			for l in s["loc"]:
 				#Add load / unload times
-				pddl += ["(= (load-time %s %s) %i)" %(veh, l, loadTime)]
-				pddl += ["(= (unload-time %s %s) %i)" %(veh, l, unloadTime)]
+				pddl.append("(= (load-time %s %s) %i)" %(veh, l, loadTime))
+				pddl.append("(= (unload-time %s %s) %i)" %(veh, l, unloadTime))
 				#Add Travel Times
 				for d in s["loc"][i+1:]:
 					pddl += linkLocations(l, d, veh, travelTime)
@@ -126,9 +126,9 @@ def createCargo(numCargo, size):
 		#Create Cargo
 		car = "C" + str(carCount)
 		carCount+=1
-		cargoes += [car]
+		cargoes.append(car)
 		#Add Size
-		pddl += ["(= (size %s) %i)" %(car, size)]
+		pddl.append("(= (size %s) %i)" %(car, size))
 	return cargoes, pddl
 
 def getRandomCargoLocations(cargoes, locations):
@@ -140,8 +140,8 @@ def getRandomCargoLocations(cargoes, locations):
 		destination = random.choice(locations)
 		while (destination == origin):
 			destination = random.choice(locations)
-		pddl += ["(at %s %s)"%(c, origin)]
-		goals += ["(at %s %s)"%(c, destination)]
+		pddl.append("(at %s %s)"%(c, origin))
+		goals.append("(at %s %s)"%(c, destination))
 		deliveryInfo[c] = [origin, destination]
 	return goals, deliveryInfo, pddl
 
@@ -163,13 +163,13 @@ def getVehicleOrigin(vehicles, sectors):
 		for v in s["veh"]:
 			origin = random.choice(s["loc"])
 			vehicleOriginMap[v] = origin
-			pddl += ["(at %s %s)"%(v, origin)]
+			pddl.append("(at %s %s)"%(v, origin))
 	return pddl, vehicleOriginMap
 
 def linkLocations (loc1, loc2, vehicle, travelTime):
 	pddl = []
-	pddl += ["(= (travel-time %s %s %s) %i)" %(vehicle, loc1, loc2, travelTime)]
-	pddl += ["(= (travel-time %s %s %s) %i)" %(vehicle, loc2, loc1, travelTime)]
+	pddl.append("(= (travel-time %s %s %s) %i)" %(vehicle, loc1, loc2, travelTime))
+	pddl.append("(= (travel-time %s %s %s) %i)" %(vehicle, loc2, loc1, travelTime))
 	return pddl
 
 def linkSectors(sect1, sect2, travelTime, loadTime, unloadTime, connectivityMap):
@@ -193,11 +193,11 @@ def linkSectors(sect1, sect2, travelTime, loadTime, unloadTime, connectivityMap)
 		connectivityMap[loc2_a][loc2] = unloadTime
 	#add load and unload times
 	for v in sect1["veh"]:
-		pddl += ["(= (load-time %s %s) %i)" %(v, loc2, loadTime)]
-		pddl += ["(= (unload-time %s %s) %i)" %(v, loc2, unloadTime)]
+		pddl.append("(= (load-time %s %s) %i)" %(v, loc2, loadTime))
+		pddl.append("(= (unload-time %s %s) %i)" %(v, loc2, unloadTime))
 	for v in sect2["veh"]:
-		pddl += ["(= (load-time %s %s) %i)" %(v, loc1, loadTime)]
-		pddl += ["(= (unload-time %s %s) %i)" %(v, loc1, unloadTime)]
+		pddl.append("(= (load-time %s %s) %i)" %(v, loc1, loadTime))
+		pddl.append("(= (unload-time %s %s) %i)" %(v, loc1, unloadTime))
 	return pddl
 
 def isVehicleAtLocation(location, vehicleOriginMap):
@@ -251,10 +251,10 @@ def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travel
 		if sampleEndTime:
 			windowEnd = random.uniform(windowStart+minWindow, windowStart+(tightness*minWindow))
 		if windowStart == 0:
-			pddl += ["(available %s)"%c]
+			pddl.append("(available %s)"%c)
 		else:
-			pddl += ["(at %f (available %s))"%(windowStart, c)]
-		pddl += ["(at %f (not (available %s)))"%(windowEnd, c)]
+			pddl.append("(at %f (available %s))"%(windowStart, c))
+		pddl.append("(at %f (not (available %s)))"%(windowEnd, c))
 	return pddl
 
 def saveProblem(name, locations, vehicles, cargoes, pddl, goals):
