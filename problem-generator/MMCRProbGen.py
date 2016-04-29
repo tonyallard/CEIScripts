@@ -169,8 +169,6 @@ def linkLocations (loc1, loc2, vehicle, connectivityMap, travelTime, bridge=Fals
 	pddl = []
 	pddl.append("(= (travel-time %s %s %s) %i)" %(vehicle, loc1, loc2, travelTime))
 	pddl.append("(= (travel-time %s %s %s) %i)" %(vehicle, loc2, loc1, travelTime))
-<<<<<<< HEAD
-=======
 	#Add conectivity
 	connectivityMap[loc1][loc2] = [travelTime]
 	connectivityMap[loc2][loc1] = [travelTime]
@@ -179,7 +177,6 @@ def linkLocations (loc1, loc2, vehicle, connectivityMap, travelTime, bridge=Fals
 		connectivityMap[loc1][loc2].append(unloadTime)
 		connectivityMap[loc2][loc1].append(loadTime)
 		connectivityMap[loc2][loc1].append(unloadTime)
->>>>>>> 20310f19cd750a067cbc414f6843fe0b3eda6ee1
 	return pddl
 
 def linkSectors(sect1, sect2, connectivityMap, travelTime, loadTime, unloadTime):
@@ -221,10 +218,7 @@ def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travel
 		isVehicleAtOrigin = isVehicleAtLocation(origin, vehicleOriginMap)
 		prePositionTime = travelTime
 		if isVehicleAtOrigin and useShortestPrePosition:
-			print "No Preposition Required"
 			prePositionTime = 0
-		else:
-			print "Prepositon Required"
 
 		#Solve Delivery Problem
 		#This includes load/unload times for cargo
@@ -232,16 +226,13 @@ def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travel
 		#build network
 		route = BreadthFirst.search(origin, destination, connectivityMap)
 		minWindow = route.cost
-		print "Route Cost: %i"%route.cost
 		#Remove supurfulous load/unload if traversed a bridge
 		#in the final leg of the journey
 		if route.fromBridge:
-			print "Bridge Required %i - (%i + %i) = %i"%(minWindow, loadTime, unloadTime, (minWindow - (loadTime + unloadTime)))
 			minWindow -= loadTime + unloadTime
 		
 		#Add time for pre-position
 		#and for inital load and final unload
-		print "Time Window: %i + %i + %i + %i = %i"%(minWindow, prePositionTime, loadTime, unloadTime, (minWindow + prePositionTime + loadTime + unloadTime))
 		minWindow += prePositionTime + loadTime + unloadTime
 		#Determine time window
 		windowStart = 0

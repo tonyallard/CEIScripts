@@ -53,16 +53,16 @@ def printUsage(name):
 	print "Usage " + name + " maxCargo maxTightness numProblemsPerCargo numGeom pathToProblems\n"
 	print "Example: " + name + " 3 2 100 5 /Path/To/Problems"
 
-def linkSectors(sectors, travelTime, loadTime, unloadTime, connectivityMap):
+def linkSectors(sectors, connectivityMap, travelTime, loadTime, unloadTime):
 	pddl = []
 	#link sectors 0 and 1
-	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[1], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[1], connectivityMap, travelTime, loadTime, unloadTime)
 	#link sectors 0 and 2
-	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[2], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[0], sectors[2], connectivityMap, travelTime, loadTime, unloadTime)
 	#link sectors 1 and 3
-	pddl += MMCRProbGen.linkSectors(sectors[1], sectors[3], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[1], sectors[3], connectivityMap, travelTime, loadTime, unloadTime)
 	#link sectors 2 and 3
-	pddl += MMCRProbGen.linkSectors(sectors[2], sectors[3], travelTime, loadTime, unloadTime, connectivityMap)
+	pddl += MMCRProbGen.linkSectors(sectors[2], sectors[3], connectivityMap, travelTime, loadTime, unloadTime)
 	return pddl
 
 def main(args):
@@ -99,11 +99,11 @@ def main(args):
 	initPDDL += pddl2
 
 	#link sectors
-	initPDDL += linkSectors(sectors, DEFAULT_TRAVEL_TIME, DEFAULT_LOAD_TIME, DEFAULT_UNLOAD_TIME, connectivityMap)
+	initPDDL += linkSectors(sectors, connectivityMap, DEFAULT_TRAVEL_TIME, DEFAULT_LOAD_TIME, DEFAULT_UNLOAD_TIME)
 	
 	probNum = 0
 
-	for c in range(1, maxCargo):
+	for c in range(1, maxCargo+1):
 		#Setup num Cargo
 		numCargo = c
 		capacityRange = numCargo * DEFAULT_CARGO_SIZE
