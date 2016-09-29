@@ -11,7 +11,7 @@ SERVER_ATTEMPT_DELIM = "Processing "
 LOG_FILE_EXT = ".txt"
 
 def main(args):
-	path = "/mnt/data/160406-Colin-RPG-logs/"
+	path = "/home/tony/Desktop/Colin-TRH-logs/"
 	server = ""
 
 	serverProblems = []

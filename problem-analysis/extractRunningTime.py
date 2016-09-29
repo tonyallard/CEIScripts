@@ -64,7 +64,7 @@ def main(args):
 	csvFile.write("Problem, Cargo, Tightness, Problem Number, Label, Running Time\n")
 	
 	#path = "/mnt/data/160406-Colin-RPG-logs-repaired/"
-	path = "/mnt/data/160404-Colin-TRH-logs/"
+	path = "/home/tony/Desktop/Colin-TRH-logs/"
 	
 	#Averages
 	avgRunTime = 0.0
