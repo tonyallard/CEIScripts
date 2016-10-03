@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import os
 from datetime import datetime
 import processProblem
 
@@ -8,8 +9,11 @@ def main (args):
 
 	expStart = datetime.now()
 	print "%s : Experiment Started"%expStart
-	for sample in sys.argv[1:]:
-		processProblem.main([sample])
+	directory = args[0]
+	for filename in os.listdir(directory):
+		fullPath = directory + filename
+		print fullPath
+		processProblem.main(fullPath)
 
 	expEnd = datetime.now()
 	print "%s : Experiment Completed"%expEnd

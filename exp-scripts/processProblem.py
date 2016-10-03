@@ -12,8 +12,8 @@ from shutil import move
 PROC_FOLDER="/mnt/data/completed/"
 COLIN_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
 COLIN_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
-TIMEOUT_CMD="timeout -s SIGXCPU 2h"
-MEMLIMIT_CMD="ulimit -Sv 10000000"
+TIMEOUT_CMD="timeout -s SIGXCPU 1h"
+MEMLIMIT_CMD="ulimit -Sv 1500000"
 LOG_FOLDER="/mnt/data/logs/"
 # DOMAIN_FILE="/mnt/data/MMCR.pddl"
 DOMAIN_FILE="/mnt/data/DOMAIN.PDDL"
@@ -44,7 +44,7 @@ def main(args):
 	stdout = log
 	stderr = log
 	#Colin-TRH
-	parameters = "-h %s %s"%(DOMAIN_FILE, proc_probFile)
+	parameters = "-h -b -v1 %s %s"%(DOMAIN_FILE, proc_probFile)
 	#Colin-RPG
 	#parameters = "-3 %s %s"%(DOMAIN_FILE, proc_probFile)
 	external_command = "(cd %s && %s && %s %s %s)"%(COLIN_LOC, MEMLIMIT_CMD, TIMEOUT_CMD, COLIN_EXEC_LOC, parameters)
@@ -65,6 +65,7 @@ def main(args):
 #Run Main Function
 if __name__ == "__main__":
 	if len(sys.argv) != 2:
-		print "Error: There must be 2 arguments"
+		print "Error: There must be 2 arguments. Received %i"%len(sys.argv)
+		print sys.argv
 		sys.exit(1)
 	main(sys.argv[1:])
