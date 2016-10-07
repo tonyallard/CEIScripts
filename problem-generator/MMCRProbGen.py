@@ -4,7 +4,6 @@
 
 import sys
 import random
-import dijkstra
 from RouteSearch import BreadthFirst
 
 def isfloat(x):

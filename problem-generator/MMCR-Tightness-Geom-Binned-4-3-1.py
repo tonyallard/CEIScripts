@@ -41,7 +41,6 @@
 #network. Number of cargo and their delivery is sampled per problem
 #
 
-#! /usr/bin/python
 import sys
 import os
 import random
