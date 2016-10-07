@@ -7,6 +7,7 @@ TIMEOUT_DELIM = "timeout: the monitored command dumped core"
 MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
 PDDL_FILE_EXT = ".pddl"
 LOG_FILE_EXT = ".pddl.txt"
+LOG_FILE_START_SEQ = "==="
 SUCCESS_DELIM = ";;;; Solution Found"
 UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
 
@@ -53,8 +54,8 @@ def isProblemFile(filename):
 		return True
 	return False
 
-def isProblemLog(filename):
-	if LOG_FILE_EXT in filename.lower():
+def isProblemLog(filename, file):
+	if LOG_FILE_EXT in filename.lower() and LOG_FILE_START_SEQ in file[0][:3]:
 		return True
 	return False
 
