@@ -7,7 +7,8 @@ import socket
 import time
 from timeit import Timer
 from shutil import move
-
+from random import randint
+from time import sleep
 
 #Variables
 PROC_FOLDER="/mnt/data/completed/"
@@ -27,6 +28,10 @@ def main(args, n=30):
 	probFile = probFullPath.rsplit('/', 1)[1]
 	proc_probFile = PROC_FOLDER+probFile
 
+	#Wait random timeout to avoid duplicates
+	sleepTime = randint(10,150)
+	print "Sleeping for %is\n"%sleepTime
+	sleep(sleepTime)
 	#Move problem to ensure exclusive access
 	try:
 		move(probFullPath, proc_probFile)
