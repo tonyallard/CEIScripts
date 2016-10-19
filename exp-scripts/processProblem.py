@@ -14,9 +14,9 @@ from time import sleep
 PROC_FOLDER="/mnt/data/completed/"
 COLIN_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
 COLIN_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
-TIMEOUT_CMD="timeout -s SIGXCPU 2h"
+TIMEOUT_CMD="timeout -s SIGXCPU 2h" #2hrs
 TIME_CMD = "time -p"
-MEMLIMIT_CMD="ulimit -Sv 2000000"
+MEMLIMIT_CMD="ulimit -Sv 2000000" #2GB
 LOG_FOLDER="/mnt/data/logs/"
 DOMAIN_FILE="/mnt/data/MMCR.pddl"
 # DOMAIN_FILE="/mnt/data/SAT-DOMAIN.PDDL"
@@ -53,10 +53,10 @@ def main(args, n=30):
 		stdout = log
 		stderr = log
 		#Colin-TRH
-		#parameters = "-h -b -v1 %s %s"%(DOMAIN_FILE, proc_probFile)
+		parameters = "-h -v1 %s %s"%(DOMAIN_FILE, proc_probFile)
 		#Colin-RPG
-		parameters = "-3 -v1 %s %s"%(DOMAIN_FILE, proc_probFile)
-		external_command = "(cd %s && %s && %s %s %s %s)"%(COLIN_LOC, MEMLIMIT_CMD, TIMEOUT_CMD, TIME_CMD, COLIN_EXEC_LOC, parameters)
+		#parameters = "-3 -v1 %s %s"%(DOMAIN_FILE, proc_probFile)
+		external_command = "(cd %s && %s && %s %s %s %s)"%(COLIN_LOC, MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, COLIN_EXEC_LOC, parameters)
 		call_args = """['%s'], stdout=stdout, stderr=stderr"""%(external_command)
 
 		#Run Experiment

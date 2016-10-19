@@ -19,6 +19,7 @@ def extractDeadEnds(log):
 			if len(deadEndCount) == 0:
 				return 0
 			return int(deadEndCount[0])
+	return 0
 
 def main(args):
 	inputPath = args[0]
