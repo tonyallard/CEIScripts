@@ -21,7 +21,7 @@ def extractHeuristicStatesEvaluated(logFile):
 			if len(states) != 1:
 				raise RuntimeError("Error! Multiple state counts found: %s"%states)
 			return int(states[0])
-	return -1
+	return None
 	
 def extractSearchStatesEvaluated(logFile):
 	for line in logFile:
@@ -31,14 +31,15 @@ def extractSearchStatesEvaluated(logFile):
 			if len(states) != 1:
 				raise RuntimeError("Error! Multiple state counts found: %s"%states)
 			return int(states[0])
-	return -1
+	return None
 
 def extractStatesEvaluated(logFile):
 	statesEvaluated = extractSearchStatesEvaluated(logFile)
 	hStatesEvaluated = extractHeuristicStatesEvaluated(logFile)
-	total = statesEvaluated+hStatesEvaluated
-	if (statesEvaluated is -1) or (hStatesEvaluated is -1):
-		total = -1
+	total = None
+	if (statesEvaluated is not None) and (hStatesEvaluated is not None):
+		total = statesEvaluated+hStatesEvaluated
+	
 	return statesEvaluated, hStatesEvaluated, total
 
 def main(args):
