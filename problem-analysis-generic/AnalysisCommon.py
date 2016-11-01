@@ -5,6 +5,8 @@
 
 TIMEOUT_DELIM = "timeout: the monitored command dumped core"
 MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
+SEARCH_SUCCESS_DELIM = "g"
+SEARCH_FAILURE_DELIM = "Problem Unsolvable"
 PDDL_FILE_EXT = ".pddl"
 LOG_FILE_EXT = ".pddl.txt"
 LOG_FILE_START_SEQ = "==="
@@ -68,3 +70,13 @@ def checkArgs(arg, args):
 	if args.count(arg) > 0:
 		return True
 	return False
+
+def getTerminationIndex(line):
+	index = line.find(TIMEOUT_DELIM)
+	if index is -1:
+		index = line.find(MEMORY_ERROR_DELIM)
+	if index is -1:
+		index = line.find(SEARCH_SUCCESS_DELIM)
+	if index is -1:
+		index = line.find(SEARCH_FAILURE_DELIM)
+	return index
