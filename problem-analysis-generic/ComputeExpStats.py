@@ -31,13 +31,25 @@ def getProblemDetails(filename):
 
 def getMeanAndVar(data):
 	mean = 0.0
+	samples = 0
 	for sample in data:
-		mean += data[sample]
-	mean /= len(data)
+		if data[sample] is not None:
+			mean += data[sample]
+			samples += 1
+	
+	#Check samples special conditions
+	if samples is 0: #No mean or variance
+		return None, None
+	elif samples is 1: #Mean but no variance
+		return mean, None
+	
+	mean /= samples
+	#Calculate Variance
 	meanDiff = 0.0
 	for sample in data:
-		meanDiff += pow((data[sample] - mean), 2)
-	variance = meanDiff / (len(data) - 1)
+		if data[sample] is not None:
+			meanDiff += pow((data[sample] - mean), 2)
+	variance = meanDiff / (samples - 1)
 	return mean, variance
 
 def createDataStructure(stats, problemName):
@@ -79,24 +91,39 @@ def main(args):
 		problemName, probNumber = getProblemDetails(filename)
 		createDataStructure(stats, problemName)
 
+		#Problem Success
 		success = ExtractSuccess.extractSuccess(buffer)
 		stats[problemName][0][probNumber] = success
 		totalSuccess += success
+		
+		#Computational Time
 		compTime = ExtractRunningTime.extractRunTime(buffer)
 		stats[problemName][1][probNumber] = compTime
-		avgCompTime += compTime
+		if compTime is not None:
+			avgCompTime += compTime
+		
+		#Heuristic Time
 		hTime = ExtractRunningTime.extractHRunTime(buffer)
 		stats[problemName][2][probNumber] = hTime
-		avgHTime += hTime
+		if hTime is not None:
+			avgHTime += hTime
+		
+		#States Evaluated
 		statesEval, hStates, totalStates = ExtractStatesEval.extractStatesEvaluated(buffer)
 		stats[problemName][3][probNumber] = statesEval
 		stats[problemName][4][probNumber] = hStates
-		avgStates += statesEval
-		avgHStates += hStates
-		deadEnds = ExtractDeadEnds.extractDeadEnds(buffer)
+		if statesEval is not None:
+			avgStates += statesEval
+		if hStates is not None:
+			avgHStates += hStates
+		
+		#Deadends Encountered
+		deadEnds = ExtractDeadEnds.extractDeadEndsManually(buffer)
 		stats[problemName][5][probNumber] = deadEnds
-		avgDeadEnds += deadEnds
+		if deadEnds is not None:
+			avgDeadEnds += deadEnds
 
+	#Print problem statistics to CSV file
 	for problem in stats:
 		success = stats[problem][0]
 		succMean, succVar = getMeanAndVar(success)
@@ -111,12 +138,15 @@ def main(args):
 		deadEnds = stats[problem][5]
 		deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
 
-		csvFile.write("%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n"%(filename, succMean, succVar, compTimeMean, 
-			compTimeVar, hTimeMean, hTimeVar, statesEvalMean, statesEvalVar, 
-			hStatesMean, hStatesVar, deadEndsMean, deadEndsVar))
+		csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
+			succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
+			statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
+			deadEndsMean, deadEndsVar))
 		
 	#Write averages
-	csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f\n"%(totalProbs, totalSuccess, avgCompTime/totalProbs, avgHTime/totalProbs, avgStates/totalProbs, avgHStates/totalProbs, avgDeadEnds/totalProbs))
+	csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f\n"%(totalProbs, totalSuccess, 
+		avgCompTime/totalProbs, avgHTime/totalProbs, avgStates/totalProbs, 
+		avgHStates/totalProbs, avgDeadEnds/totalProbs))
 	csvFile.close()
 
 #Run Main Function
