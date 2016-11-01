@@ -24,7 +24,7 @@ def extractPDDLFileWriteTime(logFile):
 			if len(runTime) != 1:
 				raise RuntimeError("Error! Multiple PDDL file write times found: %s"%runTime)
 			return float(runTime[0])
-	return -1
+	return None
 
 def extractPDDLConvertTime(logFile):
 	for line in logFile:
@@ -33,7 +33,7 @@ def extractPDDLConvertTime(logFile):
 			if len(runTime) != 1:
 				raise RuntimeError("Error! Multiple PDDL conversion times found: %s"%runTime)
 			return float(runTime[0])
-	return -1
+	return None
 
 def extractHRunTime(logFile):
 	for line in logFile:
@@ -42,7 +42,7 @@ def extractHRunTime(logFile):
 			if len(runTime) != 1:
 				raise RuntimeError("Error! Multiple heuristic run times found: %s"%runTime)
 			return float(runTime[0])
-	return -1
+	return None
 
 def extractSystemRunTime(logFile):
 	for line in logFile:
@@ -51,7 +51,7 @@ def extractSystemRunTime(logFile):
 			if len(runTime) != 1:
 				raise RuntimeError("Error! Multiple system run times found: %s"%runTime)
 			return float(runTime[0])
-	return -1
+	return None
 
 def extractUserRuntime(logFile):
 	for line in logFile:
@@ -60,13 +60,13 @@ def extractUserRuntime(logFile):
 			if len(runTime) != 1:
 				raise RuntimeError("Error! Multiple user run times found: %s"%runTime)
 			return float(runTime[0])
-	return -1
+	return None
 
 def extractRunTime(logFile):
 	user = extractUserRuntime(logFile)
-	sys = extractUserRuntime(logFile)
-	if (user == -1) or (sys == -1):
-		raise RuntimeError("Error extracting runtime (user: %f, sys: %f)"%(user, sys))
+	sys = extractSystemRunTime(logFile)
+	if (user is None) or (sys is None):
+		return None
 	return user + sys
 
 def main(args):
