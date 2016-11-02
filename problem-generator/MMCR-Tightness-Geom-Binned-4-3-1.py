@@ -143,7 +143,8 @@ def main(args):
 				pddl3 += MMCRProbGen.determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, DEFAULT_TRAVEL_TIME, DEFAULT_LOAD_TIME, DEFAULT_LOAD_TIME, tightness, False, False)
 
 				#Save problem to file
-				name = "Prob-%i-%i-%i-%i-%s-%i"%(len(sectors), len(locations), len(vehicles), len(cargoes), str(tightness).replace('.', '_'), probNum)
+				name = "Prob-%i-%i-%i-%i-%i-%s-%i"%(len(sectors), len(locations), len(vehicles), 
+					len(cargoes), p, str(tightness).replace('.', '_'), probNum)
 				MMCRProbGen.saveProblem(path+name, locations, vehicles, cargoes, pddl3, goals)
 
 #Run Main Function
