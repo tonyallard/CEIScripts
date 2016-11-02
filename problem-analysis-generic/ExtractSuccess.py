@@ -8,11 +8,9 @@ import os
 import re
 import AnalysisCommon
 
-SUCCESS_DELIM = ";;;; Solution Found"
-
 def extractSuccess(log):
 	for line in log:
-		if SUCCESS_DELIM in line:
+		if AnalysisCommon.SUCCESS_DELIM in line:
 			return 1
 	return 0
 
