@@ -14,13 +14,13 @@ from time import sleep
 PROC_FOLDER="/mnt/data/completed/"
 COLIN_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
 COLIN_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
-TIMEOUT_CMD="timeout -s SIGXCPU 2h" #2hrs
+TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
 TIME_CMD = "time -p"
 MEMLIMIT_CMD="ulimit -Sv 2000000" #2GB
 LOG_FOLDER="/mnt/data/logs/"
 DOMAIN_FILE="/mnt/data/MMCR.pddl"
-# DOMAIN_FILE="/mnt/data/SAT-DOMAIN.PDDL"
-# DOMAIN_FILE="/mnt/data/PIPES-DOMAIN.PDDL"
+#DOMAIN_FILE="/mnt/data/SAT-DOMAIN.PDDL"
+#DOMAIN_FILE="/mnt/data/PIPES-DOMAIN.PDDL"
 
 def main(args, n=30):
 	#Get problem parameters
