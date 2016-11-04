@@ -12,6 +12,7 @@ LOG_FILE_EXT = ".pddl.txt"
 LOG_FILE_START_SEQ = "==="
 SUCCESS_DELIM = ";;;; Solution Found"
 UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
+SEARCH_STARTED = "Number of literals:"
 
 SERVER_LOG_DELIM = "explog-"
 

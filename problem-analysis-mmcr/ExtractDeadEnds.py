@@ -22,6 +22,14 @@ def extractDeadEnds(log):
 	return None
 
 def extractDeadEndsManually(log):
+	#See if search actually started
+	started = False
+	for line in log:
+		if AnalysisCommon.SEARCH_STARTED in line:
+			started = True
+			break
+	if not started:
+		return None
 	#Find all dead ends from EHC
 	deadends = None
 	startLine = 0
@@ -55,7 +63,7 @@ def extractDeadEndsManually(log):
 def main(args):
 	inputPath = args[0]
 	for filename in os.listdir(inputPath):
-		if "Prob-4-12-4-3-1-1_25-308" not in filename:
+		if "Prob-4-12-4-2-8-2_0-191.pddl-11" not in filename:
 			continue
 		fullQialified = os.path.join(inputPath, filename)
 		f = open(fullQialified)
