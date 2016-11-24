@@ -52,6 +52,12 @@ def getMeanAndVar(data):
 	variance = meanDiff / (samples - 1)
 	return mean, variance
 
+def getProblemsCompleted(completed):
+	done = ""
+	for x in completed:
+		done += "%i; "%x
+	return done
+
 def createDataStructure(stats, problemName):
 	if problemName not in stats:
 		stats[problemName] = {}
@@ -61,13 +67,14 @@ def createDataStructure(stats, problemName):
 		stats[problemName][3] = {}
 		stats[problemName][4] = {}
 		stats[problemName][5] = {}
+		stats[problemName][6] = {}
 
 def main(args):
 
 	logPath = args[0]
 
 	csvFile = open("experiment.csv", 'w')
-	csvFile.write("Problem,Cargo,Tightness,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Dead Ends Mean,Dead Ends Variance\n")
+	csvFile.write("Problem,Cargo,Tightness,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Dead Ends Mean,Dead Ends Variance,Completed\n")
 
 	stats = {}
 	totalProbs = 0
@@ -80,6 +87,9 @@ def main(args):
 
 	for filename in os.listdir(logPath):
 		fullQialified = os.path.join(logPath, filename)
+		if os.path.isdir(fullQialified):
+			continue
+
 		f = open(fullQialified)
 		buffer = AnalysisCommon.bufferFile(f)
 
@@ -123,6 +133,9 @@ def main(args):
 		if deadEnds is not None:
 			avgDeadEnds += deadEnds
 
+		#Which Problems Complete
+		stats[problemName][6][probNumber] = probNumber
+
 	#Print problem statistics to CSV file
 	for problem in stats:
 		problemParts = problem.split("-")
@@ -140,14 +153,15 @@ def main(args):
 		hStatesMean, hStatesVar = getMeanAndVar(hStates)
 		deadEnds = stats[problem][5]
 		deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
+		completed = getProblemsCompleted(stats[problem][6])
 
-		csvFile.write("%s,%i,%f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, cargo, tightness, succMean, 
+		csvFile.write("%s,%i,%f,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, cargo, tightness, succMean, 
 			succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
 			statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
-			deadEndsMean, deadEndsVar))
+			deadEndsMean, deadEndsVar, completed))
 		
 	#Write averages
-	csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f\n"%(totalProbs, totalSuccess, 
+	csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f,\n"%(totalProbs, totalSuccess, 
 		avgCompTime/totalProbs, avgHTime/totalProbs, avgStates/totalProbs, 
 		avgHStates/totalProbs, avgDeadEnds/totalProbs))
 	csvFile.close()

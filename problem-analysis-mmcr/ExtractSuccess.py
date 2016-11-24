@@ -21,7 +21,8 @@ def main(args):
 		f = open(fullQialified)
 		buffer = AnalysisCommon.bufferFile(f)
 		success = extractSuccess(buffer)
-		print "%s,%i"%(filename, success)
+		if success:
+			print "%s,%i"%(filename, success)
 
 #Run Main Function
 if __name__ == "__main__":
