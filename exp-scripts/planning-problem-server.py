@@ -2,8 +2,6 @@
 import sys
 import os
 import socket
-import pickle
-from cStringIO import StringIO
 from multiprocessing import Queue
 import time
 
@@ -11,18 +9,25 @@ from PlanningProblemConstants import *
 from PlanningProblemJob import *
 
 #Socket Parameters
-HOST = socket.gethostname()
+HOST = "" #Don't restrict listener to any machine
 PORT = 50005
 BUFFER_SIZE = 4096
 QUEUED_CONNECTIONS = 10 #Have set this to the number of workers
 
 #Planner Parameters
-PLANNER_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
-PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
-PLANNER_PARAMS = "-h -v1"
+#Colin-TRH
+#PLANNER_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
+#PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
+#PLANNER_PARAMS = "-3 -v1"
+#Colin-RPG
+PLANNER_LOC="/mnt/data/bin/colin2/"
+PLANNER_EXEC_LOC="/mnt/data/bin/colin2/debug/colin/colin-clp"
+PLANNER_PARAMS = "-v1"
+
+#Limit Commands
 TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
 TIME_CMD = "time -p"
-MEMLIMIT_CMD="ulimit -Sv 2000000" #2GB
+MEMLIMIT_CMD="ulimit -Sv 4000000" #4GB
 
 #Validation Parameters
 VALIDATOR_EXEC = "/mnt/data/bin/VAL/validate"
@@ -52,7 +57,7 @@ def getProblemFiles(path):
 	return problems
 
 
-def getProblemQueue(iterations=2):
+def getProblemQueue(iterations=1):
 	#The Queue
 	q = Queue()
 	#iterate through problem sets
@@ -92,15 +97,32 @@ def getProblemQueue(iterations=2):
 					logFile = os.path.join(outputdir_fullpath, logFileName)
 					job = Job(prob, itr, plannener_command, 
 						validate_command, logFile, planFile)
-					q.put(job)				
+					q.put(job)
 		#The first entry has all the dirs
 		break
 	return q
 
+def getCurrentAllocationString(currentAllocation):
+	result = ""
+	for _id in currentAllocation:
+		result += "%s (%i): %s (%i)\n"%(currentAllocation[_id][0], 
+			_id, currentAllocation[_id][1], currentAllocation[_id][2])
+
+	return result
+
+def shutdownSocket(aSocket):
+	aSocket.shutdown(socket.SHUT_RDWR)
+	aSocket.close()
+	time.sleep(1)
+
 def main(args):
+
+	_id = getInstanceID()
 
 	#Get problems ready for computation
 	q = getProblemQueue()
+	print "Problem queue initialised."
+	currentAllocation = {}
 
 	#create an INET, STREAMing socket
 	serversocket = socket.socket(
@@ -117,28 +139,41 @@ def main(args):
 		#become a server socket
 		conn, addr = serversocket.accept()
 		data = conn.recv(BUFFER_SIZE)
-		print data
-		if data == EXIT_PROCESS:
-			conn.sendall("Ack. Exiting...")
+		message = getMessage(data)
+
+		reply = ""
+		if message.message == EXIT_PROCESS:
+			print "Exit cmd recieved from machine %s with id %i" %(addr, 
+				message._id)
+			reply = getMessageString(_id, "Ack. Exiting...")
+			conn.sendall(reply)
 			conn.shutdown(socket.SHUT_RDWR)
 			conn.close()
-			time.sleep(1)
-			sys.exit(0)
-		elif data == PROBLEM_QUEUE_SIZE:
-			conn.sendall("Ack. Queue size is %i"%q.qsize())
-		elif data == REQUEST_PROBLEM:
+			shutdownSocket(serversocket)
+			break
+		elif message.message == PROBLEM_QUEUE_SIZE:
+			print "Queue size request recieved from machine %s with id %i"%(addr, 
+				message._id)
+			reply = getMessageString(_id, "Ack. Queue size is %i"%q.qsize())
+		elif message.message == REQUEST_PROBLEM:
 			if q.empty(): #Tell the workers to terminate if done
-				print "Received request from %s, but queue is empty. \
-				Instructing worker to terminate."%addr
-				conn.sendall(EXIT_PROCESS)
+				print "Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
+							message._id)
+				reply = getMessageString(_id, EXIT_PROCESS)
 			else: #Else give it a job
 				job = q.get()
-				print "Processing %s for iteration %i on %s" %(job.problemName, 
-					job.itr, str(addr))
-				stream = StringIO() 
-				pickle.dump(job, stream)
-				conn.sendall(stream.getvalue())
-				stream.close()
+				print "Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
+					job.itr, addr, message._id)
+				reply = getMessageString(_id, job)
+				currentAllocation[message._id] = (addr[0], job.problemName, job.itr)
+		elif message.message == CURRENT_ALLOCATION:
+			print "Received request from machine %s with id %i for current allocation.but queue."%(addr, 
+				message._id) 
+			reply = getMessageString(_id, 
+				getCurrentAllocationString(currentAllocation))
+
+		#Send the reply
+		conn.sendall(reply)
 		#Close and get ready for next conn
 		conn.close()
 
