@@ -39,8 +39,9 @@ def processProblem(job):
 	#Write Time Taken to Log
 	log.write("\n\n===TIME TAKEN===\n")
 	log.write("%f seconds\n"%timeTaken)
-	log.write("===EOF===")
-	
+	log.write("====================\n\n")
+
+	#Read the plan found
 	#Reset file pointer to read
 	log.seek(0,0)
 	#Output Plan
@@ -51,8 +52,11 @@ def processProblem(job):
 	plan.close()		
 
 	#Validate the plan
-	call_args = """['%s'], stdout=stdout, stderr=stderr"""%(job.validatorCommand)
+	log.write("Plan Validation\n")
+	call_args = "%s"%(job.validatorCommand)
 	subprocess.call(call_args, shell=True, stdout=log, stderr=log)
+	
+	log.write("===EOF===")
 	log.close()
 
 def shutdownSocket(aSocket):
@@ -81,15 +85,16 @@ def main(args):
 		#Check if the buffer is empty
 		if reply.message == EXIT_PROCESS:
 			msg = getMessageString(_id, "Ack. Exiting...")
-			conn.sendall(msg)
+			clientsocket.sendall(msg)
 			shutdownSocket(clientsocket)
+			print "Received shutdown message from server id %i"%reply._id
 			sys.exit(0)
 
 		job = reply.message
 		print "Received %s for processing on iteration %i from server id %i"%(job.problemName, 
 			job.itr, reply._id)
 		processProblem(job)
-		clientsocket.close()
+		shutdownSocket(clientsocket)
 
 #Run Main Function
 if __name__ == "__main__":
