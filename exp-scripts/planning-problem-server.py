@@ -19,9 +19,15 @@ QUEUED_CONNECTIONS = 10 #Have set this to the number of workers
 #PLANNER_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
 #PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
 #PLANNER_PARAMS = "-3 -v1"
+
 #Colin-RPG
-PLANNER_LOC="/mnt/data/bin/colin2/"
-PLANNER_EXEC_LOC="/mnt/data/bin/colin2/debug/colin/colin-clp"
+#PLANNER_LOC="/mnt/data/bin/colin2/"
+#PLANNER_EXEC_LOC="/mnt/data/bin/colin2/debug/colin/colin-clp"
+#PLANNER_PARAMS = "-v1"
+
+#POPF
+PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
+PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
 PLANNER_PARAMS = "-v1"
 
 #Limit Commands
@@ -160,6 +166,7 @@ def main(args):
 				print "Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
 							message._id)
 				reply = getMessageString(_id, EXIT_PROCESS)
+				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
 			else: #Else give it a job
 				job = q.get()
 				print "Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
@@ -167,7 +174,7 @@ def main(args):
 				reply = getMessageString(_id, job)
 				currentAllocation[message._id] = (addr[0], job.problemName, job.itr)
 		elif message.message == CURRENT_ALLOCATION:
-			print "Received request from machine %s with id %i for current allocation.but queue."%(addr, 
+			print "Received request from machine %s with id %i for current allocation."%(addr, 
 				message._id) 
 			reply = getMessageString(_id, 
 				getCurrentAllocationString(currentAllocation))
