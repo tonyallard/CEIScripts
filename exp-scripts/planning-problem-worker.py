@@ -12,19 +12,37 @@ from PlanningProblemConstants import *
 from PlanningProblemJob import *
 
 #Socket parameters
-HOST = "131.185.231.182"
 PORT = 50005
 BUFFER_SIZE = 4096
 
+COLIN_LIKE_PLANNERS = ["Colin-TRH", "Colin-RPG", "POPF", "Optic", "Optic-SLFRP"]
+
 #Regex to find plan
-PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*]"
-PLAN_REGEX = re.compile(PLAN_SYNTAX)
+COLIN_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*\]"
+COLIN_PLAN_REGEX = re.compile(COLIN_PLAN_SYNTAX)
+
+LPGTD_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-_ ]+\) \[[0-9DC;:. ]*\]"
+LPGTD_PLAN_REGEX = re.compile(LPGTD_PLAN_SYNTAX)
+
+def getPlan(planner, logFile, planFile):
+	#Read the plan found
+	#Reset file pointer to read
+	logFile.seek(0,0)
+	#Output Plan
+	matches = []
+	if planner in COLIN_LIKE_PLANNERS:
+		matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
+	else: #lpg-td
+		matches = [LPGTD_PLAN_REGEX.findall(line) for line in logFile] 
+	
+	for m in matches:
+		if len(m) > 0:
+			planFile.write("%s\n"%m[0])
 
 def processProblem(job):
 	#Open files for logging
 	bufsize = 0
 	log = open(job.logFile, "a+", bufsize)
-	plan = open(job.planFile, "a", bufsize)
 
 	#Setup experiment
 	reps=1
@@ -41,14 +59,8 @@ def processProblem(job):
 	log.write("%f seconds\n"%timeTaken)
 	log.write("====================\n\n")
 
-	#Read the plan found
-	#Reset file pointer to read
-	log.seek(0,0)
-	#Output Plan
-	matches = [PLAN_REGEX.findall(line) for line in log]
-	for m in matches:
-		if len(m) > 0:
-			plan.write("%s\n"%m[0])
+	plan = open(job.planFile, "a", bufsize)
+	getPlan(job.plannerName, log, plan)
 	plan.close()		
 
 	#Validate the plan
@@ -65,8 +77,11 @@ def shutdownSocket(aSocket):
 	time.sleep(1)
 
 def main(args):
-	_id = getInstanceID()
 
+	HOST = args[1]
+
+	_id = getInstanceID()
+	print "Started. My ID is %i"%_id
 	while True:
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
@@ -86,15 +101,19 @@ def main(args):
 		if reply.message == EXIT_PROCESS:
 			msg = getMessageString(_id, "Ack. Exiting...")
 			clientsocket.sendall(msg)
-			shutdownSocket(clientsocket)
 			print "Received shutdown message from server id %i"%reply._id
+			shutdownSocket(clientsocket)
 			sys.exit(0)
-
-		job = reply.message
-		print "Received %s for processing on iteration %i from server id %i"%(job.problemName, 
-			job.itr, reply._id)
-		processProblem(job)
-		shutdownSocket(clientsocket)
+		elif reply.message == WORKER_PAUSED:
+			print "Received pause message from server id %i. Trying again in 30 seconds."%reply._id
+			shutdownSocket(clientsocket)
+			time.sleep(30)
+		else:
+			job = reply.message
+			print "Received %s for processing on iteration %i from server id %i"%(job.problemName, 
+				job.itr, reply._id)
+			processProblem(job)
+			shutdownSocket(clientsocket)
 
 #Run Main Function
 if __name__ == "__main__":

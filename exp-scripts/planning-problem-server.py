@@ -14,21 +14,61 @@ PORT = 50005
 BUFFER_SIZE = 4096
 QUEUED_CONNECTIONS = 10 #Have set this to the number of workers
 
+#Function to make command like most colin planners
+COLIN_PLANNER_PARAMS = "-v1"
+def getColinStylePlannerCommand(plannerDir, plannerExecLocation, 
+	domainFile, probFile, freeParams=COLIN_PLANNER_PARAMS):
+	
+	return "(cd %s && %s && %s %s %s %s %s %s)"%(plannerDir,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, plannerExecLocation,
+		freeParams, domainFile, probFile)
+
 #Planner Parameters
 #Colin-TRH
-#PLANNER_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
-#PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
-#PLANNER_PARAMS = "-3 -v1"
+def colinTRH(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
+	PLANNER_PARAMS = "-h -v1"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-RPG
-#PLANNER_LOC="/mnt/data/bin/colin2/"
-#PLANNER_EXEC_LOC="/mnt/data/bin/colin2/debug/colin/colin-clp"
-#PLANNER_PARAMS = "-v1"
+def colinRPG(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/colin2/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/colin2/debug/colin/colin-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #POPF
-PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
-PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
-PLANNER_PARAMS = "-v1"
+def popf(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#OPTIC
+def optic(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/optic/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/optic/debug/optic/optic-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#OPTIC - TIL Relaxation Turned off
+def opticSLFRP(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/optic/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/optic/debug/optic/optic-clp"
+	PLANNER_PARAMS = "-0 -v1"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
+
+def lpgtd(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/lpg-td/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/lpg-td/lpg-td-1.0.1"
+	PLANNER_PARAMS = "-n 1 -noout"
+
+	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
 
 #Limit Commands
 TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
@@ -47,6 +87,7 @@ OUTPUT_FOLDER = "output"
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive"]
+AIRPORT_PROBLEM = "airport-timewindows"
 
 def setupFolderStructure(plansdir_fullpath, outputdir_fullpath):
 	if not os.path.exists(plansdir_fullpath):
@@ -62,50 +103,61 @@ def getProblemFiles(path):
 				problems.append(file)
 	return problems
 
-
 def getProblemQueue(iterations=1):
 	#The Queue
 	q = Queue()
-	#iterate through problem sets
-	for root, dirs, files in os.walk(PROBLEM_SETS):
-		for subdir in dirs:
-			if subdir in IGNORE_SET_LIST:
-				continue
-			#Get full problem path
-			subdir_fullpath = os.path.join(root, subdir)
-			domainFile = os.path.join(subdir_fullpath, DOMAIN_FILE)
-			#Ger full path for plan and logs
-			plansdir_fullpath = os.path.join(LOG_FOLDER, subdir, PLANS_FOLDER)
-			outputdir_fullpath = os.path.join(LOG_FOLDER, subdir, OUTPUT_FOLDER)
-			#Create missing folders, if any
-			setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
-			
-			problems = getProblemFiles(subdir_fullpath)
-			
-			for prob in problems:
-				#Problem file
-				probFile = os.path.join(subdir_fullpath, prob)
-				#Planner command
-				plannener_command = "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC, 
-					MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC, 
-					PLANNER_PARAMS, domainFile, probFile)
+	planners = {
+		#"Colin-RPG" : colinRPG,
+		#"POPF" : popf,
+		#"Optic" : optic,
+		#"Optic-SLFRP" : opticSLFRP,
+		"lpg-td" : lpgtd
+	}
+	#iterate through planners
+	for planner in planners:
+		#Get function to create planner command
+		f = planners[planner]
+		#iterate through problem sets
+		for root, dirs, files in os.walk(PROBLEM_SETS):
+			for subdir in dirs:
+				if subdir in IGNORE_SET_LIST:
+					continue
+				#Get full problem path
+				subdir_fullpath = os.path.join(root, subdir)
+				#Ger full path for plan and logs
+				plansdir_fullpath = os.path.join(LOG_FOLDER, planner, subdir, PLANS_FOLDER)
+				outputdir_fullpath = os.path.join(LOG_FOLDER, planner, subdir, OUTPUT_FOLDER)
+				#Create missing folders, if any
+				setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
+				
+				problems = getProblemFiles(subdir_fullpath)
+				
+				for prob in problems:
+					#Problem file
+					probFile = os.path.join(subdir_fullpath, prob)
+					#Domain file
+					domainFile = os.path.join(subdir_fullpath, DOMAIN_FILE)
+					if subdir == AIRPORT_PROBLEM:
+						domainFile = os.path.join(subdir_fullpath,  prob[0:4] + DOMAIN_FILE)
+					#Planner command
+					planner_command = f(domainFile, probFile)
 
-				for itr in range(0, iterations):
-					#Plan file
-					planFileName = "%s-%i.plan"%(prob, itr)
-					planFile = os.path.join(plansdir_fullpath, planFileName)
-					#Validate command
-					validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, 
-						VALIDATOR_PARAMS, domainFile, probFile, planFile)
-					#Log file
-					logFileName = "%s-%i.txt"%(prob, itr)
-					commandList = [plannener_command, validate_command]
-					logFile = os.path.join(outputdir_fullpath, logFileName)
-					job = Job(prob, itr, plannener_command, 
-						validate_command, logFile, planFile)
-					q.put(job)
-		#The first entry has all the dirs
-		break
+					for itr in range(0, iterations):
+						#Plan file
+						planFileName = "%s-%i.plan"%(prob, itr)
+						planFile = os.path.join(plansdir_fullpath, planFileName)
+						#Validate command
+						validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, 
+							VALIDATOR_PARAMS, domainFile, probFile, planFile)
+						#Log file
+						logFileName = "%s-%i.txt"%(prob, itr)
+						logFile = os.path.join(outputdir_fullpath, logFileName)
+						#Generate job
+						job = Job(planner, prob, itr, planner_command, 
+							validate_command, logFile, planFile)
+						q.put(job)
+			#The first entry has all the dirs
+			break
 	return q
 
 def getCurrentAllocationString(currentAllocation):
@@ -116,6 +168,13 @@ def getCurrentAllocationString(currentAllocation):
 
 	return result
 
+def getNumberOfWorkersExecuting(currentAllocation):
+	numExecutions = 0
+	for _id in currentAllocation:
+		if currentAllocation[_id][1] not in [WORKER_PAUSED, WORKER_TERMINATED]:
+			numExecutions += 1
+	return numExecutions
+
 def shutdownSocket(aSocket):
 	aSocket.shutdown(socket.SHUT_RDWR)
 	aSocket.close()
@@ -124,6 +183,7 @@ def shutdownSocket(aSocket):
 def main(args):
 
 	_id = getInstanceID()
+	print "Started. My ID is %i"%_id
 
 	#Get problems ready for computation
 	q = getProblemQueue()
@@ -138,7 +198,8 @@ def main(args):
 	#bind the socket to a public host,
 	# and a well-known port
 	serversocket.bind((HOST, PORT))
-
+	paused = False
+	restrictWorkers = True
 	#Listen for workers and give them work
 	serversocket.listen(QUEUED_CONNECTIONS)
 	while True:
@@ -162,11 +223,22 @@ def main(args):
 				message._id)
 			reply = getMessageString(_id, "Ack. Queue size is %i"%q.qsize())
 		elif message.message == REQUEST_PROBLEM:
+			#Pause the worker because it is done.
+			currentAllocation[message._id] = (addr[0], WORKER_PAUSED, 0)
+			
 			if q.empty(): #Tell the workers to terminate if done
 				print "Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
 							message._id)
 				reply = getMessageString(_id, EXIT_PROCESS)
 				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
+			elif paused:
+				print "Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
+							message._id)
+				reply = getMessageString(_id, WORKER_PAUSED)
+			elif (restrictWorkers and getNumberOfWorkersExecuting(currentAllocation) >= RESTRICTED_WORKER_NUMBER):
+				print "Received request from machine %s with id %i, but computation is being restricted and is currently at limit. Instructing worker to wait."%(addr, 
+					message._id)
+				reply = getMessageString(_id, WORKER_PAUSED)
 			else: #Else give it a job
 				job = q.get()
 				print "Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
@@ -178,6 +250,26 @@ def main(args):
 				message._id) 
 			reply = getMessageString(_id, 
 				getCurrentAllocationString(currentAllocation))
+		elif message.message == PAUSE_WORKERS:
+			paused = True
+			print "Pause cmd recieved from machine %s with id %i" %(addr, 
+				message._id)
+			reply = getMessageString(_id, "Ack. Pausing...")
+		elif message.message == RESUME_WORKERS:
+			paused = False
+			print "Resume cmd recieved from machine %s with id %i" %(addr, 
+				message._id)
+			reply = getMessageString(_id, "Ack. Resuming...")
+		elif message.message == RESTRICT_WORKERS:
+			restrictWorkers = True
+			print "Restrict workers cmd recieved from machine %s with id %i" %(addr, 
+				message._id)
+			reply = getMessageString(_id, "Ack. Restricting workers...")
+		elif message.message == UNRESTRICT_WORKERS:
+			restrictWorkers = False
+			print "Relax worker restriction cmd recieved from machine %s with id %i" %(addr, 
+				message._id)
+			reply = getMessageString(_id, "Ack. Setting workers free...")
 
 		#Send the reply
 		conn.sendall(reply)

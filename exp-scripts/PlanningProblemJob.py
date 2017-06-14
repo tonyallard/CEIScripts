@@ -2,7 +2,8 @@
 
 class Job:
 
-	def __init__(self, problemName, itr, plannerCommand, validatorCommand, logFile, planFile):
+	def __init__(self, plannerName, problemName, itr, plannerCommand, validatorCommand, logFile, planFile):
+		self.plannerName = plannerName
 		self.problemName = problemName
 		self.itr = itr
 		self.plannerCommand = plannerCommand
