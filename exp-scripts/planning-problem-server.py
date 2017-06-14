@@ -4,6 +4,7 @@ import os
 import socket
 from multiprocessing import Queue
 import time
+import re
 
 from PlanningProblemConstants import *
 from PlanningProblemJob import *
@@ -89,6 +90,9 @@ DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive"]
 AIRPORT_PROBLEM = "airport-timewindows"
 
+PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
+PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
+
 def setupFolderStructure(plansdir_fullpath, outputdir_fullpath):
 	if not os.path.exists(plansdir_fullpath):
 		os.makedirs(plansdir_fullpath)
@@ -100,7 +104,12 @@ def getProblemFiles(path):
 	for root, dirs, files in os.walk(path):
 		for file in files:
 			if file != DOMAIN_FILE:
-				problems.append(file)
+				filePTR = open(os.path.join(path, file), 'r')
+				filetext = filePTR.read()
+				filePTR.close()
+				matches = PROBLEM_FILE_REGEX.findall(filetext)
+				if len(matches) > 0:
+					problems.append(file)
 	return problems
 
 def getProblemQueue(iterations=1):
@@ -137,6 +146,8 @@ def getProblemQueue(iterations=1):
 					probFile = os.path.join(subdir_fullpath, prob)
 					#Domain file
 					domainFile = os.path.join(subdir_fullpath, DOMAIN_FILE)
+					#Special case for the Airport domain
+					#As this has a domain file for each problem file
 					if subdir == AIRPORT_PROBLEM:
 						domainFile = os.path.join(subdir_fullpath,  prob[0:4] + DOMAIN_FILE)
 					#Planner command
@@ -183,11 +194,11 @@ def shutdownSocket(aSocket):
 def main(args):
 
 	_id = getInstanceID()
-	print "Started. My ID is %i"%_id
+	printMessage("Started. My ID is %i"%_id)
 
 	#Get problems ready for computation
 	q = getProblemQueue()
-	print "Problem queue initialised."
+	printMessage("Problem queue initialised.")
 	currentAllocation = {}
 
 	#create an INET, STREAMing socket
@@ -210,8 +221,8 @@ def main(args):
 
 		reply = ""
 		if message.message == EXIT_PROCESS:
-			print "Exit cmd recieved from machine %s with id %i" %(addr, 
-				message._id)
+			printMessage("Exit cmd recieved from machine %s with id %i" %(addr, 
+				message._id))
 			reply = getMessageString(_id, "Ack. Exiting...")
 			conn.sendall(reply)
 			conn.shutdown(socket.SHUT_RDWR)
@@ -219,56 +230,56 @@ def main(args):
 			shutdownSocket(serversocket)
 			break
 		elif message.message == PROBLEM_QUEUE_SIZE:
-			print "Queue size request recieved from machine %s with id %i"%(addr, 
-				message._id)
+			printMessage("Queue size request recieved from machine %s with id %i"%(addr, 
+				message._id))
 			reply = getMessageString(_id, "Ack. Queue size is %i"%q.qsize())
 		elif message.message == REQUEST_PROBLEM:
 			#Pause the worker because it is done.
 			currentAllocation[message._id] = (addr[0], WORKER_PAUSED, 0)
 			
 			if q.empty(): #Tell the workers to terminate if done
-				print "Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
-							message._id)
+				printMessage("Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
+							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
 				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
 			elif paused:
-				print "Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
-							message._id)
+				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
+							message._id))
 				reply = getMessageString(_id, WORKER_PAUSED)
 			elif (restrictWorkers and getNumberOfWorkersExecuting(currentAllocation) >= RESTRICTED_WORKER_NUMBER):
-				print "Received request from machine %s with id %i, but computation is being restricted and is currently at limit. Instructing worker to wait."%(addr, 
-					message._id)
+				printMessage("Received request from machine %s with id %i, but computation is being restricted and is currently at limit. Instructing worker to wait."%(addr, 
+					message._id))
 				reply = getMessageString(_id, WORKER_PAUSED)
 			else: #Else give it a job
 				job = q.get()
-				print "Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
-					job.itr, addr, message._id)
+				printMessage("Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
+					job.itr, addr, message._id))
 				reply = getMessageString(_id, job)
 				currentAllocation[message._id] = (addr[0], job.problemName, job.itr)
 		elif message.message == CURRENT_ALLOCATION:
-			print "Received request from machine %s with id %i for current allocation."%(addr, 
-				message._id) 
+			printMessage("Received request from machine %s with id %i for current allocation."%(addr, 
+				message._id))
 			reply = getMessageString(_id, 
 				getCurrentAllocationString(currentAllocation))
 		elif message.message == PAUSE_WORKERS:
 			paused = True
-			print "Pause cmd recieved from machine %s with id %i" %(addr, 
-				message._id)
+			printMessage("Pause cmd recieved from machine %s with id %i" %(addr, 
+				message._id))
 			reply = getMessageString(_id, "Ack. Pausing...")
 		elif message.message == RESUME_WORKERS:
 			paused = False
-			print "Resume cmd recieved from machine %s with id %i" %(addr, 
-				message._id)
+			printMessage("Resume cmd recieved from machine %s with id %i" %(addr, 
+				message._id))
 			reply = getMessageString(_id, "Ack. Resuming...")
 		elif message.message == RESTRICT_WORKERS:
 			restrictWorkers = True
-			print "Restrict workers cmd recieved from machine %s with id %i" %(addr, 
-				message._id)
+			printMessage("Restrict workers cmd recieved from machine %s with id %i" %(addr, 
+				message._id))
 			reply = getMessageString(_id, "Ack. Restricting workers...")
 		elif message.message == UNRESTRICT_WORKERS:
 			restrictWorkers = False
-			print "Relax worker restriction cmd recieved from machine %s with id %i" %(addr, 
-				message._id)
+			printMessage("Relax worker restriction cmd recieved from machine %s with id %i" %(addr, 
+				message._id))
 			reply = getMessageString(_id, "Ack. Setting workers free...")
 
 		#Send the reply

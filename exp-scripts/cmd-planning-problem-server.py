@@ -38,8 +38,8 @@ while True:
 		
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
-		print "Received: %s, from machine with id %i"%(reply.message, 
-			reply._id)
+		printMessage("Received: %s, from machine with id %i"%(reply.message, 
+			reply._id))
 		clientsocket.close()
 	elif cmd == 2: #Pause Workers
 		#create an INET, STREAMing socket
@@ -53,8 +53,8 @@ while True:
 		
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
-		print "Received: %s, from machine with id %i"%(reply.message, 
-			reply._id)
+		printMessage("Received: %s, from machine with id %i"%(reply.message, 
+			reply._id))
 		clientsocket.close()
 	elif cmd == 3: #Resume Workers
 		#create an INET, STREAMing socket
@@ -68,8 +68,8 @@ while True:
 		
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
-		print "Received: %s, from machine with id %i"%(reply.message, 
-			reply._id)
+		printMessage("Received: %s, from machine with id %i"%(reply.message, 
+			reply._id))
 		clientsocket.close()
 	elif cmd == 4: #Restrict Workers
 		#create an INET, STREAMing socket
@@ -84,8 +84,8 @@ while True:
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
 		job = reply.message
-		print "Received: %s, from machine with id %i"%(reply.message, 
-			reply._id)
+		printMessage("Received: %s, from machine with id %i"%(reply.message, 
+			reply._id))
 		clientsocket.close()
 
 	elif cmd == 5: #Unrestrict Workers
@@ -100,8 +100,8 @@ while True:
 		
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
-		print "Received: %s, from machine with id %i"%(reply.message, 
-			reply._id)
+		printMessage("Received: %s, from machine with id %i"%(reply.message, 
+			reply._id))
 		clientsocket.close()
 	elif cmd == 6: #Request a Problem
 		#create an INET, STREAMing socket
@@ -116,8 +116,8 @@ while True:
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
 		job = reply.message
-		print "Received: %s for iteration %i from machine with id %i."%(job.problemName, 
-			job.itr, reply._id)
+		printMessage("Received: %s for iteration %i from machine with id %i."%(job.problemName, 
+			job.itr, reply._id))
 		clientsocket.close()
 
 	elif cmd == 7: #Request a Current Allocation
@@ -132,8 +132,8 @@ while True:
 		
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
-		print "Received Current Allocation from machine with id %i:\n%s"%(reply._id,
-			reply.message)
+		printMessage("Received Current Allocation from machine with id %i:\n%s"%(reply._id,
+			reply.message))
 		clientsocket.close()
 
 	elif cmd == 8: #Terminate server
@@ -149,8 +149,8 @@ while True:
 
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
-		print "Received: %s from machine with ID %i"%(reply.message, 
-			reply._id)
+		printMessage("Received: %s from machine with ID %i"%(reply.message, 
+			reply._id))
 		clientsocket.close()
 		time.sleep(1)
 		sys.exit(0)

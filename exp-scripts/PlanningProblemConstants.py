@@ -3,6 +3,7 @@ import sys
 import pickle
 from cStringIO import StringIO
 import random
+from time import gmtime, strftime
 
 EXIT_PROCESS = "EXIT_PROCESS"
 REQUEST_PROBLEM = "REQUEST_PROBLEM"
@@ -49,3 +50,7 @@ def seed():
 def getInstanceID():
 	seed()
 	return random.randint(0, sys.maxint)
+
+def printMessage(text):
+	print "%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+		text)

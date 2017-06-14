@@ -81,7 +81,7 @@ def main(args):
 	HOST = args[1]
 
 	_id = getInstanceID()
-	print "Started. My ID is %i"%_id
+	printMessage("Started. My ID is %i"%_id)
 	while True:
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
@@ -101,17 +101,17 @@ def main(args):
 		if reply.message == EXIT_PROCESS:
 			msg = getMessageString(_id, "Ack. Exiting...")
 			clientsocket.sendall(msg)
-			print "Received shutdown message from server id %i"%reply._id
+			printMessage("Received shutdown message from server id %i"%reply._id)
 			shutdownSocket(clientsocket)
 			sys.exit(0)
 		elif reply.message == WORKER_PAUSED:
-			print "Received pause message from server id %i. Trying again in 30 seconds."%reply._id
+			printMessage("Received pause message from server id %i. Trying again in 30 seconds."%reply._id)
 			shutdownSocket(clientsocket)
 			time.sleep(30)
 		else:
 			job = reply.message
-			print "Received %s for processing on iteration %i from server id %i"%(job.problemName, 
-				job.itr, reply._id)
+			printMessage("Received %s for processing on iteration %i from server id %i"%(job.problemName, 
+				job.itr, reply._id))
 			processProblem(job)
 			shutdownSocket(clientsocket)
 
