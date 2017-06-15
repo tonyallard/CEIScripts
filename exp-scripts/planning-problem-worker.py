@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import sys
+import os
 import socket
 import pickle
 from cStringIO import StringIO
@@ -7,6 +8,8 @@ import time
 from timeit import Timer
 import re
 import subprocess
+import gzip
+import shutil
 
 from PlanningProblemConstants import *
 from PlanningProblemJob import *
@@ -41,8 +44,8 @@ def getPlan(planner, logFile, planFile):
 
 def processProblem(job):
 	#Open files for logging
-	bufsize = 0
-	log = open(job.logFile, "a+", bufsize)
+	buffSize = 0
+	log = open(job.logFile, "a+", buffSize)
 
 	#Setup experiment
 	reps=1
@@ -59,7 +62,7 @@ def processProblem(job):
 	log.write("%f seconds\n"%timeTaken)
 	log.write("====================\n\n")
 
-	plan = open(job.planFile, "a", bufsize)
+	plan = open(job.planFile, "a", buffSize)
 	getPlan(job.plannerName, log, plan)
 	plan.close()		
 
@@ -70,6 +73,20 @@ def processProblem(job):
 	
 	log.write("===EOF===")
 	log.close()
+
+	#Compress files to save space
+	with open(job.logFile, 'rb') as f_in, gzip.open(job.logFile + '.gz', 'wb') as f_out:
+		shutil.copyfileobj(f_in, f_out)
+		f_in.close()
+		f_out.close()
+	with open(job.planFile, 'rb') as f_in, gzip.open(job.planFile + '.gz', 'wb') as f_out:
+		shutil.copyfileobj(f_in, f_out)
+		f_in.close()
+		f_out.close()
+
+	#Remove uncompressed files
+	os.remove(job.logFile)
+	os.remove(job.planFile)
 
 def shutdownSocket(aSocket):
 	aSocket.shutdown(socket.SHUT_RDWR)
@@ -110,8 +127,8 @@ def main(args):
 			time.sleep(30)
 		else:
 			job = reply.message
-			printMessage("Received %s for processing on iteration %i from server id %i"%(job.problemName, 
-				job.itr, reply._id))
+			printMessage("Received %s for processing on iteration %i with planner %s, from server id %i"%(job.problemName, 
+				job.itr, job.plannerName, reply._id))
 			processProblem(job)
 			shutdownSocket(clientsocket)
 

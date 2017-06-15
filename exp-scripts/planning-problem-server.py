@@ -112,13 +112,13 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=1):
+def getProblemQueue(iterations=30):
 	#The Queue
 	q = Queue()
 	planners = {
-		#"Colin-RPG" : colinRPG,
-		#"POPF" : popf,
-		#"Optic" : optic,
+		"Colin-RPG" : colinRPG,
+		"POPF" : popf,
+		"Optic" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
 		"lpg-td" : lpgtd
 	}
