@@ -7,16 +7,16 @@
 import sys
 import os
 import re
+import gzip
 import AnalysisCommon
-import ExtractSuccess
-import ExtractRunningTime
-import ExtractStatesEval
-import ExtractDeadEnds
+from ProblemDomainStats import *
 
-LOG_FILE_EXT = ".pddl[-]*[\d]*.txt"
+LOG_FILE_EXT = ".txt.gz"
+OUTPUT_DIR = "output"
 
 def isProblemLog(filename, file):
-	if re.search(LOG_FILE_EXT, filename) and AnalysisCommon.LOG_FILE_START_SEQ in file[0][:3]:
+	if re.search(LOG_FILE_EXT, filename, re.IGNORECASE) and \
+		AnalysisCommon.LOG_FILE_START_SEQ in file[0][:3]:
 		return True
 	return False
 
@@ -52,102 +52,95 @@ def getMeanAndVar(data):
 	variance = meanDiff / (samples - 1)
 	return mean, variance
 
-def createDataStructure(stats, problemName):
-	if problemName not in stats:
-		stats[problemName] = {}
-		stats[problemName][0] = {}
-		stats[problemName][1] = {}
-		stats[problemName][2] = {}
-		stats[problemName][3] = {}
-		stats[problemName][4] = {}
-		stats[problemName][5] = {}
+def getLogStructure(rootDir):
+	logStructure = {}
+	for planner in os.listdir(rootDir):
+		plannerDir = os.path.join(rootDir, planner)
+		
+		if (not os.path.isdir(plannerDir)):
+			continue
+		
+		logStructure[planner] = {}
+		for problem in os.listdir(plannerDir):
+			#Driverlog shift is too different a format
+			if problem == "driverlogshift":
+				continue
+			logDir = os.path.join(plannerDir, problem, OUTPUT_DIR)
+			logStructure[planner][problem] = logDir
+					
+	return logStructure
 
-def main(args):
+def processProblemDomainStatistics(planner, problemDomain, logPath):
 
-	logPath = args[0]
-
-	csvFile = open("experiment.csv", 'w')
-	csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Dead Ends Mean,Dead Ends Variance\n")
-
-	stats = {}
-	totalProbs = 0
-	totalSuccess = 0.0
-	avgCompTime = 0.0
-	avgHTime = 0.0
-	avgStates = 0.0
-	avgHStates = 0.0
-	avgDeadEnds = 0.0
+	probDomStats = ProblemDomainStats(planner, problemDomain)
 
 	for filename in os.listdir(logPath):
-		fullQialified = os.path.join(logPath, filename)
-		f = open(fullQialified)
-		buffer = AnalysisCommon.bufferFile(f)
+		fullQualified = os.path.join(logPath, filename)
+		with gzip.open(fullQualified, 'rb') as f:
+
+			buffer = AnalysisCommon.bufferFile(f)
 
 		if not isProblemLog(filename, buffer):
 			continue
 
-		totalProbs += 1
-
 		problemName, probNumber = getProblemDetails(filename)
-		createDataStructure(stats, problemName)
+		probDomStats.processProblemLog(problemName, probNumber, buffer)
 
-		#Problem Success
-		success = ExtractSuccess.extractSuccess(buffer)
-		stats[problemName][0][probNumber] = success
-		totalSuccess += success
-		
-		#Computational Time
-		compTime = ExtractRunningTime.extractRunTime(buffer)
-		stats[problemName][1][probNumber] = compTime
-		if compTime is not None:
-			avgCompTime += compTime
-		
-		#Heuristic Time
-		hTime = ExtractRunningTime.extractHRunTime(buffer)
-		stats[problemName][2][probNumber] = hTime
-		if hTime is not None:
-			avgHTime += hTime
-		
-		#States Evaluated
-		statesEval, hStates, totalStates = ExtractStatesEval.extractStatesEvaluated(buffer)
-		stats[problemName][3][probNumber] = statesEval
-		stats[problemName][4][probNumber] = hStates
-		if statesEval is not None:
-			avgStates += statesEval
-		if hStates is not None:
-			avgHStates += hStates
-		
-		#Deadends Encountered
-		deadEnds = ExtractDeadEnds.extractDeadEndsManually(buffer)
-		stats[problemName][5][probNumber] = deadEnds
-		if deadEnds is not None:
-			avgDeadEnds += deadEnds
+	return probDomStats
 
-	#Print problem statistics to CSV file
-	for problem in stats:
-		success = stats[problem][0]
-		succMean, succVar = getMeanAndVar(success)
-		compTime = stats[problem][1]
-		compTimeMean, compTimeVar = getMeanAndVar(compTime)
-		hTime = stats[problem][2]
-		hTimeMean, hTimeVar = getMeanAndVar(hTime)
-		statesEval = stats[problem][3]
-		statesEvalMean, statesEvalVar = getMeanAndVar(statesEval)
-		hStates = stats[problem][4]
-		hStatesMean, hStatesVar = getMeanAndVar(hStates)
-		deadEnds = stats[problem][5]
-		deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
+def main(args):
 
-		csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
-			succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
-			statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
-			deadEndsMean, deadEndsVar))
-		
-	#Write averages
-	csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f\n"%(totalProbs, totalSuccess, 
-		avgCompTime/totalProbs, avgHTime/totalProbs, avgStates/totalProbs, 
-		avgHStates/totalProbs, avgDeadEnds/totalProbs))
-	csvFile.close()
+	rootLogPath = args[0]
+
+	logStructure = getLogStructure(rootLogPath)
+					
+	for planner in logStructure:
+		print planner
+		for problemDomain in logStructure[planner]:
+			logPath = logStructure[planner][problemDomain]
+
+			#open stats file
+			csvFile = open("%s-%s.csv"%(planner, problemDomain), 'w')
+			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Dead Ends Mean,Dead Ends Variance\n")
+
+			probDomStats = processProblemDomainStatistics(planner, 
+				problemDomain, logPath)
+			print "\t%s %s"%(probDomStats.problemDomain, probDomStats.totalProbs)
+			#Print problem statistics to CSV file
+			for problem in probDomStats.stats:
+				success = probDomStats.getProblemSuccess(problem)
+				succMean, succVar = getMeanAndVar(success)
+
+				compTime = probDomStats.getProblemCompTime(problem)
+				compTimeMean, compTimeVar = getMeanAndVar(compTime)
+				
+				hTime = probDomStats.getProblemHTime(problem)
+				hTimeMean, hTimeVar = getMeanAndVar(hTime)
+				
+				statesEval = probDomStats.getProblemStatesEval(problem)
+				statesEvalMean, statesEvalVar = getMeanAndVar(statesEval)
+				
+				hStates = probDomStats.getProblemHStatesEval(problem)
+				hStatesMean, hStatesVar = getMeanAndVar(hStates)
+				
+				deadEnds = probDomStats.getProblemDeadEnds(problem)
+				deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
+
+				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
+					succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
+					statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
+					deadEndsMean, deadEndsVar))
+
+			#Write averages
+			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f\n"%(probDomStats.totalProbs, 
+				probDomStats.totalSuccess, 
+				probDomStats.avgCompTime/probDomStats.totalProbs, 
+				probDomStats.avgHTime/probDomStats.totalProbs, 
+				probDomStats.avgStates/probDomStats.totalProbs, 
+				probDomStats.avgHStates/probDomStats.totalProbs, 
+				probDomStats.avgDeadEnds/probDomStats.totalProbs))
+			csvFile.close()
+
 
 #Run Main Function
 if __name__ == "__main__":

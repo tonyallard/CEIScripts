@@ -29,7 +29,9 @@ def extractDeadEndsManually(log):
 		if EHC_SEARCH_STARTING in line:
 			break
 		startLine += 1
-	if AnalysisCommon.SUCCESS_DELIM in log[startLine+1]:
+	if startLine+1 > len(log):
+		return None
+	if AnalysisCommon.COLIN_SUCCESS_DELIM in log[startLine+1]:
 		return 0
 	for line in log[startLine+2:]:
 		deadends = line.count('d')

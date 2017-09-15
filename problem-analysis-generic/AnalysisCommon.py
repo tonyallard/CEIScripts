@@ -10,7 +10,8 @@ SEARCH_FAILURE_DELIM = "Problem Unsolvable"
 PDDL_FILE_EXT = ".pddl"
 LOG_FILE_EXT = ".pddl.txt"
 LOG_FILE_START_SEQ = "==="
-SUCCESS_DELIM = ";;;; Solution Found"
+COLIN_SUCCESS_DELIM = ";;;; Solution Found"
+LPGTD_SUCCESS_DELIM = " solution found: "
 UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
 
 SERVER_LOG_DELIM = "explog-"
@@ -35,7 +36,7 @@ def isCPUTimeout(logFile):
 
 def isSuccessful(logFile):
 	for line in logFile:
-		if SUCCESS_DELIM in line:
+		if COLIN_SUCCESS_DELIM in line:
 			return True
 	return False
 

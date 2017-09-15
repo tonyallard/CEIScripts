@@ -8,9 +8,15 @@ import os
 import re
 import AnalysisCommon
 
+def extractLPGTDSuccess(log):
+	for line in log:
+		if AnalysisCommon.LPGTD_SUCCESS_DELIM in line:
+			return 1
+	return 0
+
 def extractSuccess(log):
 	for line in log:
-		if AnalysisCommon.SUCCESS_DELIM in line:
+		if AnalysisCommon.COLIN_SUCCESS_DELIM in line:
 			return 1
 	return 0
 
