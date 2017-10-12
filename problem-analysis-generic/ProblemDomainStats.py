@@ -12,7 +12,8 @@ class ProblemDomainStats:
 	H_TIME_IDX = 2
 	STATES_EVAL_IDX = 3
 	H_STATES_EVAL_IDX = 4
-	DEAD_ENDS_IDX = 5
+	COLIN_STATES_EVAIL = 5
+	DEAD_ENDS_IDX = 6
 
 	def __init__(self, plannerName, problemDomain):
 		self.plannerName = plannerName
@@ -24,6 +25,7 @@ class ProblemDomainStats:
 		self.avgHTime = 0.0
 		self.avgStates = 0.0
 		self.avgHStates = 0.0
+		self.avgColinStates = 0.0
 		self.avgDeadEnds = 0.0
 
 	def getProblemSuccess(self, problem):
@@ -41,6 +43,9 @@ class ProblemDomainStats:
 	def getProblemHStatesEval(self, problem):
 		return self.stats[problem][self.H_STATES_EVAL_IDX]
 
+	def getProblemColinStatesEval(self, problem):
+		return self.stats[problem][self.COLIN_STATES_EVAIL]
+
 	def getProblemDeadEnds(self, problem):
 		return self.stats[problem][self.DEAD_ENDS_IDX]
 
@@ -52,6 +57,7 @@ class ProblemDomainStats:
 			self.stats[problemName][self.H_TIME_IDX] = {}
 			self.stats[problemName][self.STATES_EVAL_IDX] = {}
 			self.stats[problemName][self.H_STATES_EVAL_IDX] = {}
+			self.stats[problemName][self.COLIN_STATES_EVAIL] = {}
 			self.stats[problemName][self.DEAD_ENDS_IDX] = {}
 
 	def processProblemLog(self, problemName, probNumber, logBuffer):
@@ -87,6 +93,12 @@ class ProblemDomainStats:
 			self.avgStates += statesEval
 		if hStates is not None:
 			self.avgHStates += hStates
+
+		#Colin States
+		colinStates = ExtractStatesEval.genericExtractStatesEvaluated(logBuffer)
+		self.stats[problemName][self.COLIN_STATES_EVAIL][probNumber] = colinStates
+		if colinStates is not None:
+			self.avgColinStates += colinStates
 		
 		#Deadends Encountered
 		deadEnds = ExtractDeadEnds.extractDeadEndsManually(logBuffer)

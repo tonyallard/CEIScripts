@@ -3,18 +3,39 @@
 #Date: 06 April 2016
 #Description: Common methods for problem analysis
 
+import re
+
 TIMEOUT_DELIM = "timeout: the monitored command dumped core"
 MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
+EHC_SUCCESS = "EHC Success!!!!"
+BFS_SUCCESS = "BFS Success!!!!"
+COLIN_SUCCESS_DELIM = ";;;; Solution Found"
+UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
+TERMINATE_FLAGS = [TIMEOUT_DELIM, MEMORY_ERROR_DELIM, EHC_SUCCESS, BFS_SUCCESS, COLIN_SUCCESS_DELIM, UNSOVLEABLE_DELIM, "Beginning the replay"]
 SEARCH_SUCCESS_DELIM = "g"
 SEARCH_FAILURE_DELIM = "Problem Unsolvable"
 PDDL_FILE_EXT = ".pddl"
 LOG_FILE_EXT = ".pddl.txt"
 LOG_FILE_START_SEQ = "==="
-COLIN_SUCCESS_DELIM = ";;;; Solution Found"
 LPGTD_SUCCESS_DELIM = " solution found: "
-UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
+SEARCH_BEGIN_DELIM = "Initial heuristic = "
+BRANCH_STRING_START = "[0-9]: "
+NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
+RESORTING_TO_BFS = "Resorting to best-first search"
 
 SERVER_LOG_DELIM = "explog-"
+
+def filterBranchString(branch):
+	branch = re.sub(NEW_HVAL_STRING, "", branch) #remove hvals
+	branch = re.sub(BRANCH_STRING_START, "", branch) #remove starting delim
+	branch = branch.partition(TIMEOUT_DELIM)[0] #remove timeouts
+	branch = branch.partition(MEMORY_ERROR_DELIM)[0] #remove memory overruns
+	branch = branch.partition(EHC_SUCCESS)[0] #remove success
+	branch = branch.partition(BFS_SUCCESS)[0] #remove success
+	branch = branch.partition(COLIN_SUCCESS_DELIM)[0] #remove success
+	branch = branch.partition(UNSOVLEABLE_DELIM)[0] #remove success
+	branch = branch.partition("Beginning the replay")[0] #remove success
+	return branch
 
 def hasTimedOut(logFile):
 	for line in logFile:
