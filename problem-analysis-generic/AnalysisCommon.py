@@ -34,6 +34,7 @@ def filterBranchString(branch):
 	branch = branch.partition(BFS_SUCCESS)[0] #remove success
 	branch = branch.partition(COLIN_SUCCESS_DELIM)[0] #remove success
 	branch = branch.partition(UNSOVLEABLE_DELIM)[0] #remove success
+	branch = branch.partition(RESORTING_TO_BFS)[0] #remove BFS Switch
 	branch = branch.partition("Beginning the replay")[0] #remove success
 	return branch
 

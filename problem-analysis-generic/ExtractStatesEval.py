@@ -62,7 +62,7 @@ def genericExtractStatesEvaluated(logBuffer):
 		if any(substring in logBuffer[x] for substring in AnalysisCommon.TERMINATE_FLAGS):
 			if "Beginning the replay" in logBuffer[x]:
 				stateTypeCount['g'] += 1
-			break	
+			break
 	return 1 + stateTypeCount['.'] + stateTypeCount['b'] + stateTypeCount['d'] + stateTypeCount['g']
 
 def main2(args):
@@ -74,6 +74,15 @@ def main2(args):
 				log.append(x)
 			statesEval = genericExtractStatesEvaluated(log)
 			print filename, statesEval
+
+def main3(args):
+	file = sys.argv[1]
+	with gzip.open(file, 'rb') as f:
+		log = []
+		for x in f:
+			log.append(x)
+		statesEval = genericExtractStatesEvaluated(log)
+		print file, statesEval
 
 def main(args):
 	csvFile = open('states-data.csv', 'w')
