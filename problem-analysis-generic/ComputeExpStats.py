@@ -77,8 +77,10 @@ def processProblemDomainStatistics(planner, problemDomain, logPath):
 	for filename in os.listdir(logPath):
 		fullQualified = os.path.join(logPath, filename)
 		with gzip.open(fullQualified, 'rb') as f:
-
-			buffer = AnalysisCommon.bufferFile(f)
+			try:
+				buffer = AnalysisCommon.bufferFile(f)
+			except IOError:
+				continue
 
 		if not isProblemLog(filename, buffer):
 			continue
@@ -91,6 +93,9 @@ def processProblemDomainStatistics(planner, problemDomain, logPath):
 def main(args):
 
 	rootLogPath = args[0]
+	csvPath = "."
+	if len(args) > 1:
+		csvPath = args[1]
 
 	logStructure = getLogStructure(rootLogPath)
 					
@@ -100,12 +105,14 @@ def main(args):
 			logPath = logStructure[planner][problemDomain]
 
 			#open stats file
-			csvFile = open("%s-%s.csv"%(planner, problemDomain), 'w')
-			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Dead Ends Mean,Dead Ends Variance\n")
+			csvFile = open(os.path.join(csvPath, "%s-%s.csv"%(planner, problemDomain)), 'w')
+			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Colin States Evaluated Mean,Colin States Evaluated Variance,Dead Ends Mean,Dead Ends Variance\n")
 
 			probDomStats = processProblemDomainStatistics(planner, 
 				problemDomain, logPath)
 			print "\t%s %s"%(probDomStats.problemDomain, probDomStats.totalProbs)
+			if (probDomStats.totalProbs <= 0):
+				continue
 			#Print problem statistics to CSV file
 			for problem in probDomStats.stats:
 				success = probDomStats.getProblemSuccess(problem)
@@ -122,22 +129,26 @@ def main(args):
 				
 				hStates = probDomStats.getProblemHStatesEval(problem)
 				hStatesMean, hStatesVar = getMeanAndVar(hStates)
+
+				colinStates = probDomStats.getProblemColinStatesEval(problem)
+				colinStatesMean, colinStatesVar = getMeanAndVar(colinStates)
 				
 				deadEnds = probDomStats.getProblemDeadEnds(problem)
 				deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
 
-				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
+				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
 					succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
 					statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
-					deadEndsMean, deadEndsVar))
+					colinStatesMean, colinStatesVar, deadEndsMean, deadEndsVar))
 
 			#Write averages
-			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
+			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
 				probDomStats.totalSuccess, 
 				probDomStats.avgCompTime/probDomStats.totalProbs, 
 				probDomStats.avgHTime/probDomStats.totalProbs, 
 				probDomStats.avgStates/probDomStats.totalProbs, 
-				probDomStats.avgHStates/probDomStats.totalProbs, 
+				probDomStats.avgHStates/probDomStats.totalProbs,
+				probDomStats.avgColinStates/probDomStats.totalProbs,
 				probDomStats.avgDeadEnds/probDomStats.totalProbs))
 			csvFile.close()
 

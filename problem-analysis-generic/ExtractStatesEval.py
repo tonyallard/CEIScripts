@@ -8,6 +8,8 @@
 import sys
 import os
 import re
+import gzip
+import collections
 import AnalysisCommon
 
 HEURISTIC_STATE_DELIM = "#; Heuristic States Evaluated: "
@@ -41,6 +43,46 @@ def extractStatesEvaluated(logFile):
 		total = statesEvaluated+hStatesEvaluated
 	
 	return statesEvaluated, hStatesEvaluated, total
+
+def genericExtractStatesEvaluated(logBuffer):
+	startIdx = -1
+	i = 0
+	for line in logBuffer:
+		if line.find(AnalysisCommon.SEARCH_BEGIN_DELIM) >= 0:
+			startIdx = i
+			break
+		i+=1
+	if startIdx == -1:
+		return None
+	stateTypeCount = collections.defaultdict(int)
+	for x in range(startIdx+1, len(logBuffer)):
+		for c in AnalysisCommon.filterBranchString(logBuffer[x]):
+			# print AnalysisCommon.filterBranchString(logBuffer[x])
+			stateTypeCount[c] += 1
+		if any(substring in logBuffer[x] for substring in AnalysisCommon.TERMINATE_FLAGS):
+			if "Beginning the replay" in logBuffer[x]:
+				stateTypeCount['g'] += 1
+			break
+	return 1 + stateTypeCount['.'] + stateTypeCount['b'] + stateTypeCount['d'] + stateTypeCount['g']
+
+def main2(args):
+	path = sys.argv[1]
+	for filename in os.listdir(path):
+		with gzip.open(os.path.join(path, filename), 'rb') as f:
+			log = []
+			for x in f:
+				log.append(x)
+			statesEval = genericExtractStatesEvaluated(log)
+			print filename, statesEval
+
+def main3(args):
+	file = sys.argv[1]
+	with gzip.open(file, 'rb') as f:
+		log = []
+		for x in f:
+			log.append(x)
+		statesEval = genericExtractStatesEvaluated(log)
+		print file, statesEval
 
 def main(args):
 	csvFile = open('states-data.csv', 'w')

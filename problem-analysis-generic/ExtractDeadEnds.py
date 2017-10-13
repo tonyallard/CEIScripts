@@ -21,38 +21,23 @@ def extractDeadEnds(log):
 			return int(deadEndCount[0])
 	return None
 
-def extractDeadEndsManually(log):
-	#Find all dead ends from EHC
-	deadends = None
-	startLine = 0
-	for line in log:
-		if EHC_SEARCH_STARTING in line:
+def extractDeadEndsManually(logBuffer):
+	startIdx = -1
+	i = 0
+	for line in logBuffer:
+		if line.find(AnalysisCommon.SEARCH_BEGIN_DELIM) >= 0:
+			startIdx = i
 			break
-		startLine += 1
-	if startLine+1 > len(log):
+		i+=1
+	if startIdx == -1:
 		return None
-	if AnalysisCommon.COLIN_SUCCESS_DELIM in log[startLine+1]:
-		return 0
-	for line in log[startLine+2:]:
-		deadends = line.count('d')
-		break
-	#Find all dead ends from BFS
-	startLine = 0
-	for line in log:
-		if BFS_SEARCH_STARTING in line:
-			break
-		startLine += 1
-	#Search for deadends until a termination is encountered
-	for line in log[startLine+1:]:
-		termination = AnalysisCommon.getTerminationIndex(line)
-		if termination is -1:
-			termination = len(line)
-		deadends += line[:termination].count('d')
-		#If we found the termination delimeter
-		#then this is the last line to count
-		if termination is not len(line):
-			break
-	return deadends
+
+	deadEnds = 0
+	for x in range(startIdx+1, len(logBuffer)):
+		deadEnds += AnalysisCommon.filterBranchString(logBuffer[x]).count('d')
+		if any(substring in logBuffer[x] for substring in AnalysisCommon.TERMINATE_FLAGS):
+			break	
+	return deadEnds
 
 def main(args):
 	inputPath = args[0]
