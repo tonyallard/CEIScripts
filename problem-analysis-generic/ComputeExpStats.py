@@ -132,7 +132,7 @@ def main(args):
 					deadEndsMean, deadEndsVar))
 
 			#Write averages
-			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f\n"%(probDomStats.totalProbs, 
+			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
 				probDomStats.totalSuccess, 
 				probDomStats.avgCompTime/probDomStats.totalProbs, 
 				probDomStats.avgHTime/probDomStats.totalProbs, 
