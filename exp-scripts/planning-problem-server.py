@@ -27,8 +27,8 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 #Planner Parameters
 #Colin-TRH
 def colinTRH(domainFile, probFile):
-	PLANNER_LOC="/mnt/data/bin/Colin2-withStatePrinter/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-withStatePrinter/debug/colin/colin-clp"
+	PLANNER_LOC="/mnt/data/bin/Colin2-TRH/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-TRH/debug/colin/colin-clp"
 	PLANNER_PARAMS = "-h -v1"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
@@ -116,11 +116,12 @@ def getProblemQueue(iterations=30):
 	#The Queue
 	q = Queue()
 	planners = {
-		"Colin-RPG" : colinRPG,
-		"POPF" : popf,
-		"Optic" : optic,
+		#"Colin-RPG" : colinRPG,
+		#"POPF" : popf,
+		#"Optic" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
-		"lpg-td" : lpgtd
+		#"lpg-td" : lpgtd
+		"Colin-TRH" : colinTRH
 	}
 	#iterate through planners
 	for planner in planners:
