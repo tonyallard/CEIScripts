@@ -172,8 +172,6 @@ while True:
 		printMessage("Received: %s from machine with ID %i"%(reply.message, 
 			reply._id))
 		clientsocket.close()
-		time.sleep(1)
-		sys.exit(0)
 
 	elif cmd == 0: #Exit
 		sys.exit(0)

@@ -271,6 +271,7 @@ def main(args):
 				printMessage("Received request from machine %s with id %i, but have been instructed to terminate workers. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
+				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
 			elif paused:
 				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
 							message._id))
