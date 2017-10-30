@@ -26,13 +26,13 @@ def removeTILs(f, filename, outputPath):
 			output.write(line)
 			
 
-def main(args):
+def main(name, args):
 	argName = ("Input Path", "Output Path")
 	params = dict()
 	try:
 		params = MMCRProbGen.parseArgs(args, argName)
 	except:
-		printUsage(args[0])
+		printUsage(name)
 		sys.exit(1)
 
 	inputPath = params[argName[0]]
@@ -45,4 +45,4 @@ def main(args):
 
 #Run Main Function
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	main(sys.argv[0], sys.argv[1:])
