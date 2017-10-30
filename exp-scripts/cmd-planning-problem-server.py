@@ -23,7 +23,8 @@ while True:
 	print "\t 6: Request a problem"
 	print "\t 7: Request Current Allocation"
 	print "\t 8: Terminate server"
-	print "\t 9: Exit"
+	print "\t 9: Terminate workers"
+	print "\t 0: Exit"
 
 	cmd = input("Your choice: ")
 	if cmd == 1: #Query problem queue size
@@ -155,5 +156,24 @@ while True:
 		time.sleep(1)
 		sys.exit(0)
 
-	elif cmd == 9: #Exit
+	elif cmd == 9: #Terminate Workers
+		#create an INET, STREAMing socket
+		clientsocket = socket.socket(
+   		socket.AF_INET, socket.SOCK_STREAM)
+		#bind the socket to a public host,
+		# and a well-known port
+		clientsocket.connect((HOST, PORT))
+
+		msg = getMessageString(_id, TERMINATE_WORKERS)
+		clientsocket.sendall(msg)
+
+		data = clientsocket.recv(BUFFER_SIZE)
+		reply = getMessage(data)
+		printMessage("Received: %s from machine with ID %i"%(reply.message, 
+			reply._id))
+		clientsocket.close()
+		time.sleep(1)
+		sys.exit(0)
+
+	elif cmd == 0: #Exit
 		sys.exit(0)

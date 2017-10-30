@@ -25,18 +25,38 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 		freeParams, domainFile, probFile)
 
 #Planner Parameters
-#Colin-TRH
-def colinTRH(domainFile, probFile):
-	PLANNER_LOC="/mnt/data/bin/Colin2-TRH/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-TRH/debug/colin/colin-clp"
-	PLANNER_PARAMS = "-h -v1"
+#Colin-TRH-Colin
+def colinTRHcolin(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/Colin2-trh-colin/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-colin/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Colin-TRH-Popf
+def colinTRHpopf(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/Colin2-trh-popf/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-popf/release/colin/colin-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Popf-TRH-Colin
+def popfTRHcolin(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/popf-trh-colin/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-colin/release/compile/popf2/popf3-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Popf-TRH-Popf
+def popfTRHpopf(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/release/compile/popf2/popf3-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-RPG
 def colinRPG(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/colin2/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/colin2/debug/colin/colin-clp"
+	PLANNER_EXEC_LOC="/mnt/data/bin/colin2/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
@@ -87,8 +107,8 @@ PLANS_FOLDER = "plans"
 OUTPUT_FOLDER = "output"
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
-IGNORE_SET_LIST = ["archive"]
-AIRPORT_PROBLEM = "airport-timewindows"
+IGNORE_SET_LIST = ["archive", "archive2"]
+AIRPORT_PROBLEM = "airport"
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
 PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
@@ -112,7 +132,7 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=30):
+def getProblemQueue(iterations=5):
 	#The Queue
 	q = Queue()
 	planners = {
@@ -120,8 +140,11 @@ def getProblemQueue(iterations=30):
 		#"POPF" : popf,
 		#"Optic" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
-		#"lpg-td" : lpgtd
-		"Colin-TRH" : colinTRH
+		#"lpg-td" : lpgtd,
+		"Colin-TRH-Colin" : colinTRHcolin,
+		"Colin-TRH-Popf" : colinTRHpopf,
+		"Popf-TRH-Colin" : popfTRHcolin,
+		"Popf-TRH-Popf" : popfTRHpopf
 	}
 	#iterate through planners
 	for planner in planners:
@@ -211,6 +234,7 @@ def main(args):
 	# and a well-known port
 	serversocket.bind((HOST, PORT))
 	paused = False
+	terminate = False
 	restrictWorkers = True
 	#Listen for workers and give them work
 	serversocket.listen(QUEUED_CONNECTIONS)
@@ -243,6 +267,10 @@ def main(args):
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
 				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
+			elif terminate:
+				printMessage("Received request from machine %s with id %i, but have been instructed to terminate workers. Instructing worker to terminate."%(addr, 
+							message._id))
+				reply = getMessageString(_id, EXIT_PROCESS)
 			elif paused:
 				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
 							message._id))
@@ -267,6 +295,11 @@ def main(args):
 			printMessage("Pause cmd recieved from machine %s with id %i" %(addr, 
 				message._id))
 			reply = getMessageString(_id, "Ack. Pausing...")
+		elif message.message == TERMINATE_WORKERS:
+			terminate = True
+			printMessage("Terminate cmd recieved from machine %s with id %i" %(addr, 
+				message._id))
+			reply = getMessageString(_id, "Ack. Terminating...")
 		elif message.message == RESUME_WORKERS:
 			paused = False
 			printMessage("Resume cmd recieved from machine %s with id %i" %(addr, 
