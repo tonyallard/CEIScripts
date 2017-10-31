@@ -42,14 +42,14 @@ def colinTRHpopf(domainFile, probFile):
 #Popf-TRH-Colin
 def popfTRHcolin(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-colin/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-colin/release/compile/popf2/popf3-clp"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-colin/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH-Popf
 def popfTRHpopf(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/release/compile/popf2/popf3-clp"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
@@ -132,19 +132,19 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=5):
+def getProblemQueue(iterations=30):
 	#The Queue
 	q = Queue()
 	planners = {
-		#"Colin-RPG" : colinRPG,
+		"Colin-RPG" : colinRPG
 		#"POPF" : popf,
 		#"Optic" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
 		#"lpg-td" : lpgtd,
-		"Colin-TRH-Colin" : colinTRHcolin,
-		"Colin-TRH-Popf" : colinTRHpopf,
-		"Popf-TRH-Colin" : popfTRHcolin,
-		"Popf-TRH-Popf" : popfTRHpopf
+		# "Colin-TRH-Colin-noHA" : colinTRHcolin,
+		# "Colin-TRH-Popf-noHA" : colinTRHpopf,
+		# "Popf-TRH-Colin-noHA" : popfTRHcolin,
+		# "Popf-TRH-Popf-noHA" : popfTRHpopf
 	}
 	#iterate through planners
 	for planner in planners:
