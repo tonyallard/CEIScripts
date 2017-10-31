@@ -19,6 +19,7 @@ PORT = 50005
 BUFFER_SIZE = 4096
 
 COLIN_LIKE_PLANNERS = ["Colin-TRH", "Colin-RPG", "POPF", "Optic", "Optic-SLFRP"]
+LPT_TD = "lpg-td"
 
 #Regex to find plan
 COLIN_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*\]"
@@ -33,10 +34,10 @@ def getPlan(planner, logFile, planFile):
 	logFile.seek(0,0)
 	#Output Plan
 	matches = []
-	if planner in COLIN_LIKE_PLANNERS:
-		matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
-	else: #lpg-td
+	if planner == LPT_TD:
 		matches = [LPGTD_PLAN_REGEX.findall(line) for line in logFile] 
+	else: #Colin-like planner
+		matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
 	
 	for m in matches:
 		if len(m) > 0:
