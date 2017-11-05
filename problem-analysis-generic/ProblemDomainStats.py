@@ -14,6 +14,7 @@ class ProblemDomainStats:
 	H_STATES_EVAL_IDX = 4
 	COLIN_STATES_EVAIL = 5
 	DEAD_ENDS_IDX = 6
+	TIME_PER_STATE_EVAL = 7
 
 	def __init__(self, plannerName, problemDomain):
 		self.plannerName = plannerName
@@ -27,6 +28,7 @@ class ProblemDomainStats:
 		self.avgHStates = 0.0
 		self.avgColinStates = 0.0
 		self.avgDeadEnds = 0.0
+		self.avgTimePerStateEval = 0.0
 
 	def getProblemSuccess(self, problem):
 		return self.stats[problem][self.SUCCESS_IDX]
@@ -49,6 +51,9 @@ class ProblemDomainStats:
 	def getProblemDeadEnds(self, problem):
 		return self.stats[problem][self.DEAD_ENDS_IDX]
 
+	def getProblemTimePerStateEval(self, problem):
+		return self.stats[problem][self.TIME_PER_STATE_EVAL]
+
 	def createDataStructure(self, problemName):
 		if problemName not in self.stats:
 			self.stats[problemName] = {}
@@ -59,6 +64,7 @@ class ProblemDomainStats:
 			self.stats[problemName][self.H_STATES_EVAL_IDX] = {}
 			self.stats[problemName][self.COLIN_STATES_EVAIL] = {}
 			self.stats[problemName][self.DEAD_ENDS_IDX] = {}
+			self.stats[problemName][self.TIME_PER_STATE_EVAL] = {}
 
 	def processProblemLog(self, problemName, probNumber, logBuffer):
 		self.totalProbs += 1
@@ -66,15 +72,12 @@ class ProblemDomainStats:
 		self.createDataStructure(problemName)
 
 		#Problem Success
-		success = ExtractSuccess.extractSuccess(logBuffer)
-		if self.plannerName == "lpg-td":
-			success = ExtractSuccess.extractLPGTDSuccess(logBuffer)
-		
+		success = ExtractSuccess.extractValidatorSuccess(logBuffer)		
 		self.stats[problemName][self.SUCCESS_IDX][probNumber] = success
 		self.totalSuccess += success
 		
 		#Computational Time
-		compTime = ExtractRunningTime.extractRunTime(logBuffer)
+		compTime = ExtractRunningTime.extractPythonRunTime(logBuffer)
 		self.stats[problemName][self.COMP_TIME_IDX][probNumber] = compTime
 		if compTime is not None:
 			self.avgCompTime += compTime
@@ -105,3 +108,10 @@ class ProblemDomainStats:
 		self.stats[problemName][self.DEAD_ENDS_IDX][probNumber] = deadEnds
 		if deadEnds is not None:
 			self.avgDeadEnds += deadEnds
+
+		#Time Per State Eval
+		avgTimePerStateEval = 0
+		if colinStates > 0:
+			avgTimePerStateEval = compTime / colinStates
+		self.stats[problemName][self.TIME_PER_STATE_EVAL][probNumber] = avgTimePerStateEval
+		self.avgTimePerStateEval += avgTimePerStateEval

@@ -38,7 +38,6 @@ def extractDeadEndsManually(logBuffer):
 		if any(substring in logBuffer[x] for substring in AnalysisCommon.TERMINATE_FLAGS):
 			break	
 	return deadEnds
-
 def main(args):
 	inputPath = args[0]
 	for filename in os.listdir(inputPath):

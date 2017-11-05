@@ -6,6 +6,7 @@
 import sys
 import os
 import re
+import gzip
 import AnalysisCommon
 
 def extractLPGTDSuccess(log):
@@ -14,20 +15,69 @@ def extractLPGTDSuccess(log):
 			return 1
 	return 0
 
-def extractSuccess(log):
+def extractColinSuccess(log):
 	for line in log:
 		if AnalysisCommon.COLIN_SUCCESS_DELIM in line:
 			return 1
 	return 0
 
+def extractValidatorSuccess(log):
+	for line in log:
+		if AnalysisCommon.VALIDATOR_SUCCESS in line:
+			return 1
+		elif AnalysisCommon.VALIDATOR_FAILURE in line:
+			return 0
+	raise RuntimeError("Error! Success unknown.")
+
+def getLogStructure(rootDir):
+	logStructure = {}
+	for planner in os.listdir(rootDir):
+		plannerDir = os.path.join(rootDir, planner)
+		
+		if (not os.path.isdir(plannerDir)):
+			continue
+		
+		logStructure[planner] = {}
+
+		for problem in os.listdir(plannerDir):
+			#Driverlog shift is too different a format
+			if problem == "driverlogshift":
+				continue
+			logDir = os.path.join(plannerDir, problem, AnalysisCommon.OUTPUT_DIR)
+			logStructure[planner][problem] = logDir
+	return logStructure
+
 def main(args):
 	inputPath = args[0]
-	for filename in os.listdir(inputPath):
-		fullQialified = os.path.join(inputPath, filename)
-		f = open(fullQialified)
-		buffer = AnalysisCommon.bufferFile(f)
-		success = extractSuccess(buffer)
-		print "%s,%i"%(filename, success)
+
+
+	logStructure = getLogStructure(inputPath)
+
+	for planner in logStructure:
+		print planner
+		for problemDomain in logStructure[planner]:
+			logPath = logStructure[planner][problemDomain]
+
+			success = 0
+			failure = 0
+
+			for filename in os.listdir(logPath):
+				fullQualified = os.path.join(logPath, filename)
+				with gzip.open(fullQualified, 'rb') as f:
+					try:
+						buffer = AnalysisCommon.bufferFile(f)
+					except IOError:
+						continue
+
+				if not AnalysisCommon.isProblemLog(filename, buffer):
+					continue
+				if extractValidatorSuccess(buffer):
+					success += 1
+				else:
+					failure += 1
+			print "\t%s"%problemDomain
+			print "\t\tSuccess: %i"%success
+			print "\t\tFailure: %i"%failure
 
 #Run Main Function
 if __name__ == "__main__":
