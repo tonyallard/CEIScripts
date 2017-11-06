@@ -23,7 +23,13 @@ BRANCH_STRING_START = "[0-9]: "
 NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
 RESORTING_TO_BFS = "Resorting to best-first search"
 
+VALIDATOR_SUCCESS = "Successful plans:"
+VALIDATOR_FAILURE = "Failed plans:"
+
 SERVER_LOG_DELIM = "explog-"
+
+LOG_FILE_EXT = ".txt.gz"
+OUTPUT_DIR = "output"
 
 def filterBranchString(branch):
 	branch = re.sub(NEW_HVAL_STRING, "", branch) #remove hvals
@@ -78,9 +84,9 @@ def isProblemFile(filename):
 	if PDDL_FILE_EXT.lower() in filename[-len(PROBFILE_DELIM):].lower():
 		return True
 	return False
-
 def isProblemLog(filename, file):
-	if LOG_FILE_EXT in filename.lower() and LOG_FILE_START_SEQ in file[0][:3]:
+	if re.search(LOG_FILE_EXT, filename, re.IGNORECASE) and \
+		LOG_FILE_START_SEQ in file[0][:3]:
 		return True
 	return False
 
