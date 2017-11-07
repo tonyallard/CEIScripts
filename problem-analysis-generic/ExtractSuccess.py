@@ -9,25 +9,49 @@ import re
 import gzip
 import AnalysisCommon
 
-def extractLPGTDSuccess(log):
+def extractLPGTDSuccess(log, filename):
+	checkPlanExistsLPGTD(log, filename)
 	for line in log:
 		if AnalysisCommon.LPGTD_SUCCESS_DELIM in line:
 			return 1
 	return 0
 
-def extractColinSuccess(log):
+def extractColinSuccess(log, filename):
+	checkPlanExists(log, filename)
 	for line in log:
 		if AnalysisCommon.COLIN_SUCCESS_DELIM in line:
 			return 1
 	return 0
 
-def extractValidatorSuccess(log):
+def extractValidatorSuccess(log, filename):
+	checkPlanExists(log, filename)
 	for line in log:
 		if AnalysisCommon.VALIDATOR_SUCCESS in line:
 			return 1
 		elif AnalysisCommon.VALIDATOR_FAILURE in line:
 			return 0
-	raise RuntimeError("Error! Success unknown.")
+	raise RuntimeError("Error! Success unknown for %s"%filename)
+
+def checkPlanExists(log, filename):
+	for line in log:
+		if AnalysisCommon.VALIDATOR_PLAN_EXECUTE_SUCCESS in line:
+			return
+		elif (AnalysisCommon.VALIDATOR_PLAN_EXECUTE_FAILURE in line) or \
+			(AnalysisCommon.VALIDATOR_PLAN_GOAL_FAILURE in line):
+			print "The following file produced a plan, but it was invalid:\n\t%s"%filename
+			return
+	raise RuntimeError("Error! No plan assessed for %s"%filename)
+
+def checkPlanExistsLPGTD(log, filename):
+	for line in log:
+		if (AnalysisCommon.VALIDATOR_PLAN_EXECUTE_SUCCESS in line) or \
+			(AnalysisCommon.VALIDATOR_BAD_PLAN_DESCRIPTION in line):
+			return
+		elif (AnalysisCommon.VALIDATOR_PLAN_EXECUTE_FAILURE in line) or \
+			(AnalysisCommon.VALIDATOR_PLAN_GOAL_FAILURE in line):
+			print "The following file produced a plan, but it was invalid:\n\t%s"%filename
+			return
+	raise RuntimeError("Error! No plan assessed for %s"%filename)
 
 def getLogStructure(rootDir):
 	logStructure = {}
@@ -68,13 +92,18 @@ def main(args):
 						buffer = AnalysisCommon.bufferFile(f)
 					except IOError:
 						continue
-
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
-				if extractValidatorSuccess(buffer):
-					success += 1
+				if planner == "lpg-td":
+					if extractLPGTDSuccess(buffer, fullQualified):
+						success += 1
+					else:
+						failure += 1
 				else:
-					failure += 1
+					if extractValidatorSuccess(buffer, fullQualified):
+						success += 1
+					else:
+						failure += 1
 			print "\t%s"%problemDomain
 			print "\t\tSuccess: %i"%success
 			print "\t\tFailure: %i"%failure

@@ -23,6 +23,10 @@ BRANCH_STRING_START = "[0-9]: "
 NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
 RESORTING_TO_BFS = "Resorting to best-first search"
 
+VALIDATOR_PLAN_EXECUTE_SUCCESS = "Plan executed successfully - checking goal"
+VALIDATOR_PLAN_EXECUTE_FAILURE = "Plan failed to execute"
+VALIDATOR_PLAN_GOAL_FAILURE = "Goal not satisfied"
+VALIDATOR_BAD_PLAN_DESCRIPTION = "Bad plan description!"
 VALIDATOR_SUCCESS = "Successful plans:"
 VALIDATOR_FAILURE = "Failed plans:"
 
