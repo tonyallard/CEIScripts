@@ -13,13 +13,12 @@ from PlanningProblemJob import *
 HOST = "" #Don't restrict listener to any machine
 PORT = 50005
 BUFFER_SIZE = 4096
-QUEUED_CONNECTIONS = 10 #Have set this to the number of workers
+QUEUED_CONNECTIONS = 30 #Have set this to the number of workers
 
 #Function to make command like most colin planners
 COLIN_PLANNER_PARAMS = "-v1"
 def getColinStylePlannerCommand(plannerDir, plannerExecLocation, 
 	domainFile, probFile, freeParams=COLIN_PLANNER_PARAMS):
-	
 	return "(cd %s && %s && %s %s %s %s %s %s)"%(plannerDir,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, plannerExecLocation,
 		freeParams, domainFile, probFile)
@@ -50,6 +49,38 @@ def popfTRHcolin(domainFile, probFile):
 def popfTRHpopf(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Colin-TRH-Colin
+def colinTRHcolin_noHA(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/Colin2-trh-colin/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-colin/release/colin/colin-clp"
+	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Colin-TRH-Popf
+def colinTRHpopf_noHA(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/Colin2-trh-popf/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-popf/release/colin/colin-clp"
+	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Popf-TRH-Colin
+def popfTRHcolin_noHA(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/popf-trh-colin/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-colin/compile/popf2/popf3-clp"
+	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Popf-TRH-Popf
+def popfTRHpopf_noHA(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
+	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
@@ -107,7 +138,7 @@ PLANS_FOLDER = "plans"
 OUTPUT_FOLDER = "output"
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
-IGNORE_SET_LIST = ["archive", "archive2"]
+IGNORE_SET_LIST = ["archive", "archive2", "archive3"]
 AIRPORT_PROBLEM = "airport"
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
@@ -136,15 +167,19 @@ def getProblemQueue(iterations=30):
 	#The Queue
 	q = Queue()
 	planners = {
-		"Colin-RPG" : colinRPG
+		# "Colin-RPG" : colinRPG
 		#"POPF" : popf,
 		#"Optic" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
 		#"lpg-td" : lpgtd,
-		# "Colin-TRH-Colin-noHA" : colinTRHcolin,
-		# "Colin-TRH-Popf-noHA" : colinTRHpopf,
-		# "Popf-TRH-Colin-noHA" : popfTRHcolin,
-		# "Popf-TRH-Popf-noHA" : popfTRHpopf
+		"Colin-TRH-Colin" : colinTRHcolin,
+		# "Colin-TRH-Popf" : colinTRHpopf,
+		# "Popf-TRH-Colin" : popfTRHcolin,
+		"Popf-TRH-Popf" : popfTRHpopf,
+		# "Colin-TRH-Colin-noHA" : colinTRHcolin_noHA,
+		# "Colin-TRH-Popf-noHA" : colinTRHpopf_noHA,
+		# "Popf-TRH-Colin-noHA" : popfTRHcolin_noHA,
+		# "Popf-TRH-Popf-noHA" : popfTRHpopf_noHA
 	}
 	#iterate through planners
 	for planner in planners:
