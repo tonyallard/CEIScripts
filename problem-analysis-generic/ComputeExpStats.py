@@ -126,19 +126,27 @@ def main(args):
 				
 				timePerStateEval = probDomStats.getProblemTimePerStateEval(problem)
 				timePerStateEvalMean, timePerStateEvalVar = getMeanAndVar(timePerStateEval)
+
+				initStateHTime = probDomStats.getProblemInitStateHTime(problem)
+				initStateHTimeMean, initStateHTimeVar = getMeanAndVar(initStateHTime)
+
+				initStateHStates = probDomStats.getProblemInitStateHStates(problem)
+				initStateHStatesMean, initStateHStatesVar = getMeanAndVar(initStateHStates)
 				
 				deadEnds = probDomStats.getProblemDeadEnds(problem)
 				deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
 
-				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
+				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
 					succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
 					statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
 					colinStatesMean, colinStatesVar,
 					timePerStateEvalMean, timePerStateEvalVar,
+					initStateHTimeMean, initStateHTimeVar,
+					initStateHStatesMean, initStateHStatesVar,
 					deadEndsMean, deadEndsVar))
 
 			#Write averages
-			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
+			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
 				probDomStats.totalSuccess, 
 				probDomStats.avgCompTime/probDomStats.totalProbs, 
 				probDomStats.avgHTime/probDomStats.totalProbs, 
@@ -146,6 +154,8 @@ def main(args):
 				probDomStats.avgHStates/probDomStats.totalProbs,
 				probDomStats.avgColinStates/probDomStats.totalProbs,
 				probDomStats.avgTimePerStateEval/probDomStats.totalProbs,
+				probDomStats.avgInitStateHTime/probDomStats.totalProbs,
+				probDomStats.avgInitStateHStates/probDomStats.totalProbs,
 				probDomStats.avgDeadEnds/probDomStats.totalProbs))
 			csvFile.close()
 

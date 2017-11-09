@@ -14,6 +14,17 @@ import AnalysisCommon
 
 HEURISTIC_STATE_DELIM = "#; Heuristic States Evaluated: "
 STATE_DELIM = "#; States evaluated: "
+INITIAL_STATE_STATES_EVAL = "#; Initial State - heuristic states evaluated:"
+
+def extractInitialStateHeuristicStatesEvaluated(logFile):
+	for line in logFile:
+		if INITIAL_STATE_STATES_EVAL in line:
+			value = line[line.index(INITIAL_STATE_STATES_EVAL) + len(INITIAL_STATE_STATES_EVAL):]
+			states = re.findall(r'\d+', value)
+			if len(states) != 1:
+				raise RuntimeError("Error! Multiple state counts found: %s"%states)
+			return int(states[0])
+	return None
 
 def extractHeuristicStatesEvaluated(logFile):
 	for line in logFile:

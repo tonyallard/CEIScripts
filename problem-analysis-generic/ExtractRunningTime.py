@@ -15,8 +15,18 @@ TIME_DELIM = "===TIME TAKEN==="
 PDDL_CONVERT_TIME_DELIM = "#; Time spent converting PDDL state:"
 PDDL_FILE_WRTIE_TIME_DELIM = "#; Time spent printing state to file:"
 H_TIME_DELIM = "#; Time spent in heuristic:"
+INITIAL_STATE_H_TIME = "#; Initial State - time spent in heuristic:"
 USER_TIME_DELIM = "user "
 SYSTEM_TIME_DELIM = "sys "
+
+def extractInitialStateHTime(logFile):
+	for line in logFile:
+		if INITIAL_STATE_H_TIME in line:
+			runTime = re.findall(r'\d+\.\d+', line)
+			if len(runTime) != 1:
+				raise RuntimeError("Error! Multiple PDDL file write times found: %s"%runTime)
+			return float(runTime[0])
+	return None
 
 def extractPDDLFileWriteTime(logFile):
 	for line in logFile:
