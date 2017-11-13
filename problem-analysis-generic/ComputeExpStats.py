@@ -97,7 +97,7 @@ def main(args):
 
 			#open stats file
 			csvFile = open(os.path.join(csvPath, "%s-%s.csv"%(planner, problemDomain)), 'w')
-			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Colin States Evaluated Mean,Colin States Evaluated Variance,Time Per State Eval Mean,Time Per State Eval Variance,Dead Ends Mean,Dead Ends Variance\n")
+			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Colin States Evaluated Mean,Colin States Evaluated Variance,Time Per State Eval Mean,Time Per State Eval Variance,Initial State Heuristic Time Mean,Initial State Heuristic Time Variance,Initial State Heuristic States Mean,Initial State Heuristic States Variance,Dead Ends Mean,Dead Ends Variance\n")
 
 			probDomStats = processProblemDomainStatistics(planner, 
 				problemDomain, logPath)
