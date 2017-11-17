@@ -67,11 +67,12 @@ def processProblemDomainStatistics(planner, problemDomain, logPath):
 
 	for filename in os.listdir(logPath):
 		fullQualified = os.path.join(logPath, filename)
-		with gzip.open(fullQualified, 'rb') as f:
-			try:
+		try:
+			with gzip.open(fullQualified, 'rb') as f:
+			
 				buffer = AnalysisCommon.bufferFile(f)
-			except IOError:
-				continue
+		except IOError:
+			continue
 
 		if not AnalysisCommon.isProblemLog(filename, buffer):
 			continue
