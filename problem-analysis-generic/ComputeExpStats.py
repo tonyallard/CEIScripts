@@ -98,7 +98,7 @@ def main(args):
 
 			#open stats file
 			csvFile = open(os.path.join(csvPath, "%s-%s.csv"%(planner, problemDomain)), 'w')
-			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Colin States Evaluated Mean,Colin States Evaluated Variance,Time Per State Eval Mean,Time Per State Eval Variance,Initial State Heuristic Time Mean,Initial State Heuristic Time Variance,Initial State Heuristic States Mean,Initial State Heuristic States Variance,Dead Ends Mean,Dead Ends Variance\n")
+			csvFile.write("Problem,Success Mean,Success Variance,Computation Time Mean,Computation Time Variance,Heuristic Computation Time Mean,Heuristic Computation Time Variance,States Evaluated Mean,States Evaluated Variance,Heuristic States Evaluated Mean,Heuristic States Evaluated Variance,Colin States Evaluated Mean,Colin States Evaluated Variance,Dead Ends Mean,Dead Ends Variance,Time Per State Eval Mean,Time Per State Eval Variance,Initial State Heuristic Time Mean,Initial State Heuristic Time Variance,Initial State Heuristic States Mean,Initial State Heuristic States Variance,Initial State Dead Ends Mean,Initial State Dead Ends Variance\n")
 
 			probDomStats = processProblemDomainStatistics(planner, 
 				problemDomain, logPath)
@@ -125,6 +125,9 @@ def main(args):
 				colinStates = probDomStats.getProblemColinStatesEval(problem)
 				colinStatesMean, colinStatesVar = getMeanAndVar(colinStates)
 				
+				deadEnds = probDomStats.getProblemDeadEnds(problem)
+				deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
+				
 				timePerStateEval = probDomStats.getProblemTimePerStateEval(problem)
 				timePerStateEvalMean, timePerStateEvalVar = getMeanAndVar(timePerStateEval)
 
@@ -133,31 +136,33 @@ def main(args):
 
 				initStateHStates = probDomStats.getProblemInitStateHStates(problem)
 				initStateHStatesMean, initStateHStatesVar = getMeanAndVar(initStateHStates)
-				
-				deadEnds = probDomStats.getProblemDeadEnds(problem)
-				deadEndsMean, deadEndsVar = getMeanAndVar(deadEnds)
 
-				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
+				initStateDeadEnds = probDomStats.getProblemInitStateDeadEnds(problem)
+				initStateDeadEndsMean, initStateDeadEndsVar = getMeanAndVar(initStateDeadEnds)				
+
+				csvFile.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(problem, succMean, 
 					succVar, compTimeMean, compTimeVar, hTimeMean, hTimeVar, 
 					statesEvalMean, statesEvalVar, hStatesMean, hStatesVar, 
 					colinStatesMean, colinStatesVar,
+					deadEndsMean, deadEndsVar,
 					timePerStateEvalMean, timePerStateEvalVar,
 					initStateHTimeMean, initStateHTimeVar,
 					initStateHStatesMean, initStateHStatesVar,
-					deadEndsMean, deadEndsVar))
+					initStateDeadEndsMean, initStateDeadEndsVar))
 
 			#Write averages
-			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
+			csvFile.write("%i,%i,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f,,%f"%(probDomStats.totalProbs, 
 				probDomStats.totalSuccess, 
 				probDomStats.avgCompTime/probDomStats.totalProbs, 
 				probDomStats.avgHTime/probDomStats.totalProbs, 
 				probDomStats.avgStates/probDomStats.totalProbs, 
 				probDomStats.avgHStates/probDomStats.totalProbs,
 				probDomStats.avgColinStates/probDomStats.totalProbs,
+				probDomStats.avgDeadEnds/probDomStats.totalProbs,
 				probDomStats.avgTimePerStateEval/probDomStats.totalProbs,
 				probDomStats.avgInitStateHTime/probDomStats.totalProbs,
 				probDomStats.avgInitStateHStates/probDomStats.totalProbs,
-				probDomStats.avgDeadEnds/probDomStats.totalProbs))
+				probDomStats.avgInitStateDeadEnds/probDomStats.totalProbs))
 			csvFile.close()
 
 

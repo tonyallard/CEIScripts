@@ -17,6 +17,7 @@ class ProblemDomainStats:
 	INIT_STATE_H_STATES = 7
 	DEAD_ENDS_IDX = 8
 	TIME_PER_STATE_EVAL = 9
+	INIT_STATE_DEAD_ENDS = 10
 
 	def __init__(self, plannerName, problemDomain):
 		self.plannerName = plannerName
@@ -33,6 +34,7 @@ class ProblemDomainStats:
 		self.avgTimePerStateEval = 0.0
 		self.avgInitStateHTime = 0.0
 		self.avgInitStateHStates = 0.0
+		self.avgInitStateDeadEnds = 0.0
 
 	def getProblemSuccess(self, problem):
 		return self.stats[problem][self.SUCCESS_IDX]
@@ -64,6 +66,10 @@ class ProblemDomainStats:
 	def getProblemInitStateHStates(self, problem):
 		return self.stats[problem][self.INIT_STATE_H_STATES]
 
+	def getProblemInitStateDeadEnds(self, problem):
+		return self.stats[problem][self.INIT_STATE_DEAD_ENDS]
+
+
 	def createDataStructure(self, problemName):
 		if problemName not in self.stats:
 			self.stats[problemName] = {}
@@ -77,6 +83,7 @@ class ProblemDomainStats:
 			self.stats[problemName][self.TIME_PER_STATE_EVAL] = {}
 			self.stats[problemName][self.INIT_STATE_H_TIME] = {}
 			self.stats[problemName][self.INIT_STATE_H_STATES] = {}
+			self.stats[problemName][self.INIT_STATE_DEAD_ENDS] = {}
 
 	def processProblemLog(self, problemName, probNumber, logBuffer):
 		self.totalProbs += 1
@@ -145,3 +152,9 @@ class ProblemDomainStats:
 			avgTimePerStateEval = compTime / colinStates
 		self.stats[problemName][self.TIME_PER_STATE_EVAL][probNumber] = avgTimePerStateEval
 		self.avgTimePerStateEval += avgTimePerStateEval
+
+		#Init State Dead Ends
+		initStateDeadEnds = ExtractDeadEnds.extractInitialStateDeadEnds(logBuffer)
+		self.stats[problemName][self.INIT_STATE_DEAD_ENDS][probNumber] = initStateDeadEnds
+		if initStateDeadEnds is not None:
+			self.avgInitStateDeadEnds += initStateDeadEnds
