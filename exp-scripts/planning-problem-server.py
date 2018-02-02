@@ -101,15 +101,16 @@ def popf(domainFile, probFile):
 #OPTIC
 def optic(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/optic/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/optic/debug/optic/optic-clp"
+	PLANNER_EXEC_LOC="/mnt/data/bin/optic/release/optic/optic-clp"
+	PLANNER_PARAMS = "-N " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC - TIL Relaxation Turned off
 def opticSLFRP(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/optic/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/optic/debug/optic/optic-clp"
-	PLANNER_PARAMS = "-0 -v1"
+	PLANNER_EXEC_LOC="/mnt/data/bin/optic/release/optic/optic-clp"
+	PLANNER_PARAMS = "-N -0 " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
@@ -163,19 +164,19 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=30):
+def getProblemQueue(iterations=5, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
-		# "Colin-RPG" : colinRPG
-		#"POPF" : popf,
-		#"Optic" : optic,
-		#"Optic-SLFRP" : opticSLFRP,
-		#"lpg-td" : lpgtd,
+		# "Colin-RPG" : colinRPG,
+		# "POPF" : popf,
+		# "Optic" : optic,
+		# "Optic-SLFRP" : opticSLFRP
+		# "lpg-td" : lpgtd
 		"Colin-TRH-Colin" : colinTRHcolin,
 		# "Colin-TRH-Popf" : colinTRHpopf,
 		# "Popf-TRH-Colin" : popfTRHcolin,
-		"Popf-TRH-Popf" : popfTRHpopf,
+		"Popf-TRH-Popf" : popfTRHpopf
 		# "Colin-TRH-Colin-noHA" : colinTRHcolin_noHA,
 		# "Colin-TRH-Popf-noHA" : colinTRHpopf_noHA,
 		# "Popf-TRH-Colin-noHA" : popfTRHcolin_noHA,
@@ -212,7 +213,7 @@ def getProblemQueue(iterations=30):
 					#Planner command
 					planner_command = f(domainFile, probFile)
 
-					for itr in range(0, iterations):
+					for itr in range(start, start+iterations):
 						#Plan file
 						planFileName = "%s-%i.plan"%(prob, itr)
 						planFile = os.path.join(plansdir_fullpath, planFileName)
