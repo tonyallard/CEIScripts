@@ -24,65 +24,65 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 		freeParams, domainFile, probFile)
 
 #Planner Parameters
-#Colin-TRH-Colin
+#Colin-TRH
 def colinTRHcolin(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/Colin2-trh-colin/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-colin/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
-#Colin-TRH-Popf
-def colinTRHpopf(domainFile, probFile):
-	PLANNER_LOC="/mnt/data/bin/Colin2-trh-popf/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-popf/release/colin/colin-clp"
+#Colin-TRH-Ablation
+def colinTRHcolinAblation(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/colin-trh-ablation/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/colin-trh-ablation/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
-#Popf-TRH-Colin
-def popfTRHcolin(domainFile, probFile):
-	PLANNER_LOC="/mnt/data/bin/popf-trh-colin/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-colin/compile/popf2/popf3-clp"
-	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
-
-#Popf-TRH-Popf
+#Popf-TRH
 def popfTRHpopf(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
-#Colin-TRH-Colin
-def colinTRHcolin_noHA(domainFile, probFile):
+#Popf-TRH-Ablation
+def popfTRHpopfAblation(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/popf-trh-ablation/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-ablation/compile/popf2/popf3-clp"
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#Colin-TRH No Steepest Descent
+def colinTRHcolinNoSD(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/Colin2-trh-colin/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-colin/release/colin/colin-clp"
-	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
+	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
-#Colin-TRH-Popf
-def colinTRHpopf_noHA(domainFile, probFile):
-	PLANNER_LOC="/mnt/data/bin/Colin2-trh-popf/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-popf/release/colin/colin-clp"
-	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
+#Colin-TRH-Ablation No Steepest Descent
+def colinTRHcolinAblationNoSD(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/colin-trh-ablation/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/colin-trh-ablation/release/colin/colin-clp"
+	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
-#Popf-TRH-Colin
-def popfTRHcolin_noHA(domainFile, probFile):
-	PLANNER_LOC="/mnt/data/bin/popf-trh-colin/"
-	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-colin/compile/popf2/popf3-clp"
-	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
-	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
-
-#Popf-TRH-Popf
-def popfTRHpopf_noHA(domainFile, probFile):
+#Popf-TRH No Steepest Descent
+def popfTRHpopfNoSD(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
-	PLANNER_PARAMS = "-h " + COLIN_PLANNER_PARAMS
+	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
+
+#Popf-TRH-Ablation No Steepest Descent
+def popfTRHpopfAblationNoSD(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/popf-trh-ablation/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-ablation/compile/popf2/popf3-clp"
+	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-RPG
 def colinRPG(domainFile, probFile):
@@ -91,12 +91,28 @@ def colinRPG(domainFile, probFile):
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
+#Colin-RPG No Steepest Descent
+def colinRPGNoSD(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/colin2/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/colin2/release/colin/colin-clp"
+	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
+
 #POPF
 def popf(domainFile, probFile):
 	PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
+
+#POPF No Steepest Descent
+def popfNoSD(domainFile, probFile):
+	PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
+	PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
+	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
+	return getColinStylePlannerCommand(PLANNER_LOC, 
+		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC
 def optic(domainFile, probFile):
@@ -164,23 +180,25 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=5, start=0):
+def getProblemQueue(iterations=1, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
-		# "Colin-RPG" : colinRPG,
-		# "POPF" : popf,
-		# "Optic" : optic,
-		# "Optic-SLFRP" : opticSLFRP
-		# "lpg-td" : lpgtd
+		"Colin-RPG" : colinRPG,
+		"NoSD-Colin-RPG" : colinRPGNoSD,
+		"POPF-RPG" : popf,
+		"NoSD-POPF-RPG" : popfNoSD,
+		"Optic-RPG" : optic,
+		"Optic-SLFRP" : opticSLFRP,
+		"lpg-td" : lpgtd,
 		"Colin-TRH-Colin" : colinTRHcolin,
-		# "Colin-TRH-Popf" : colinTRHpopf,
-		# "Popf-TRH-Colin" : popfTRHcolin,
-		"Popf-TRH-Popf" : popfTRHpopf
-		# "Colin-TRH-Colin-noHA" : colinTRHcolin_noHA,
-		# "Colin-TRH-Popf-noHA" : colinTRHpopf_noHA,
-		# "Popf-TRH-Colin-noHA" : popfTRHcolin_noHA,
-		# "Popf-TRH-Popf-noHA" : popfTRHpopf_noHA
+		"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
+		"Popf-TRH-Popf" : popfTRHpopf,
+		"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
+		"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
+		"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
+		"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
+		"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD
 	}
 	#iterate through planners
 	for planner in planners:
@@ -258,7 +276,7 @@ def main(args):
 
 	#Get problems ready for computation
 	q = getProblemQueue()
-	printMessage("Problem queue initialised.")
+	printMessage("Problem queue initialised with %i problems."%q.qsize())
 	currentAllocation = {}
 
 	#create an INET, STREAMing socket
