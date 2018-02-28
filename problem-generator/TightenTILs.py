@@ -2,10 +2,12 @@
 import sys
 import os
 import re
+from shutil import copyfile
 
 TIL = "\(at [0-9]+\.?[0-9]* \([a-zA-Z0-9\-_ \(\)]+\)"
 MAYBE_DECIMAL_NUMBER = "[0-9]+\.?[0-9]*"
-PREDICATE = "(\(( )*not( )*)?(\([a-zA-Z0-9\-_ ]+\))(( )*\))?"
+PREDICATE = "\([a-zA-Z0-9\-_ ]+\)"
+NOT_TEXT = "\([ ]*not[ ]*\("
 #(\(( )*(not) ( )?)?
 #( ( )?\))?
 
@@ -26,13 +28,21 @@ def findTILs(problem):
 def main(args):
 	problemPath = args[0]
 	newProblemPath = args[1]
+	createDomainFiles = False
+	if len(args) == 3:
+		createDomainFiles = True
 
-	tighten_schedule = [0.9, 0.8, 0.7, 0.6, 0.5]
+	tighten_schedule = [0.9, 0.8, 0.7]
 
 	for root, dirs, files in os.walk(problemPath):
 		for file in files:
 			if "DOMAIN" in file:
-				continue
+				if not createDomainFiles:
+					continue
+				else:
+					for t in tighten_schedule:
+						copyfile(os.path.join(root, file), os.path.join(newProblemPath, file.replace(".PDDL", "-%s.PDDL"%tightness)))
+
 			f = open(os.path.join(root, file), 'r')
 			buffer = bufferFile(f)
 			
@@ -48,12 +58,23 @@ def main(args):
 							precision = len(val[0].split(".")[1])
 						
 						val = float(val[0])
+						neg = False
+						negText = re.findall(NOT_TEXT, til[0])
+						if len(negText) > 0:
+							neg = True
+
 						pred = re.findall(PREDICATE, til[0])
 						val *= t
-						w.write("(at %0.*f %s)\n"%(precision, val, "".join(pred[0])))
+
+						if neg:
+							w.write("(at %0.*f (not %s))\n"%(precision, val, "".join(pred)))
+						else:
+							w.write("(at %0.*f %s)\n"%(precision, val, "".join(pred)))
+						
 					else:
 						w.write(line)
 				w.close()
+			f.close()
 		break
 
 
