@@ -6,11 +6,13 @@
 import re
 
 TIMEOUT_DELIM = "timeout: the monitored command dumped core"
+LPG_TIMEOUT_DELIM = "Max time exceeded."
 MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
 EHC_SUCCESS = "EHC Success!!!!"
 BFS_SUCCESS = "BFS Success!!!!"
 COLIN_SUCCESS_DELIM = ";;;; Solution Found"
 UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
+INVALID_PLAN_DELIM = "Plan failed to execute"
 TERMINATE_FLAGS = [TIMEOUT_DELIM, MEMORY_ERROR_DELIM, EHC_SUCCESS, BFS_SUCCESS, COLIN_SUCCESS_DELIM, UNSOVLEABLE_DELIM, "Beginning the replay"]
 SEARCH_SUCCESS_DELIM = "g"
 SEARCH_FAILURE_DELIM = "Problem Unsolvable"
@@ -27,8 +29,11 @@ VALIDATOR_PLAN_EXECUTE_SUCCESS = "Plan executed successfully - checking goal"
 VALIDATOR_PLAN_EXECUTE_FAILURE = "Plan failed to execute"
 VALIDATOR_PLAN_GOAL_FAILURE = "Goal not satisfied"
 VALIDATOR_BAD_PLAN_DESCRIPTION = "Bad plan description!"
+VALIDATOR_NO_PLAN = "Bad plan file!"
 VALIDATOR_SUCCESS = "Successful plans:"
 VALIDATOR_FAILURE = "Failed plans:"
+
+PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
 
 SERVER_LOG_DELIM = "explog-"
 
