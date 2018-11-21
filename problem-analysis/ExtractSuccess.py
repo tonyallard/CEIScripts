@@ -16,15 +16,15 @@ def extractLPGTDSuccess(log, filename):
 			return 1
 	return 0
 
-def extractColinSuccess(log, filename):
-	checkPlanExists(log, filename)
+def extractColinSuccess(log, planner, filename):
+	checkPlanExists(log, planner, filename)
 	for line in log:
 		if AnalysisCommon.COLIN_SUCCESS_DELIM in line:
 			return 1
 	return 0
 
-def extractValidatorSuccess(log, filename):
-	checkPlanExists(log, filename)
+def extractValidatorSuccess(log, planner, filename):
+	checkPlanExists(log, planner, filename)
 	for line in log:
 		if AnalysisCommon.VALIDATOR_SUCCESS in line:
 			return 1
@@ -32,13 +32,19 @@ def extractValidatorSuccess(log, filename):
 			return 0
 	raise RuntimeError("Error! Success unknown for %s"%filename)
 
-def checkPlanExists(log, filename):
+def checkPlanExists(log, planner, filename):
 	for line in log:
 		if AnalysisCommon.VALIDATOR_PLAN_EXECUTE_SUCCESS in line:
 			return
 		elif (AnalysisCommon.VALIDATOR_PLAN_EXECUTE_FAILURE in line) or \
 			(AnalysisCommon.VALIDATOR_PLAN_GOAL_FAILURE in line):
-			print "The following file produced a plan, but it was invalid:\n\t%s"%filename
+			print "The following file produced a plan, but it was invalid:" +\
+					"\n\t%s: %s"%(planner, filename)
+			return
+		elif (planner in AnalysisCommon.PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES) and \
+			(AnalysisCommon.VALIDATOR_NO_PLAN in line):
+			print "%s: %s did not produce a plan, but that maybe ok as it could "%(planner, filename) +\
+					"have exhausted CPU/memory. Investigate."
 			return
 	raise RuntimeError("Error! No plan assessed for %s"%filename)
 
@@ -94,16 +100,10 @@ def main(args):
 						continue
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
-				if planner == "lpg-td":
-					if extractLPGTDSuccess(buffer, fullQualified):
-						success += 1
-					else:
-						failure += 1
+				if extractValidatorSuccess(buffer, planner, fullQualified):
+					success += 1
 				else:
-					if extractValidatorSuccess(buffer, fullQualified):
-						success += 1
-					else:
-						failure += 1
+					failure += 1
 			print "\t%s"%problemDomain
 			print "\t\tSuccess: %i"%success
 			print "\t\tFailure: %i"%failure
