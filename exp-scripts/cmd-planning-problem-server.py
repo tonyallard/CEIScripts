@@ -9,7 +9,7 @@ from PlanningProblemJob import *
 #Socket Parameters
 HOST = socket.gethostname()
 PORT = 50005
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 8192
 
 _id = getInstanceID()
 
@@ -133,9 +133,9 @@ while True:
 		
 		data = clientsocket.recv(BUFFER_SIZE)
 		reply = getMessage(data)
+		clientsocket.close()
 		printMessage("Received Current Allocation from machine with id %i:\n%s"%(reply._id,
 			reply.message))
-		clientsocket.close()
 
 	elif cmd == 8: #Terminate server
 		#create an INET, STREAMing socket

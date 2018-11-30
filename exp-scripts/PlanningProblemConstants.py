@@ -56,3 +56,4 @@ def getInstanceID():
 def printMessage(text):
 	print "%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", gmtime()),
 		text)
+	sys.stdout.flush()

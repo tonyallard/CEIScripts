@@ -5,6 +5,8 @@ import socket
 from multiprocessing import Queue
 import time
 import re
+import time
+import datetime
 
 from PlanningProblemConstants import *
 from PlanningProblemJob import *
@@ -12,8 +14,8 @@ from PlanningProblemJob import *
 #Socket Parameters
 HOST = "" #Don't restrict listener to any machine
 PORT = 50005
-BUFFER_SIZE = 4096
-QUEUED_CONNECTIONS = 30 #Have set this to the number of workers
+BUFFER_SIZE = 8192
+QUEUED_CONNECTIONS = 50 #Have set this to the number of workers
 
 #Function to make command like most colin planners
 COLIN_PLANNER_PARAMS = "-v1"
@@ -180,7 +182,7 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=1, start=0):
+def getProblemQueue(iterations=7, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
@@ -190,11 +192,11 @@ def getProblemQueue(iterations=1, start=0):
 		#"NoSD-POPF-RPG" : popfNoSD,
 		#"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
-		"lpg-td" : lpgtd,
-		#"Colin-TRH-Colin" : colinTRHcolin,
-		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		#"Popf-TRH-Popf" : popfTRHpopf,
-		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
+		#"lpg-td" : lpgtd,
+		"Colin-TRH-Colin" : colinTRHcolin,
+		"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
+		"Popf-TRH-Popf" : popfTRHpopf,
+		"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
 		#"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
@@ -254,9 +256,11 @@ def getProblemQueue(iterations=1, start=0):
 def getCurrentAllocationString(currentAllocation):
 	result = ""
 	for _id in currentAllocation:
-		result += "%s [%s] (%i): %s (%i)\n"%(currentAllocation[_id][1],
+		duration = time.time() - currentAllocation[_id][4]
+		result += "%s [%s] (%i): %s (%i) [%s]\n"%(currentAllocation[_id][1],
 			currentAllocation[_id][0], _id, 
-			currentAllocation[_id][2], currentAllocation[_id][3])
+			currentAllocation[_id][2], currentAllocation[_id][3], 
+			str(datetime.timedelta(seconds=duration)))
 
 	return result
 
@@ -286,6 +290,7 @@ def main(args):
 	#1: Hostname
 	#2: STATUS
 	#3: Problem Name (iteration)
+	#4: Timestamp of last command
 	currentAllocation = {}
 
 	#create an INET, STREAMing socket
@@ -323,18 +328,21 @@ def main(args):
 			reply = getMessageString(_id, "Ack. Queue size is %i"%q.qsize())
 		elif message.message == REQUEST_PROBLEM:
 			#Pause the worker because it is done.
-			currentAllocation[message._id] = (addr[0], message.hostname, WORKER_PAUSED, 0)
+			currentAllocation[message._id] = (addr[0], message.hostname, WORKER_PAUSED, 0, 
+				time.time())
 			
 			if q.empty(): #Tell the workers to terminate if done
 				printMessage("Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0)
+				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0,
+					time.time())
 			elif terminate:
 				printMessage("Received request from machine %s with id %i, but have been instructed to terminate workers. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0)
+				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0,
+					time.time())
 			elif paused:
 				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
 							message._id))
@@ -348,7 +356,8 @@ def main(args):
 				printMessage("Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
 					job.itr, addr, message._id))
 				reply = getMessageString(_id, job)
-				currentAllocation[message._id] = (addr[0], message.hostname, job.problemName, job.itr)
+				currentAllocation[message._id] = (addr[0], message.hostname, job.problemName, job.itr,
+					time.time())
 		elif message.message == CURRENT_ALLOCATION:
 			printMessage("Received request from machine %s with id %i for current allocation."%(addr, 
 				message._id))

@@ -18,7 +18,7 @@ from PlanningProblemJob import *
 
 #Socket parameters
 PORT = 50005
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 8192
 
 PLANNERS_THAT_REQUIRE_PLAN_EXTRACTION = ["Colin-TRH", "Colin-RPG", "POPF", "Optic", "Optic-SLFRP"]
 PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
@@ -28,12 +28,12 @@ VAL_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*\]"
 VAL_PLAN_REGEX = re.compile(VAL_PLAN_SYNTAX)
 
 
-def extractPlanFromPlannerOutput(planner, logFile, planFile):
+def getPlan(planner, logFile, planFile):
 	#Read the plan found
 	#Reset file pointer to read
 	logFile.seek(0,0)
 	#Output Plan
-	matches = [VAL_PLAN_SYNTAX.findall(line) for line in logFile]
+	matches = [VAL_PLAN_REGEX.findall(line) for line in logFile]
 	
 	for m in matches:
 		if len(m) > 0:
@@ -90,7 +90,7 @@ def processProblem(job):
 
 	#Check for plan file before compressing
 	planFilePath = Path(job.planFile)
-	print "Checking for file %s"%planFilePath
+	printMessage("Checking for file %s"%planFilePath)
 	if planFilePath.is_file(): 
 		with open(job.planFile, 'rb') as f_in, gzip.open(job.planFile + '.gz', 'wb') as f_out:
 				shutil.copyfileobj(f_in, f_out)
