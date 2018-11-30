@@ -46,7 +46,7 @@ def checkPlanExists(log, planner, filename):
 			print "%s: %s did not produce a plan, but that maybe ok as it could "%(planner, filename) +\
 					"have exhausted CPU/memory. Investigate."
 			return
-	raise RuntimeError("Error! No plan assessed for %s"%filename)
+	raise RuntimeError("Error! No plan assessed for %s: %s"%(planner, filename))
 
 def checkPlanExistsLPGTD(log, filename):
 	for line in log:
