@@ -138,6 +138,51 @@ def lpgtd(domainFile, probFile):
 	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
+		
+def metricff(domainFile, probFile):
+	PLANNER_LOC="/home/tony/dev/Planners/Metric-FF-v2.1"
+	PLANNER_EXEC_LOC="/home/tony/dev/Planners/Metric-FF-v2.1/ff"
+	PLANNER_PARAMS = "-s 0"
+
+	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
+		
+def cpt_yahsp(domainFile, probFile):
+	PLANNER_LOC="/home/tony/dev/Planners/descarwin/cpt-yahsp/release"
+	PLANNER_EXEC_LOC="/home/tony/dev/Planners/descarwin/cpt-yahsp/release/cpt_yahsp"
+	PLANNER_PARAMS = ""
+
+	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
+		
+def fd_FF(domainFile, probFile):
+	PLANNER_LOC="/home/tony/dev/Planners/fd"
+	PLANNER_EXEC_LOC="/home/tony/dev/Planners/fd/fast-downward.py"
+	PLANNER_PARAMS = "--heuristic \"hff=ff()\" --search \"lazy_greedy([hff], preferred=[hff])\""
+
+	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
+		
+def fd_blind(domainFile, probFile):
+	PLANNER_LOC="/home/tony/dev/Planners/fd"
+	PLANNER_EXEC_LOC="/home/tony/dev/Planners/fd/fast-downward.py"
+	PLANNER_PARAMS = "--search \"astar(blind())\""
+
+	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
+		
+def madagascar(domainFile, probFile):
+	PLANNER_LOC="/home/tony/dev/Planners/MADAGASCAR/src"
+	PLANNER_EXEC_LOC="/home/tony/dev/Planners/MADAGASCAR/src/MpC"
+	PLANNER_PARAMS = "-P 2"
+
+	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
 
 #Limit Commands
 TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
@@ -145,18 +190,19 @@ TIME_CMD = "time -p"
 MEMLIMIT_CMD="ulimit -Sv 4000000" #4GB
 
 #Validation Parameters
-VALIDATOR_EXEC = "/mnt/data/bin/VAL/validate"
+VALIDATOR_EXEC = "/home/tony/dev/VAL/validate"
 VALIDATOR_PARAMS = "-t 0.001 -v"
 
 #File Locations
-LOG_FOLDER="/mnt/data/logs/"
-PROBLEM_SETS="/mnt/data/problem-sets/"
+LOG_FOLDER="/home/tony/dev/logs/"
+PROBLEM_SETS="/home/tony/dev/pddl-domains/exp-now/"
 PLANS_FOLDER = "plans"
 OUTPUT_FOLDER = "output"
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive", "archive2", "archive3"]
 AIRPORT_PROBLEM = "airport"
+NO_GOODS_PROBLEM = ["mmcr-no-metric-no-goods", "mmcr-no-metric-no-goods-10Cargo"]
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
 PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
@@ -184,21 +230,25 @@ def getProblemQueue(iterations=1, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
-		"Colin-RPG" : colinRPG,
-		"NoSD-Colin-RPG" : colinRPGNoSD,
-		"POPF-RPG" : popf,
-		"NoSD-POPF-RPG" : popfNoSD,
-		"Optic-RPG" : optic,
-		"Optic-SLFRP" : opticSLFRP,
-		"lpg-td" : lpgtd,
-		"Colin-TRH-Colin" : colinTRHcolin,
-		"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		"Popf-TRH-Popf" : popfTRHpopf,
-		"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
-		"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
-		"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
-		"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
-		"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD
+		#"Colin-RPG" : colinRPG,
+		#"NoSD-Colin-RPG" : colinRPGNoSD,
+		#"POPF-RPG" : popf,
+		#"NoSD-POPF-RPG" : popfNoSD,
+		#"Optic-RPG" : optic,
+		#"Optic-SLFRP" : opticSLFRP,
+		#"lpg-td" : lpgtd,
+		#"Colin-TRH-Colin" : colinTRHcolin,
+		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
+		#"Popf-TRH-Popf" : popfTRHpopf,
+		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
+		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
+		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
+		#"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
+		#"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD,
+		"MetricFF": metricff,
+		"fd_FF": fd_FF,
+		"fd_blind" : fd_blind,
+		"madagascar" : madagascar
 	}
 	#iterate through planners
 	for planner in planners:
@@ -218,7 +268,7 @@ def getProblemQueue(iterations=1, start=0):
 				setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
 				
 				problems = getProblemFiles(subdir_fullpath)
-				
+
 				for prob in problems:
 					#Problem file
 					probFile = os.path.join(subdir_fullpath, prob)
@@ -228,15 +278,17 @@ def getProblemQueue(iterations=1, start=0):
 					#As this has a domain file for each problem file
 					if subdir == AIRPORT_PROBLEM:
 						domainFile = os.path.join(subdir_fullpath,  prob[0:4] + DOMAIN_FILE)
+					elif subdir in NO_GOODS_PROBLEM:
+						domainFile = os.path.join(subdir_fullpath,  prob[:-5] + "-" + DOMAIN_FILE)
 					#Planner command
 					planner_command = f(domainFile, probFile)
-
+						
 					for itr in range(start, start+iterations):
 						#Plan file
 						planFileName = "%s-%i.plan"%(prob, itr)
 						planFile = os.path.join(plansdir_fullpath, planFileName)
 						#Validate command
-						validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, 
+						validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, \
 							VALIDATOR_PARAMS, domainFile, probFile, planFile)
 						#Log file
 						logFileName = "%s-%i.txt"%(prob, itr)
@@ -245,6 +297,7 @@ def getProblemQueue(iterations=1, start=0):
 						job = Job(planner, prob, itr, planner_command, 
 							validate_command, logFile, planFile)
 						q.put(job)
+	
 			#The first entry has all the dirs
 			break
 	return q
