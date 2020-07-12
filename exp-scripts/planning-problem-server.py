@@ -140,6 +140,16 @@ def lpgtd(domainFile, probFile, planFile):
 	return "(cd %s && %s && %s %s %s -o %s -f %s -out %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, planFile, PLANNER_PARAMS)
+		
+#tplan
+def tplan(domainFile, probFile, planFile=""):
+	PLANNER_LOC="/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = ""
+	
+	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS)
 
 #Limit Commands
 TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
@@ -147,12 +157,12 @@ TIME_CMD = "time -p"
 MEMLIMIT_CMD="ulimit -Sv 4000000" #4GB
 
 #Validation Parameters
-VALIDATOR_EXEC = "/mnt/data/bin/VAL/validate"
+VALIDATOR_EXEC = "/mnt/exp/VAL/validate"
 VALIDATOR_PARAMS = "-t 0.001 -v"
 
 #File Locations
-LOG_FOLDER="/mnt/data/logs/"
-PROBLEM_SETS="/mnt/data/problem-sets/"
+LOG_FOLDER="/mnt/exp/logs/"
+PROBLEM_SETS="/mnt/exp/problems/"
 PLANS_FOLDER = "plans"
 OUTPUT_FOLDER = "output"
 #Constants
@@ -182,7 +192,7 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=7, start=0):
+def getProblemQueue(iterations=1, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
@@ -193,14 +203,15 @@ def getProblemQueue(iterations=7, start=0):
 		#"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
 		#"lpg-td" : lpgtd,
-		"Colin-TRH-Colin" : colinTRHcolin,
-		"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		"Popf-TRH-Popf" : popfTRHpopf,
-		"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
+		#"Colin-TRH-Colin" : colinTRHcolin,
+		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
+		#"Popf-TRH-Popf" : popfTRHpopf,
+		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
 		#"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
 		#"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD
+		"tplan" : tplan
 	}
 	#iterate through planners
 	for planner in planners:

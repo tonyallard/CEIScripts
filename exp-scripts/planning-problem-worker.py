@@ -100,8 +100,11 @@ def processProblem(job):
 		os.remove(job.planFile)	
 
 def shutdownSocket(aSocket):
-	aSocket.shutdown(socket.SHUT_RDWR)
-	aSocket.close()
+	try:
+		aSocket.shutdown(socket.SHUT_RDWR)
+		aSocket.close()
+	except socket.error, e:
+		print "Error shutting down socket"
 	time.sleep(1)
 
 def main(args):
