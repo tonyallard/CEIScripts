@@ -19,7 +19,10 @@ PORT = 50005
 BUFFER_SIZE = 4096
 
 COLIN_LIKE_PLANNERS = ["Colin-TRH", "Colin-RPG", "POPF", "Optic", "Optic-SLFRP"]
-NON_COLIN_LIKE_PLANNERS = ["lpg-td"]
+LPG_PLANNERS = ["lpg-td"]
+FD_PLANNERS = ["fd_FF", "fd_blind"]
+METRICFF_PLANNERS = ["MetricFF"]
+MADAGASCAR_PLANNERS = ["madagascar"]
 
 #Regex to find plan
 COLIN_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*\]"
@@ -28,20 +31,49 @@ COLIN_PLAN_REGEX = re.compile(COLIN_PLAN_SYNTAX)
 LPGTD_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-_ ]+\) \[[0-9DC;:. ]*\]"
 LPGTD_PLAN_REGEX = re.compile(LPGTD_PLAN_SYNTAX)
 
+FD_PLAN_SYNTAX = "[0-9A-Za-z\-\_ ]+ \(1\)"
+FD_PLAN_REGEX = re.compile(FD_PLAN_SYNTAX)
+
+METRICFF_PLAN_SYNTAX = "\d+: [0-9A-Za-z\-\_ ]+\n"
+METRICFF_PLAN_REGEX = re.compile(METRICFF_PLAN_SYNTAX)
+
+MADAGASCAR_PLAN_SYNTAX = "([0-9A-Za-z\-\_]+\([0-9A-Za-z\-\_\,]+\))+"
+MADAGASCAR_PLAN_REGEX = re.compile(MADAGASCAR_PLAN_SYNTAX)
+
 def getPlan(planner, logFile, planFile):
 	#Read the plan found
 	#Reset file pointer to read
 	logFile.seek(0,0)
 	#Output Plan
 	matches = []
-	if planner in NON_COLIN_LIKE_PLANNERS:
-		matches = [LPGTD_PLAN_REGEX.findall(line) for line in logFile] 
-	else: #Colin-like planner
+	if planner in COLIN_LIKE_PLANNERS:
 		matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
+	elif planner in LPG_PLANNERS:
+		matches = [LPGTD_PLAN_REGEX.findall(line) for line in logFile]
+	elif planner in FD_PLANNERS:
+		matches = [FD_PLAN_REGEX.findall(line) for line in logFile]
+		for m in matches:
+			if len(m) > 0:
+				m[0] = m[0].replace(" (1)", ")")
+				m[0] = "(" + m[0]
+	elif planner in METRICFF_PLANNERS:
+		matches = [METRICFF_PLAN_REGEX.findall(line) for line in logFile]
+		for m in matches:
+			if len(m) > 0:
+				m[0] = re.sub("\d+: ", "(", m[0])
+				m[0] = m[0].replace("\n", ")")
+	elif planner in MADAGASCAR_PLANNERS:
+		matches = [MADAGASCAR_PLAN_REGEX.findall(line) for line in logFile]
+		for m in matches:
+			m[:] = [x.replace("(", " ") for x in m]
+			m[:] = [x.replace(",", " ") for x in m]
+			m[:] = ["(" + x for x in m]			
+	else:
+		print "Error: Unmatched Planner. Plans not extracted or validated."		
 	
-	for m in matches:
-		if len(m) > 0:
-			planFile.write("%s\n"%m[0])
+	for ms in matches:
+		for m in ms:
+			planFile.write("%s\n"%m)
 
 def processProblem(job):
 	#Open files for logging
