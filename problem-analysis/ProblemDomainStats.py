@@ -91,13 +91,8 @@ class ProblemDomainStats:
 		self.createDataStructure(problemName)
 
 		#Problem Success
-		success = 0
-		if self.plannerName == "lpg-td":
-			success = ExtractSuccess.extractLPGTDSuccess(logBuffer, 
-				"%s-%s-%s"%(self.plannerName, problemName, probNumber))
-		else:
-			success = ExtractSuccess.extractValidatorSuccess(logBuffer, 
-				"%s-%s-%s"%(self.plannerName, problemName, probNumber))
+		success = ExtractSuccess.extractValidatorSuccess(logBuffer, self.plannerName,
+				"%s-%s"%(problemName, probNumber))
 		self.stats[problemName][self.SUCCESS_IDX][probNumber] = success
 		self.totalSuccess += success
 		

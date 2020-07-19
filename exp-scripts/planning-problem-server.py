@@ -5,6 +5,8 @@ import socket
 from multiprocessing import Queue
 import time
 import re
+import time
+import datetime
 
 from PlanningProblemConstants import *
 from PlanningProblemJob import *
@@ -12,8 +14,8 @@ from PlanningProblemJob import *
 #Socket Parameters
 HOST = "" #Don't restrict listener to any machine
 PORT = 50005
-BUFFER_SIZE = 4096
-QUEUED_CONNECTIONS = 30 #Have set this to the number of workers
+BUFFER_SIZE = 8192
+QUEUED_CONNECTIONS = 50 #Have set this to the number of workers
 
 #Function to make command like most colin planners
 COLIN_PLANNER_PARAMS = "-v1"
@@ -25,35 +27,35 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 
 #Planner Parameters
 #Colin-TRH
-def colinTRHcolin(domainFile, probFile):
+def colinTRHcolin(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/Colin2-trh-colin/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-colin/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-TRH-Ablation
-def colinTRHcolinAblation(domainFile, probFile):
+def colinTRHcolinAblation(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/colin-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/colin-trh-ablation/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH
-def popfTRHpopf(domainFile, probFile):
+def popfTRHpopf(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH-Ablation
-def popfTRHpopfAblation(domainFile, probFile):
+def popfTRHpopfAblation(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-ablation/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-TRH No Steepest Descent
-def colinTRHcolinNoSD(domainFile, probFile):
+def colinTRHcolinNoSD(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/Colin2-trh-colin/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/Colin2-trh-colin/release/colin/colin-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -61,7 +63,7 @@ def colinTRHcolinNoSD(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-TRH-Ablation No Steepest Descent
-def colinTRHcolinAblationNoSD(domainFile, probFile):
+def colinTRHcolinAblationNoSD(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/colin-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/colin-trh-ablation/release/colin/colin-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -69,7 +71,7 @@ def colinTRHcolinAblationNoSD(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Popf-TRH No Steepest Descent
-def popfTRHpopfNoSD(domainFile, probFile):
+def popfTRHpopfNoSD(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-popf/compile/popf2/popf3-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -77,7 +79,7 @@ def popfTRHpopfNoSD(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Popf-TRH-Ablation No Steepest Descent
-def popfTRHpopfAblationNoSD(domainFile, probFile):
+def popfTRHpopfAblationNoSD(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/popf-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/popf-trh-ablation/compile/popf2/popf3-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -85,14 +87,14 @@ def popfTRHpopfAblationNoSD(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-RPG
-def colinRPG(domainFile, probFile):
+def colinRPG(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/colin2/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/colin2/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-RPG No Steepest Descent
-def colinRPGNoSD(domainFile, probFile):
+def colinRPGNoSD(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/colin2/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/colin2/release/colin/colin-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -100,14 +102,14 @@ def colinRPGNoSD(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #POPF
-def popf(domainFile, probFile):
+def popf(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #POPF No Steepest Descent
-def popfNoSD(domainFile, probFile):
+def popfNoSD(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/tempo-sat-popf2/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/tempo-sat-popf2/compile/popf2/popf3-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -115,7 +117,7 @@ def popfNoSD(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC
-def optic(domainFile, probFile):
+def optic(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/optic/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/optic/release/optic/optic-clp"
 	PLANNER_PARAMS = "-N " + COLIN_PLANNER_PARAMS
@@ -123,19 +125,29 @@ def optic(domainFile, probFile):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC - TIL Relaxation Turned off
-def opticSLFRP(domainFile, probFile):
+def opticSLFRP(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/data/bin/optic/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/optic/release/optic/optic-clp"
 	PLANNER_PARAMS = "-N -0 " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
-def lpgtd(domainFile, probFile):
+def lpgtd(domainFile, probFile, planFile):
 	PLANNER_LOC="/mnt/data/bin/lpg-td/"
 	PLANNER_EXEC_LOC="/mnt/data/bin/lpg-td/lpg-td-1.0.1"
-	PLANNER_PARAMS = "-n 1 -noout"
+	PLANNER_PARAMS = "-n 1"
 
-	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
+	return "(cd %s && %s && %s %s %s -o %s -f %s -out %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, planFile, PLANNER_PARAMS)
+		
+#tplan
+def tplan(domainFile, probFile, planFile=""):
+	PLANNER_LOC="/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = ""
+	
+	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
 		
@@ -190,18 +202,19 @@ TIME_CMD = "time -p"
 MEMLIMIT_CMD="ulimit -Sv 4000000" #4GB
 
 #Validation Parameters
-VALIDATOR_EXEC = "/home/tony/dev/VAL/validate"
+VALIDATOR_EXEC = "/mnt/exp/VAL/validate"
 VALIDATOR_PARAMS = "-t 0.001 -v"
 
 #File Locations
-LOG_FOLDER="/home/tony/dev/logs/"
-PROBLEM_SETS="/home/tony/dev/pddl-domains/exp-now/"
+LOG_FOLDER="/mnt/exp/logs/"
+PROBLEM_SETS="/mnt/exp/problems/"
 PLANS_FOLDER = "plans"
 OUTPUT_FOLDER = "output"
+
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive", "archive2", "archive3"]
-AIRPORT_PROBLEM = "airport"
+AIRPORT_PROBLEM = ["airport", "airport-tighten"]
 NO_GOODS_PROBLEM = ["mmcr-no-metric-no-goods", "mmcr-no-metric-no-goods-10Cargo"]
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
@@ -245,10 +258,11 @@ def getProblemQueue(iterations=1, start=0):
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
 		#"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
 		#"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD,
-		"MetricFF": metricff,
-		"fd_FF": fd_FF,
-		"fd_blind" : fd_blind,
-		"madagascar" : madagascar
+		#"MetricFF": metricff,
+		#"fd_FF": fd_FF,
+		#"fd_blind" : fd_blind,
+		#"madagascar" : madagascar
+		"tplan" : tplan
 	}
 	#iterate through planners
 	for planner in planners:
@@ -276,7 +290,7 @@ def getProblemQueue(iterations=1, start=0):
 					domainFile = os.path.join(subdir_fullpath, DOMAIN_FILE)
 					#Special case for the Airport domain
 					#As this has a domain file for each problem file
-					if subdir == AIRPORT_PROBLEM:
+					if subdir in AIRPORT_PROBLEM:
 						domainFile = os.path.join(subdir_fullpath,  prob[0:4] + DOMAIN_FILE)
 					elif subdir in NO_GOODS_PROBLEM:
 						domainFile = os.path.join(subdir_fullpath,  prob[:-5] + "-" + DOMAIN_FILE)
@@ -285,8 +299,12 @@ def getProblemQueue(iterations=1, start=0):
 						
 					for itr in range(start, start+iterations):
 						#Plan file
-						planFileName = "%s-%i.plan"%(prob, itr)
+						planFileName = "%s-%i.plan"%(prob, itr)						
 						planFile = os.path.join(plansdir_fullpath, planFileName)
+
+						#Planner command
+						planner_command = f(domainFile, probFile, planFile)
+
 						#Validate command
 						validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, \
 							VALIDATOR_PARAMS, domainFile, probFile, planFile)
@@ -305,15 +323,18 @@ def getProblemQueue(iterations=1, start=0):
 def getCurrentAllocationString(currentAllocation):
 	result = ""
 	for _id in currentAllocation:
-		result += "%s (%i): %s (%i)\n"%(currentAllocation[_id][0], 
-			_id, currentAllocation[_id][1], currentAllocation[_id][2])
+		duration = time.time() - currentAllocation[_id][4]
+		result += "%s [%s] (%i): %s (%i) [%s]\n"%(currentAllocation[_id][1],
+			currentAllocation[_id][0], _id, 
+			currentAllocation[_id][2], currentAllocation[_id][3], 
+			str(datetime.timedelta(seconds=duration)))
 
 	return result
 
 def getNumberOfWorkersExecuting(currentAllocation):
 	numExecutions = 0
 	for _id in currentAllocation:
-		if currentAllocation[_id][1] not in [WORKER_PAUSED, WORKER_TERMINATED]:
+		if currentAllocation[_id][2] not in [WORKER_PAUSED, WORKER_TERMINATED]:
 			numExecutions += 1
 	return numExecutions
 
@@ -330,6 +351,13 @@ def main(args):
 	#Get problems ready for computation
 	q = getProblemQueue()
 	printMessage("Problem queue initialised with %i problems."%q.qsize())
+	#Current allocation data structure
+	#Indexed by id, then list. Elements:
+	#0: IP
+	#1: Hostname
+	#2: STATUS
+	#3: Problem Name (iteration)
+	#4: Timestamp of last command
 	currentAllocation = {}
 
 	#create an INET, STREAMing socket
@@ -367,18 +395,21 @@ def main(args):
 			reply = getMessageString(_id, "Ack. Queue size is %i"%q.qsize())
 		elif message.message == REQUEST_PROBLEM:
 			#Pause the worker because it is done.
-			currentAllocation[message._id] = (addr[0], WORKER_PAUSED, 0)
+			currentAllocation[message._id] = (addr[0], message.hostname, WORKER_PAUSED, 0, 
+				time.time())
 			
 			if q.empty(): #Tell the workers to terminate if done
 				printMessage("Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
+				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0,
+					time.time())
 			elif terminate:
 				printMessage("Received request from machine %s with id %i, but have been instructed to terminate workers. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				currentAllocation[message._id] = (addr[0], WORKER_TERMINATED, 0)
+				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0,
+					time.time())
 			elif paused:
 				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
 							message._id))
@@ -392,7 +423,8 @@ def main(args):
 				printMessage("Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
 					job.itr, addr, message._id))
 				reply = getMessageString(_id, job)
-				currentAllocation[message._id] = (addr[0], job.problemName, job.itr)
+				currentAllocation[message._id] = (addr[0], message.hostname, job.problemName, job.itr,
+					time.time())
 		elif message.message == CURRENT_ALLOCATION:
 			printMessage("Received request from machine %s with id %i for current allocation."%(addr, 
 				message._id))

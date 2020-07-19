@@ -24,12 +24,13 @@ RESTRICTED_WORKER_NUMBER = 5
 SEEDED = False
 
 class Message:
-	def __init__(self, _id, message):
+	def __init__(self, _id, hostname, message):
 		self._id = _id
+		self.hostname = hostname
 		self.message = message
 
-def getMessageString(_id, message):
-	m = Message(_id, message)
+def getMessageString(_id, message, hostname = ""):
+	m = Message(_id, hostname, message)
 	stream = StringIO() 
 	pickle.dump(m, stream)
 	messageStr = stream.getvalue()
@@ -55,3 +56,4 @@ def getInstanceID():
 def printMessage(text):
 	print "%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", gmtime()),
 		text)
+	sys.stdout.flush()

@@ -10,13 +10,15 @@ import re
 import subprocess
 import gzip
 import shutil
+from pathlib2 import Path
+
 
 from PlanningProblemConstants import *
 from PlanningProblemJob import *
 
 #Socket parameters
 PORT = 50005
-BUFFER_SIZE = 4096
+BUFFER_SIZE = 8192
 
 COLIN_LIKE_PLANNERS = ["Colin-TRH", "Colin-RPG", "POPF", "Optic", "Optic-SLFRP"]
 LPG_PLANNERS = ["lpg-td"]
@@ -28,8 +30,6 @@ MADAGASCAR_PLANNERS = ["madagascar"]
 COLIN_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*\]"
 COLIN_PLAN_REGEX = re.compile(COLIN_PLAN_SYNTAX)
 
-LPGTD_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-_ ]+\) \[[0-9DC;:. ]*\]"
-LPGTD_PLAN_REGEX = re.compile(LPGTD_PLAN_SYNTAX)
 
 FD_PLAN_SYNTAX = "[0-9A-Za-z\-\_ ]+ \(1\)"
 FD_PLAN_REGEX = re.compile(FD_PLAN_SYNTAX)
@@ -95,9 +95,18 @@ def processProblem(job):
 	log.write("%f seconds\n"%timeTaken)
 	log.write("====================\n\n")
 
-	plan = open(job.planFile, "a", buffSize)
-	getPlan(job.plannerName, log, plan)
-	plan.close()		
+	#Check for lpg-td as this writes its own plan
+	if job.plannerName not in PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES:
+		plan = open(job.planFile, "a", buffSize)
+		getPlan(job.plannerName, log, plan)
+		plan.close()
+	else:
+		#remove extra plan files as appropriate
+		for x in range(1, 3):
+			extraFile = "%s_%i.SOL"%(job.planFile, x)
+			extraPlanFilePath = Path(extraFile)
+			if extraPlanFilePath.is_file():
+				os.remove(extraFile)
 
 	#Validate the plan
 	log.write("Plan Validation\n")
@@ -112,18 +121,26 @@ def processProblem(job):
 		shutil.copyfileobj(f_in, f_out)
 		f_in.close()
 		f_out.close()
-	with open(job.planFile, 'rb') as f_in, gzip.open(job.planFile + '.gz', 'wb') as f_out:
-		shutil.copyfileobj(f_in, f_out)
-		f_in.close()
-		f_out.close()
-
 	#Remove uncompressed files
 	os.remove(job.logFile)
-	os.remove(job.planFile)
+
+	#Check for plan file before compressing
+	planFilePath = Path(job.planFile)
+	printMessage("Checking for file %s"%planFilePath)
+	if planFilePath.is_file(): 
+		with open(job.planFile, 'rb') as f_in, gzip.open(job.planFile + '.gz', 'wb') as f_out:
+				shutil.copyfileobj(f_in, f_out)
+				f_in.close()
+				f_out.close()
+		#Remove uncompressed files
+		os.remove(job.planFile)	
 
 def shutdownSocket(aSocket):
-	aSocket.shutdown(socket.SHUT_RDWR)
-	aSocket.close()
+	try:
+		aSocket.shutdown(socket.SHUT_RDWR)
+		aSocket.close()
+	except socket.error, e:
+		print "Error shutting down socket"
 	time.sleep(1)
 
 def main(args):
@@ -135,13 +152,14 @@ def main(args):
 	while True:
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
-	   	socket.AF_INET, socket.SOCK_STREAM)
+		socket.AF_INET, socket.SOCK_STREAM)
 		clientsocket.setsockopt(socket.SOL_SOCKET, 
 			socket.SO_REUSEADDR, 1)
 		#bind the socket to a public host,
 		# and a well-known port
 		clientsocket.connect((HOST, PORT))
-		msg = getMessageString(_id, REQUEST_PROBLEM)
+		hostname = socket.gethostname()
+		msg = getMessageString(_id, REQUEST_PROBLEM, hostname)
 		clientsocket.sendall(msg)
 
 		data = clientsocket.recv(BUFFER_SIZE)
@@ -149,7 +167,7 @@ def main(args):
 
 		#Check if the buffer is empty
 		if reply.message == EXIT_PROCESS:
-			msg = getMessageString(_id, "Ack. Exiting...")
+			msg = getMessageString(_id, "Ack. Exiting...", hostname)
 			clientsocket.sendall(msg)
 			printMessage("Received shutdown message from server id %i"%reply._id)
 			shutdownSocket(clientsocket)
