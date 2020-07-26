@@ -20,14 +20,16 @@ from PlanningProblemJob import *
 PORT = 50005
 BUFFER_SIZE = 8192
 
-COLIN_LIKE_PLANNERS = ["Colin-TRH", "Colin-RPG", "POPF", "Optic", "Optic-SLFRP"]
+COLIN_LIKE_PLANNERS = ["Colin-TRH-Colin", "Popf-TRH-Popf", "Colin-RPG", "POPF-RPG", "Optic", "Optic-SLFRP", "tplan"]
 LPG_PLANNERS = ["lpg-td"]
 FD_PLANNERS = ["fd_FF", "fd_blind"]
 METRICFF_PLANNERS = ["MetricFF"]
 MADAGASCAR_PLANNERS = ["madagascar"]
 
+PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
+
 #Regex to find plan
-COLIN_PLAN_SYNTAX = "\d+\.*\d*: \([0-9A-Za-z\-\_ ]+\)  \[\d+\.*\d*\]"
+COLIN_PLAN_SYNTAX = "\d+\.*\d*:[\s]+\([0-9A-Za-z\-\_ ]+\)[\s]+\[\d+\.*\d*\]"
 COLIN_PLAN_REGEX = re.compile(COLIN_PLAN_SYNTAX)
 
 
