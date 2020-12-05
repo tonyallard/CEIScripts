@@ -20,7 +20,19 @@ from PlanningProblemJob import *
 PORT = 50005
 BUFFER_SIZE = 8192
 
-COLIN_LIKE_PLANNERS = ["Colin-TRH-Colin", "Popf-TRH-Popf", "Colin-RPG", "POPF-RPG", "Optic", "Optic-SLFRP", "tplan"]
+COLIN_LIKE_PLANNERS = [	"Colin-TRH-Colin", 
+						"Popf-TRH-Popf", 
+						"Colin-RPG", 
+						"POPF-RPG", 
+						"Optic", 
+						"Optic-SLFRP", 
+						"tplan",
+						"tplanS0T0", 
+						"tplanS0T1",
+						"tplanS1T0",
+						"tplanS1T1",
+						"tplanS2T0",
+						"tplanS2T1" ]
 LPG_PLANNERS = ["lpg-td"]
 FD_PLANNERS = ["fd_FF", "fd_blind"]
 METRICFF_PLANNERS = ["MetricFF"]
@@ -128,7 +140,7 @@ def processProblem(job):
 
 	#Check for plan file before compressing
 	planFilePath = Path(job.planFile)
-	printMessage("Checking for file %s"%planFilePath)
+	#printMessage("Checking for file %s"%planFilePath)
 	if planFilePath.is_file(): 
 		with open(job.planFile, 'rb') as f_in, gzip.open(job.planFile + '.gz', 'wb') as f_out:
 				shutil.copyfileobj(f_in, f_out)

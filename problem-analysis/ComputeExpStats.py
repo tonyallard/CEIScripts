@@ -106,7 +106,7 @@ def main(args):
 			if (probDomStats.totalProbs <= 0):
 				continue
 			#Print problem statistics to CSV file
-			for problem in probDomStats.stats:
+			for problem in sorted(probDomStats.stats):
 				success = probDomStats.getProblemSuccess(problem)
 				succMean, succVar = getMeanAndVar(success)
 

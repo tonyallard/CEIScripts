@@ -27,35 +27,35 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 
 #Planner Parameters
 #Colin-TRH
-def colinTRHcolin(domainFile, probFile, planFile=""):
+def colinTRHcolin(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/Colin2-trh-colin/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/Colin2-trh-colin/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-TRH-Ablation
-def colinTRHcolinAblation(domainFile, probFile, planFile=""):
+def colinTRHcolinAblation(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/colin-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/colin-trh-ablation/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH
-def popfTRHpopf(domainFile, probFile, planFile=""):
+def popfTRHpopf(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-popf/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH-Ablation
-def popfTRHpopfAblation(domainFile, probFile, planFile=""):
+def popfTRHpopfAblation(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/popf-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-ablation/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-TRH No Steepest Descent
-def colinTRHcolinNoSD(domainFile, probFile, planFile=""):
+def colinTRHcolinNoSD(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/Colin2-trh-colin/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/Colin2-trh-colin/release/colin/colin-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -63,7 +63,7 @@ def colinTRHcolinNoSD(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-TRH-Ablation No Steepest Descent
-def colinTRHcolinAblationNoSD(domainFile, probFile, planFile=""):
+def colinTRHcolinAblationNoSD(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/colin-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/colin-trh-ablation/release/colin/colin-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -71,7 +71,7 @@ def colinTRHcolinAblationNoSD(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Popf-TRH No Steepest Descent
-def popfTRHpopfNoSD(domainFile, probFile, planFile=""):
+def popfTRHpopfNoSD(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/popf-trh-popf/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-popf/compile/popf2/popf3-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -79,7 +79,7 @@ def popfTRHpopfNoSD(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Popf-TRH-Ablation No Steepest Descent
-def popfTRHpopfAblationNoSD(domainFile, probFile, planFile=""):
+def popfTRHpopfAblationNoSD(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/popf-trh-ablation/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-ablation/compile/popf2/popf3-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -87,14 +87,14 @@ def popfTRHpopfAblationNoSD(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-RPG
-def colinRPG(domainFile, probFile, planFile=""):
+def colinRPG(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/colin2/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/colin2/release/colin/colin-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-RPG No Steepest Descent
-def colinRPGNoSD(domainFile, probFile, planFile=""):
+def colinRPGNoSD(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/colin2/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/colin2/release/colin/colin-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -102,14 +102,14 @@ def colinRPGNoSD(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #POPF
-def popf(domainFile, probFile, planFile=""):
+def popf(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/tempo-sat-popf2/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/tempo-sat-popf2/compile/popf2/popf3-clp"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #POPF No Steepest Descent
-def popfNoSD(domainFile, probFile, planFile=""):
+def popfNoSD(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/tempo-sat-popf2/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/tempo-sat-popf2/compile/popf2/popf3-clp"
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
@@ -117,7 +117,7 @@ def popfNoSD(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC
-def optic(domainFile, probFile, planFile=""):
+def optic(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/optic/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/optic/release/optic/optic-clp"
 	PLANNER_PARAMS = "-N " + COLIN_PLANNER_PARAMS
@@ -125,14 +125,14 @@ def optic(domainFile, probFile, planFile=""):
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC - TIL Relaxation Turned off
-def opticSLFRP(domainFile, probFile, planFile=""):
+def opticSLFRP(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/optic/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/optic/release/optic/optic-clp"
 	PLANNER_PARAMS = "-N -0 " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
-def lpgtd(domainFile, probFile, planFile):
+def lpgtd(domainFile, probFile, planFile, confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/lpg-td/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/lpg-td/lpg-td-1.0.1"
 	PLANNER_PARAMS = "-n 1"
@@ -142,16 +142,61 @@ def lpgtd(domainFile, probFile, planFile):
 		domainFile, probFile, planFile, PLANNER_PARAMS)
 		
 #tplan
-def tplan(domainFile, probFile, planFile=""):
+def tplanS0T0(domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC="/mnt/exp/planners/tplan/"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = ""
+	PLANNER_PARAMS = "-s 0 -t 0"
 	
-	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
-		domainFile, probFile, PLANNER_PARAMS)
+		domainFile, probFile, PLANNER_PARAMS, confFile)
 		
-def metricff(domainFile, probFile):
+def tplanS0T1(domainFile, probFile, planFile="", confFile=""):
+	PLANNER_LOC="/mnt/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = "-s 0 -t 1"
+	
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS, confFile)
+		
+def tplanS1T0(domainFile, probFile, planFile="", confFile=""):
+	PLANNER_LOC="/mnt/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = "-s 1 -t 0 -c"
+	
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS, confFile)
+		
+def tplanS1T1(domainFile, probFile, planFile="", confFile=""):
+	PLANNER_LOC="/mnt/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = "-s 1 -t 1 -c"
+	
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS, confFile)
+			
+def tplanS2T0(domainFile, probFile, planFile="", confFile=""):
+	PLANNER_LOC="/mnt/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = "-s 2 -t 0 -c"
+	
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS, confFile)
+		
+def tplanS2T1(domainFile, probFile, planFile="", confFile=""):
+	PLANNER_LOC="/mnt/exp/planners/tplan/"
+	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
+	PLANNER_PARAMS = "-s 2 -t 1 -c"
+	
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		domainFile, probFile, PLANNER_PARAMS, confFile)
+			
+def metricff(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/exp/planners/Metric-FF-v2.1"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/Metric-FF-v2.1/ff"
 	PLANNER_PARAMS = "-s 0"
@@ -160,7 +205,7 @@ def metricff(domainFile, probFile):
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
 		
-def cpt_yahsp(domainFile, probFile):
+def cpt_yahsp(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/exp/planners/descarwin/cpt-yahsp/release"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/descarwin/cpt-yahsp/release/cpt_yahsp"
 	PLANNER_PARAMS = ""
@@ -169,7 +214,7 @@ def cpt_yahsp(domainFile, probFile):
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
 		
-def fd_FF(domainFile, probFile):
+def fd_FF(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/exp/planners/fd"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/fd/fast-downward.py"
 	PLANNER_PARAMS = "--heuristic \"hff=ff()\" --search \"lazy_greedy([hff], preferred=[hff])\""
@@ -178,7 +223,7 @@ def fd_FF(domainFile, probFile):
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
 		
-def fd_blind(domainFile, probFile):
+def fd_blind(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/exp/planners/fd"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/fd/fast-downward.py"
 	PLANNER_PARAMS = "--search \"astar(blind())\""
@@ -187,7 +232,7 @@ def fd_blind(domainFile, probFile):
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
 		
-def madagascar(domainFile, probFile):
+def madagascar(domainFile, probFile, planFile=""):
 	PLANNER_LOC="/mnt/exp/planners/MADAGASCAR/src"
 	PLANNER_EXEC_LOC="/mnt/exp/planners/MADAGASCAR/src/MpC"
 	PLANNER_PARAMS = "-P 2"
@@ -213,9 +258,20 @@ OUTPUT_FOLDER = "output"
 
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
-IGNORE_SET_LIST = ["archive", "archive2", "archive3"]
+IGNORE_SET_LIST = ["archive", "archive2", "archive3", "constraints_def"]
 AIRPORT_PROBLEM = ["airport", "airport-tighten"]
 NO_GOODS_PROBLEM = ["mmcr-no-metric-no-goods", "mmcr-no-metric-no-goods-10Cargo"]
+
+PLANNERS_NEEDING_EXTRA_CONF = ["tplanS1T0", "tplanS1T1", "tplanS2T0", "tplanS2T1"]
+CONF_FILE_DIR = "constraints_def"
+CONF_FILE_SUBDIR = {"tplanS1T0" : "1", 
+					"tplanS1T1" : "1", 
+					"tplanS2T0" : "2", 
+					"tplanS2T1" : "2"}
+
+CONF_FILE_NAMES = {	"satellite" : "satellite.conf",
+					"pipesworld" : "pipesworld.conf",
+					"mmcr-nometric" : "mmcr.conf"}
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
 PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
@@ -245,14 +301,14 @@ def getProblemQueue(iterations=1, start=0):
 	planners = {
 		#"Colin-RPG" : colinRPG,
 		#"NoSD-Colin-RPG" : colinRPGNoSD,
-		#"POPF-RPG" : popf
+		#"POPF-RPG" : popf,
 		#"NoSD-POPF-RPG" : popfNoSD,
 		#"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
 		#"lpg-td" : lpgtd,
 		#"Colin-TRH-Colin" : colinTRHcolin,
 		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		"Popf-TRH-Popf" : popfTRHpopf
+		#"Popf-TRH-Popf" : popfTRHpopf
 		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
@@ -262,7 +318,12 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		#"tplan" : tplan
+		#"tplanS0T0" : tplanS0T0,
+		#"tplanS0T1" : tplanS0T1,
+		#"tplanS1T0" : tplanS1T0,
+		#"tplanS1T1" : tplanS1T1,
+		#"tplanS2T0" : tplanS2T0,
+		"tplanS2T1" : tplanS2T1
 	}
 	#iterate through planners
 	for planner in planners:
@@ -294,16 +355,20 @@ def getProblemQueue(iterations=1, start=0):
 						domainFile = os.path.join(subdir_fullpath,  prob[0:4] + DOMAIN_FILE)
 					elif subdir in NO_GOODS_PROBLEM:
 						domainFile = os.path.join(subdir_fullpath,  prob[:-5] + "-" + DOMAIN_FILE)
-					#Planner command
-					planner_command = f(domainFile, probFile)
 						
 					for itr in range(start, start+iterations):
 						#Plan file
 						planFileName = "%s-%i.plan"%(prob, itr)						
 						planFile = os.path.join(plansdir_fullpath, planFileName)
-
-						#Planner command
-						planner_command = f(domainFile, probFile, planFile)
+						
+						planner_command = ""
+						if (planner in PLANNERS_NEEDING_EXTRA_CONF):
+							confFileName = CONF_FILE_NAMES[subdir]
+							confFile = os.path.join(PROBLEM_SETS, CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
+							planner_command = f(domainFile, probFile, planFile, confFile)
+						else:
+							#Planner command
+							planner_command = f(domainFile, probFile, planFile)
 
 						#Validate command
 						validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, \
@@ -420,7 +485,7 @@ def main(args):
 				reply = getMessageString(_id, WORKER_PAUSED)
 			else: #Else give it a job
 				job = q.get()
-				printMessage("Processing %s for iteration %i on machine %s with id %i"%(job.problemName, 
+				printMessage("Processing %s, %s for iteration %i on machine %s with id %i"%(job.plannerName, job.problemName, 
 					job.itr, addr, message._id))
 				reply = getMessageString(_id, job)
 				currentAllocation[message._id] = (addr[0], message.hostname, job.problemName, job.itr,
