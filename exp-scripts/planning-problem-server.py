@@ -17,6 +17,8 @@ PORT = 50005
 BUFFER_SIZE = 8192
 QUEUED_CONNECTIONS = 50 #Have set this to the number of workers
 
+DEFAULT_ROOT_DIR = "/exp"
+
 #Function to make command like most colin planners
 COLIN_PLANNER_PARAMS = "-v1"
 def getColinStylePlannerCommand(plannerDir, plannerExecLocation, 
@@ -28,113 +30,113 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 #Planner Parameters
 #Colin-TRH
 def colinTRHcolin(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/Colin2-trh-colin/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/Colin2-trh-colin/release/colin/colin-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Colin2-trh-colin/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Colin2-trh-colin/release/colin/colin-clp")
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-TRH-Ablation
 def colinTRHcolinAblation(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/colin-trh-ablation/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/colin-trh-ablation/release/colin/colin-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin-trh-ablation/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin-trh-ablation/release/colin/colin-clp")
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH
 def popfTRHpopf(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/popf-trh-popf/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-popf/compile/popf2/popf3-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-popf/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-popf/compile/popf2/popf3-clp")
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Popf-TRH-Ablation
 def popfTRHpopfAblation(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/popf-trh-ablation/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-ablation/compile/popf2/popf3-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-ablation/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-ablation/compile/popf2/popf3-clp")
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-TRH No Steepest Descent
 def colinTRHcolinNoSD(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/Colin2-trh-colin/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/Colin2-trh-colin/release/colin/colin-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Colin2-trh-colin/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Colin2-trh-colin/release/colin/colin-clp")
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-TRH-Ablation No Steepest Descent
 def colinTRHcolinAblationNoSD(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/colin-trh-ablation/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/colin-trh-ablation/release/colin/colin-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin-trh-ablation/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin-trh-ablation/release/colin/colin-clp")
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Popf-TRH No Steepest Descent
 def popfTRHpopfNoSD(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/popf-trh-popf/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-popf/compile/popf2/popf3-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-popf/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-popf/compile/popf2/popf3-clp")
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Popf-TRH-Ablation No Steepest Descent
 def popfTRHpopfAblationNoSD(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/popf-trh-ablation/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/popf-trh-ablation/compile/popf2/popf3-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-ablation/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-ablation/compile/popf2/popf3-clp")
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #Colin-RPG
 def colinRPG(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/colin2/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/colin2/release/colin/colin-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin2/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin2/release/colin/colin-clp")
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #Colin-RPG No Steepest Descent
 def colinRPGNoSD(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/colin2/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/colin2/release/colin/colin-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin2/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin2/release/colin/colin-clp")
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #POPF
 def popf(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tempo-sat-popf2/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tempo-sat-popf2/compile/popf2/popf3-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tempo-sat-popf2/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tempo-sat-popf2/compile/popf2/popf3-clp")
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile)
 
 #POPF No Steepest Descent
 def popfNoSD(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tempo-sat-popf2/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tempo-sat-popf2/compile/popf2/popf3-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tempo-sat-popf2/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tempo-sat-popf2/compile/popf2/popf3-clp")
 	PLANNER_PARAMS = "-e " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC
 def optic(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/optic/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/optic/release/optic/optic-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/optic/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/optic/release/optic/optic-clp")
 	PLANNER_PARAMS = "-N " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 #OPTIC - TIL Relaxation Turned off
 def opticSLFRP(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/optic/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/optic/release/optic/optic-clp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/optic/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/optic/release/optic/optic-clp")
 	PLANNER_PARAMS = "-N -0 " + COLIN_PLANNER_PARAMS
 	return getColinStylePlannerCommand(PLANNER_LOC, 
 		PLANNER_EXEC_LOC, domainFile, probFile, PLANNER_PARAMS)
 
 def lpgtd(domainFile, probFile, planFile, confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/lpg-td/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/lpg-td/lpg-td-1.0.1"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/lpg-td/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/lpg-td/lpg-td-1.0.1")
 	PLANNER_PARAMS = "-n 1"
 
 	return "(cd %s && %s && %s %s %s -o %s -f %s -out %s %s)"%(PLANNER_LOC,
@@ -143,62 +145,55 @@ def lpgtd(domainFile, probFile, planFile, confFile=""):
 		
 #tplan
 def tplanS0T0(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tplan/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = "-s 0 -t 0"
-	
-	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
-		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
-		domainFile, probFile, PLANNER_PARAMS, confFile)
+	return base_tplan(0, 0, domainFile, probFile, planFile, confFile)
 		
 def tplanS0T1(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tplan/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = "-s 0 -t 1"
-	
-	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
-		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
-		domainFile, probFile, PLANNER_PARAMS, confFile)
+	return base_tplan(0, 1, domainFile, probFile, planFile, confFile)
 		
 def tplanS1T0(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tplan/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = "-s 1 -t 0 -c"
-	
-	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
-		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
-		domainFile, probFile, PLANNER_PARAMS, confFile)
+	return base_tplan(1, 0, domainFile, probFile, planFile, confFile)
 		
 def tplanS1T1(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tplan/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = "-s 1 -t 1 -c"
-	
-	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
-		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
-		domainFile, probFile, PLANNER_PARAMS, confFile)
+	return base_tplan(1, 1, domainFile, probFile, planFile, confFile)
 			
 def tplanS2T0(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tplan/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = "-s 2 -t 0 -c"
+	return base_tplan(2, 0, domainFile, probFile, planFile, confFile)
 	
-	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
-		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
-		domainFile, probFile, PLANNER_PARAMS, confFile)
-		
 def tplanS2T1(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC="/mnt/exp/planners/tplan/"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/tplan/compile/planner/tplan"
-	PLANNER_PARAMS = "-s 2 -t 1 -c"
+	return base_tplan(2, 1, domainFile, probFile, planFile, confFile)
+	
+def tplanS3T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(3, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS3T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(3, 1, domainFile, probFile, planFile, confFile)
+	
+def tplanS4T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(4, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS4T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(4, 1, domainFile, probFile, planFile, confFile)
+	
+def tplanS5T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(5, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS5T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(5, 1, domainFile, probFile, planFile, confFile)
+		
+def base_tplan(strategy, application, domainFile, probFile, planFile="", confFile=""):
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/compile/planner/tplan")
+	PLANNER_PARAMS = "-v 5 -s %i -t %i"%(strategy, application)
+	if len(confFile) > 0:
+		PLANNER_PARAMS = PLANNER_PARAMS + " -c"
 	
 	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS, confFile)
 			
 def metricff(domainFile, probFile, planFile=""):
-	PLANNER_LOC="/mnt/exp/planners/Metric-FF-v2.1"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/Metric-FF-v2.1/ff"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Metric-FF-v2.1")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Metric-FF-v2.1/ff")
 	PLANNER_PARAMS = "-s 0"
 
 	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
@@ -206,8 +201,8 @@ def metricff(domainFile, probFile, planFile=""):
 		domainFile, probFile, PLANNER_PARAMS)
 		
 def cpt_yahsp(domainFile, probFile, planFile=""):
-	PLANNER_LOC="/mnt/exp/planners/descarwin/cpt-yahsp/release"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/descarwin/cpt-yahsp/release/cpt_yahsp"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/descarwin/cpt-yahsp/release")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/descarwin/cpt-yahsp/release/cpt_yahsp")
 	PLANNER_PARAMS = ""
 
 	return "(cd %s && %s && %s %s %s -o %s -f %s %s)"%(PLANNER_LOC,
@@ -215,8 +210,8 @@ def cpt_yahsp(domainFile, probFile, planFile=""):
 		domainFile, probFile, PLANNER_PARAMS)
 		
 def fd_FF(domainFile, probFile, planFile=""):
-	PLANNER_LOC="/mnt/exp/planners/fd"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/fd/fast-downward.py"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/fd")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/fd/fast-downward.py")
 	PLANNER_PARAMS = "--heuristic \"hff=ff()\" --search \"lazy_greedy([hff], preferred=[hff])\""
 
 	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
@@ -224,8 +219,8 @@ def fd_FF(domainFile, probFile, planFile=""):
 		domainFile, probFile, PLANNER_PARAMS)
 		
 def fd_blind(domainFile, probFile, planFile=""):
-	PLANNER_LOC="/mnt/exp/planners/fd"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/fd/fast-downward.py"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/fd")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/fd/fast-downward.py")
 	PLANNER_PARAMS = "--search \"astar(blind())\""
 
 	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
@@ -233,13 +228,18 @@ def fd_blind(domainFile, probFile, planFile=""):
 		domainFile, probFile, PLANNER_PARAMS)
 		
 def madagascar(domainFile, probFile, planFile=""):
-	PLANNER_LOC="/mnt/exp/planners/MADAGASCAR/src"
-	PLANNER_EXEC_LOC="/mnt/exp/planners/MADAGASCAR/src/MpC"
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/MADAGASCAR/src")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/MADAGASCAR/src/MpC")
 	PLANNER_PARAMS = "-P 2"
 
 	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
+
+def validate(domainFile, probFile, planFile):
+	VALIDATOR_EXEC_CMD = os.path.join(DEFAULT_ROOT_DIR, VALIDATOR_EXEC)
+	return "(%s %s %s %s %s)" % (VALIDATOR_EXEC_CMD,
+		VALIDATOR_PARAMS, domainFile, probFile, planFile)
 
 #Limit Commands
 TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
@@ -247,12 +247,12 @@ TIME_CMD = "time -p"
 MEMLIMIT_CMD="ulimit -Sv 4000000" #4GB
 
 #Validation Parameters
-VALIDATOR_EXEC = "/mnt/exp/VAL/validate"
+VALIDATOR_EXEC = "VAL/validate"
 VALIDATOR_PARAMS = "-t 0.001 -v"
 
 #File Locations
-LOG_FOLDER="/mnt/exp/logs/"
-PROBLEM_SETS="/mnt/exp/problems/"
+LOG_FOLDER= "logs/"
+PROBLEM_SETS= "problems/"
 PLANS_FOLDER = "plans"
 OUTPUT_FOLDER = "output"
 
@@ -262,12 +262,27 @@ IGNORE_SET_LIST = ["archive", "archive2", "archive3", "constraints_def"]
 AIRPORT_PROBLEM = ["airport", "airport-tighten"]
 NO_GOODS_PROBLEM = ["mmcr-no-metric-no-goods", "mmcr-no-metric-no-goods-10Cargo"]
 
-PLANNERS_NEEDING_EXTRA_CONF = ["tplanS1T0", "tplanS1T1", "tplanS2T0", "tplanS2T1"]
+PLANNERS_NEEDING_EXTRA_CONF = [	"tplanS1T0", 
+								"tplanS1T1", 
+								"tplanS2T0", 
+								"tplanS2T1",
+								"tplanS3T0", 
+								"tplanS3T1",
+								"tplanS4T0", 
+								"tplanS4T1",
+								"tplanS5T0", 
+								"tplanS5T1"]
 CONF_FILE_DIR = "constraints_def"
 CONF_FILE_SUBDIR = {"tplanS1T0" : "1", 
 					"tplanS1T1" : "1", 
 					"tplanS2T0" : "2", 
-					"tplanS2T1" : "2"}
+					"tplanS2T1" : "2", 
+					"tplanS3T0" : "2", 
+					"tplanS3T1" : "2", 
+					"tplanS4T0" : "3", 
+					"tplanS4T1" : "3", 
+					"tplanS5T0" : "3", 
+					"tplanS5T1" : "3"}
 
 CONF_FILE_NAMES = {	"satellite" : "satellite.conf",
 					"pipesworld" : "pipesworld.conf",
@@ -318,27 +333,35 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		#"tplanS0T0" : tplanS0T0,
-		#"tplanS0T1" : tplanS0T1,
-		#"tplanS1T0" : tplanS1T0,
-		#"tplanS1T1" : tplanS1T1,
-		#"tplanS2T0" : tplanS2T0,
-		"tplanS2T1" : tplanS2T1
+		"tplanS0T0" : tplanS0T0,
+		"tplanS0T1" : tplanS0T1,
+		"tplanS1T0" : tplanS1T0,
+		"tplanS1T1" : tplanS1T1,
+		"tplanS2T0" : tplanS2T0,
+		"tplanS2T1" : tplanS2T1,
+		"tplanS3T0" : tplanS3T0,
+		"tplanS3T1" : tplanS3T1,
+		"tplanS4T0" : tplanS4T0,
+		"tplanS4T1" : tplanS4T1,
+		"tplanS5T0" : tplanS4T0,
+		"tplanS5T1" : tplanS4T1
 	}
 	#iterate through planners
 	for planner in planners:
 		#Get function to create planner command
 		f = planners[planner]
 		#iterate through problem sets
-		for root, dirs, files in os.walk(PROBLEM_SETS):
+		problemDir = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS)
+		
+		for root, dirs, files in os.walk(problemDir):
 			for subdir in dirs:
 				if subdir in IGNORE_SET_LIST:
 					continue
 				#Get full problem path
 				subdir_fullpath = os.path.join(root, subdir)
 				#Ger full path for plan and logs
-				plansdir_fullpath = os.path.join(LOG_FOLDER, planner, subdir, PLANS_FOLDER)
-				outputdir_fullpath = os.path.join(LOG_FOLDER, planner, subdir, OUTPUT_FOLDER)
+				plansdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, subdir, PLANS_FOLDER)
+				outputdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, subdir, OUTPUT_FOLDER)
 				#Create missing folders, if any
 				setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
 				
@@ -364,15 +387,15 @@ def getProblemQueue(iterations=1, start=0):
 						planner_command = ""
 						if (planner in PLANNERS_NEEDING_EXTRA_CONF):
 							confFileName = CONF_FILE_NAMES[subdir]
-							confFile = os.path.join(PROBLEM_SETS, CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
+							confFile = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS, 
+								CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
 							planner_command = f(domainFile, probFile, planFile, confFile)
 						else:
 							#Planner command
 							planner_command = f(domainFile, probFile, planFile)
 
 						#Validate command
-						validate_command = "(%s %s %s %s %s)" % (VALIDATOR_EXEC, \
-							VALIDATOR_PARAMS, domainFile, probFile, planFile)
+						validate_command = validate(domainFile, probFile, planFile)
 						#Log file
 						logFileName = "%s-%i.txt"%(prob, itr)
 						logFile = os.path.join(outputdir_fullpath, logFileName)
@@ -412,6 +435,15 @@ def main(args):
 
 	_id = getInstanceID()
 	printMessage("Started. My ID is %i"%_id)
+	
+	if len(args) > 1:
+		if os.path.isdir(args[1]):
+			global DEFAULT_ROOT_DIR
+			DEFAULT_ROOT_DIR = args[1]
+		else:
+			printMessage("Error: Invalid direcory specified as experimentation directory: %s"%args[1])
+
+	printMessage("Experimentation directory set to %s"%DEFAULT_ROOT_DIR) 
 
 	#Get problems ready for computation
 	q = getProblemQueue()
@@ -435,7 +467,7 @@ def main(args):
 	serversocket.bind((HOST, PORT))
 	paused = False
 	terminate = False
-	restrictWorkers = True
+	restrictWorkers = False
 	#Listen for workers and give them work
 	serversocket.listen(QUEUED_CONNECTIONS)
 	while True:
