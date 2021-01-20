@@ -32,7 +32,14 @@ COLIN_LIKE_PLANNERS = [	"Colin-TRH-Colin",
 						"tplanS1T0",
 						"tplanS1T1",
 						"tplanS2T0",
-						"tplanS2T1" ]
+						"tplanS2T1",
+						"tplanS3T0",
+						"tplanS3T1",
+						"tplanS4T0",
+						"tplanS4T1",
+						"tplanS5T0",
+						"tplanS5T1"
+						 ]
 LPG_PLANNERS = ["lpg-td"]
 FD_PLANNERS = ["fd_FF", "fd_blind"]
 METRICFF_PLANNERS = ["MetricFF"]

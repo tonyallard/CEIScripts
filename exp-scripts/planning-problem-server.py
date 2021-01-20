@@ -285,7 +285,9 @@ CONF_FILE_SUBDIR = {"tplanS1T0" : "1",
 					"tplanS5T1" : "3"}
 
 CONF_FILE_NAMES = {	"satellite" : "satellite.conf",
+					"satellite-tighten" : "satellite.conf",
 					"pipesworld" : "pipesworld.conf",
+					"pipesworld-tighten" : "pipesworld.conf",
 					"mmcr-nometric" : "mmcr.conf"}
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
@@ -323,7 +325,7 @@ def getProblemQueue(iterations=1, start=0):
 		#"lpg-td" : lpgtd,
 		#"Colin-TRH-Colin" : colinTRHcolin,
 		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		#"Popf-TRH-Popf" : popfTRHpopf
+		#"Popf-TRH-Popf" : popfTRHpopf,
 		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
@@ -333,18 +335,18 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		"tplanS0T0" : tplanS0T0,
-		"tplanS0T1" : tplanS0T1,
-		"tplanS1T0" : tplanS1T0,
-		"tplanS1T1" : tplanS1T1,
-		"tplanS2T0" : tplanS2T0,
-		"tplanS2T1" : tplanS2T1,
-		"tplanS3T0" : tplanS3T0,
+		#"tplanS0T0" : tplanS0T0, #All Ground Operators
+		#"tplanS0T1" : tplanS0T1,
+		#"tplanS1T0" : tplanS1T0, #Selective Ground Operators
+		#"tplanS1T1" : tplanS1T1,
+		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
+		#"tplanS2T1" : tplanS2T1,
+		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
 		"tplanS3T1" : tplanS3T1,
-		"tplanS4T0" : tplanS4T0,
-		"tplanS4T1" : tplanS4T1,
-		"tplanS5T0" : tplanS4T0,
-		"tplanS5T1" : tplanS4T1
+		#"tplanS4T0" : tplanS4T0, #Operator Effects
+		#"tplanS4T1" : tplanS4T1,
+		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		#"tplanS5T1" : tplanS5T1
 	}
 	#iterate through planners
 	for planner in planners:
