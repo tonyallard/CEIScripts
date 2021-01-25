@@ -8,10 +8,13 @@ import re
 TIMEOUT_DELIM = "timeout: the monitored command dumped core"
 LPG_TIMEOUT_DELIM = "Max time exceeded."
 MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
+SEGMENTATION_FAULT = "Segmentation fault (core dumped)"
+SEGMENTATION_FAULT_IN_SUB_CMD = "Command terminated by signal 11"
 EHC_SUCCESS = "EHC Success!!!!"
 BFS_SUCCESS = "BFS Success!!!!"
 COLIN_SUCCESS_DELIM = ";;;; Solution Found"
 UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
+UNSOLVABLE_TPLAN = "Could not find solution."
 INVALID_PLAN_DELIM = "Plan failed to execute"
 TERMINATE_FLAGS = [TIMEOUT_DELIM, MEMORY_ERROR_DELIM, EHC_SUCCESS, BFS_SUCCESS, COLIN_SUCCESS_DELIM, UNSOVLEABLE_DELIM, "Beginning the replay"]
 SEARCH_SUCCESS_DELIM = "g"
