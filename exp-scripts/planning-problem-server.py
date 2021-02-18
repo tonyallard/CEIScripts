@@ -341,12 +341,12 @@ def getProblemQueue(iterations=1, start=0):
 		#"tplanS1T1" : tplanS1T1,
 		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
 		#"tplanS2T1" : tplanS2T1,
-		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
-		"tplanS3T1" : tplanS3T1,
-		#"tplanS4T0" : tplanS4T0, #Operator Effects
-		#"tplanS4T1" : tplanS4T1,
-		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		#"tplanS5T1" : tplanS5T1
+		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
+		#"tplanS3T1" : tplanS3T1,
+		"tplanS4T0" : tplanS4T0, #Operator Effects
+		"tplanS4T1" : tplanS4T1,
+		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		"tplanS5T1" : tplanS5T1
 	}
 	#iterate through planners
 	for planner in planners:
@@ -427,7 +427,13 @@ def getNumberOfWorkersExecuting(currentAllocation):
 		if currentAllocation[_id][2] not in [WORKER_PAUSED, WORKER_TERMINATED]:
 			numExecutions += 1
 	return numExecutions
-
+	
+def workersTerminated(currentAllocation):
+	for _id in currentAllocation:
+		if not currentAllocation[_id][2] is WORKER_TERMINATED:
+			return False
+	return True
+	
 def shutdownSocket(aSocket):
 	aSocket.shutdown(socket.SHUT_RDWR)
 	aSocket.close()
@@ -554,6 +560,12 @@ def main(args):
 			printMessage("Relax worker restriction cmd recieved from machine %s with id %i" %(addr, 
 				message._id))
 			reply = getMessageString(_id, "Ack. Setting workers free...")
+		elif q.empty() and workersTerminated():
+			printMessage("Queue is empty and all Workers have terminated. Shutting Down")
+			conn.shutdown(socket.SHUT_RDWR)
+			conn.close()
+			shutdownSocket(serversocket)
+			break
 
 		#Send the reply
 		conn.sendall(reply)

@@ -1,13 +1,16 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 #Author: Tony Allard
 #Date: 06 April 2016
 #Description: Common methods for problem analysis
 
+import os
 import re
 
 TIMEOUT_DELIM = "timeout: the monitored command dumped core"
 LPG_TIMEOUT_DELIM = "Max time exceeded."
 MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
+MADAGASCAR_MEMORY_DELIM = "ERROR: Could not allocate more memory"
+MADAGASCAR_OWN_ALLOC_MEMORY_DELIM = "MpC: clausesets.c:69: ownalloc: Assertion `ptr' failed."
 SEGMENTATION_FAULT = "Segmentation fault (core dumped)"
 SEGMENTATION_FAULT_IN_SUB_CMD = "Command terminated by signal 11"
 EHC_SUCCESS = "EHC Success!!!!"
@@ -27,6 +30,8 @@ SEARCH_BEGIN_DELIM = "Initial heuristic = "
 BRANCH_STRING_START = "[0-9]: "
 NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
 RESORTING_TO_BFS = "Resorting to best-first search"
+COMMAND_DELIM = "===with Command \((.*)\)==="
+TIMEOUT_COMMAND = "timeout -s SIGXCPU 30m "
 
 VALIDATOR_PLAN_EXECUTE_SUCCESS = "Plan executed successfully - checking goal"
 VALIDATOR_PLAN_EXECUTE_FAILURE = "Plan failed to execute"
@@ -55,6 +60,36 @@ def filterBranchString(branch):
 	branch = branch.partition(RESORTING_TO_BFS)[0] #remove BFS Switch
 	branch = branch.partition("Beginning the replay")[0] #remove success
 	return branch
+	
+def getLogStructure(rootDir):
+	IGNORED_PROBLEMS = [ 
+						"driverlogshift" #Driverlog shift is too different a format
+						]
+
+	logStructure = {}
+	for planner in os.listdir(rootDir):
+		plannerDir = os.path.join(rootDir, planner)
+		
+		if (not os.path.isdir(plannerDir)):
+			continue
+		
+		logStructure[planner] = {}
+
+		for problem in os.listdir(plannerDir):
+			
+			if problem in IGNORED_PROBLEMS:
+				continue
+			logDir = os.path.join(plannerDir, problem, OUTPUT_DIR)
+			logStructure[planner][problem] = logDir
+	return logStructure
+
+def extractCommand(logFile):
+	result = re.search(COMMAND_DELIM, logFile[1])
+	return result.group(1)
+
+def extractPlannerCommand(logFile):
+	fullCmd = extractCommand(logFile)
+	return fullCmd.split(TIMEOUT_COMMAND,1)[1]
 
 def hasTimedOut(logFile):
 	for line in logFile:
@@ -96,6 +131,7 @@ def isProblemFile(filename):
 	if PDDL_FILE_EXT.lower() in filename[-len(PROBFILE_DELIM):].lower():
 		return True
 	return False
+	
 def isProblemLog(filename, file):
 	if re.search(LOG_FILE_EXT, filename, re.IGNORECASE) and \
 		LOG_FILE_START_SEQ in file[0][:3]:

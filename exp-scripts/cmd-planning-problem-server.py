@@ -175,3 +175,6 @@ while True:
 
 	elif cmd == 0: #Exit
 		sys.exit(0)
+		
+	else:
+		print "Error: %s is not a valid option"%cmd

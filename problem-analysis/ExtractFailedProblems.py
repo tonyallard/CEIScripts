@@ -10,20 +10,13 @@ import gzip
 import re
 import AnalysisCommon
 import ExtractSuccess
+import FindSegFaults
 
-segfault_check		= re.compile("%s|%s"%(	AnalysisCommon.SEGMENTATION_FAULT, \
-											AnalysisCommon.SEGMENTATION_FAULT_IN_SUB_CMD))
 timeout_check 		= re.compile(AnalysisCommon.TIMEOUT_DELIM)
-mem_check 			= re.compile("%s|%s"%(AnalysisCommon.MEMORY_ERROR_DELIM, \
-						AnalysisCommon.LPG_TIMEOUT_DELIM))
+
 unsolvable_check 	= re.compile("%s|%s"%(	AnalysisCommon.SEARCH_FAILURE_DELIM, \
 											AnalysisCommon.UNSOLVABLE_TPLAN))
 invalidPlan_check 	= re.compile(AnalysisCommon.INVALID_PLAN_DELIM)
-
-IGNORED_PROBLEMS = [ 
-	"driverlogshift" #Driverlog shift is too different a format
-]
-
 
 class PlannerStats():
 	
@@ -32,6 +25,7 @@ class PlannerStats():
 		
 		self.SUCCESS_COUNT = {}
 		self.FAILED_COUND = {}
+		self.SUCCESS_LIST = {}	
 		#SEG Faults
 		self.SEGMENTATION_FAULT_COUNT = {}
 		self.SEGMENTATION_FAULT_LIST = {}	
@@ -52,8 +46,11 @@ class PlannerStats():
 		self.FAILED_FOR_OTHER_REASONS_LIST = {}
 	
 	def initProblem (self, problem):
+		
 		self.SUCCESS_COUNT[problem] = 0
 		self.FAILED_COUND[problem] = 0
+		self.SUCCESS_LIST[problem] = []
+		
 		#SEG Faults
 		self.SEGMENTATION_FAULT_COUNT[problem] = 0
 		self.SEGMENTATION_FAULT_LIST[problem] = []	
@@ -106,7 +103,10 @@ class PlannerStats():
 		self.FAILED_FOR_OTHER_REASONS_COUNT[problem] += 1
 		
 	
-	
+	def addSuccessProblem(self, problem, filename):
+		self.problems.add(problem)
+		self.SUCCESS_LIST[problem].append(filename)
+		
 	def addSegFaultProblem(self, problem, filename):
 		self.problems.add(problem)
 		self.SEGMENTATION_FAULT_LIST[problem].append(filename)
@@ -130,21 +130,6 @@ class PlannerStats():
 	def addOtherFailProblem(self, problem, filename):
 		self.problems.add(problem)
 		self.FAILED_FOR_OTHER_REASONS_LIST[problem].append(filename)
-	
-def isSegFault(log):
-	for line in log:
-		#check problem for memory crash
-		if segfault_check.search(line) is not None:
-			return True
-	return False
-
-
-def isMemoryFail(log):
-	for line in log:
-		#check problem for memory crash
-		if mem_check.search(line) is not None:
-			return True
-	return False
 
 def isTimeOutFail(log):
 	for line in log:
@@ -167,24 +152,6 @@ def isInvalidPlan(log):
 			return True
 	return False
 
-def getLogStructure(rootDir):
-	logStructure = {}
-	for planner in os.listdir(rootDir):
-		plannerDir = os.path.join(rootDir, planner)
-		
-		if (not os.path.isdir(plannerDir)):
-			continue
-		
-		logStructure[planner] = {}
-
-		for problem in os.listdir(plannerDir):
-			
-			if problem in IGNORED_PROBLEMS:
-				continue
-			logDir = os.path.join(plannerDir, problem, AnalysisCommon.OUTPUT_DIR)
-			logStructure[planner][problem] = logDir
-	return logStructure
-	
 def processLogs(logStructure):
 
 	results = {}
@@ -197,7 +164,7 @@ def processLogs(logStructure):
 
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
-				with gzip.open(fullQualified, 'rb') as f:
+				with gzip.open(fullQualified, 'rt') as f:
 					try:
 						buffer = AnalysisCommon.bufferFile(f)
 					except IOError:
@@ -205,10 +172,11 @@ def processLogs(logStructure):
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
 				if ExtractSuccess.extractValidatorSuccess(buffer, planner, fullQualified):
+					results[planner].addSuccessProblem(problemDomain, filename)
 					results[planner].incrementSuccess(problemDomain)
 				else:
 					results[planner].incrementFailure(problemDomain)
-					if isSegFault(buffer):
+					if FindSegFaults.isSegFault(buffer):
 						results[planner].addSegFaultProblem(problemDomain, filename)
 						results[planner].incrementSegFault(problemDomain)
 					elif isMemoryFail(buffer):
@@ -239,7 +207,11 @@ def main(args):
 	parser.add_argument('-v',
 						'--verbose',
 						action='store_true',
-						help='verbosity of the output')
+						help='Show the logs that recorded failed')
+	parser.add_argument('-V',
+						'--Verbose',
+						action='store_true',
+						help='Show the logs that recorded successful plans')
 	args = parser.parse_args()
 	
 	if not os.path.isdir(args.path):
@@ -247,7 +219,7 @@ def main(args):
 		sys.exit(-1)
 
 
-	logStructure = getLogStructure(args.path)
+	logStructure = AnalysisCommon.getLogStructure(args.path)
 	results = processLogs(logStructure)
 	
 	#Print statistics
@@ -298,6 +270,12 @@ def main(args):
 					print "\n\t\t\tProblems failed for other reasons:"
 					for prob in plannerStat.FAILED_FOR_OTHER_REASONS_LIST[problem]:
 						print "\t\t\t\t%s"%prob
+			elif args.Verbose:
+				if plannerStat.SUCCESS_COUNT[problem] > 0:
+					print "\n\t\t\tProblems that recorded a successful plan:"
+					for prob in plannerStat.SUCCESS_LIST[problem]:
+						print "\t\t\t\t%s"%prob
+					
 
 	
 

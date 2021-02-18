@@ -11,13 +11,15 @@ import re
 import gzip
 import AnalysisCommon
 
-segfault_check		= re.compile("%s|%s"%(	AnalysisCommon.SEGMENTATION_FAULT, \
-											AnalysisCommon.SEGMENTATION_FAULT_IN_SUB_CMD))
+mem_check 			= re.compile("%s|%s|%s|%s"%(AnalysisCommon.MEMORY_ERROR_DELIM, \
+						AnalysisCommon.LPG_TIMEOUT_DELIM, \
+						AnalysisCommon.MADAGASCAR_MEMORY_DELIM, \
+						AnalysisCommon.MADAGASCAR_OWN_ALLOC_MEMORY_DELIM))
 
-def isSegFault(log):
+def isMemoryFail(log):
 	for line in log:
 		#check problem for memory crash
-		if segfault_check.search(line) is not None:
+		if mem_check.search(line) is not None:
 			return True
 	return False
 
@@ -48,9 +50,9 @@ def main(args):
 	for planner in sorted(logStructure):
 		print(planner)
 		for problemDomain in logStructure[planner]:
-			numSegs = 0
-			segPlans = []
-			segCmds = []
+			numFail = 0
+			failPlans = []
+			failCmds = []
 			logPath = logStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
@@ -61,20 +63,20 @@ def main(args):
 						continue
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
-				if isSegFault(buffer):
-					numSegs += 1
-					segPlans.append(filename)
-					segCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
+				if isMemoryFail(buffer):
+					numFail += 1
+					failPlans.append(filename)
+					failCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
 					
-			print("\t%s: %s"%(problemDomain, numSegs))
+			print("\t%s: %s"%(problemDomain, numFail))
 			if args.verbose:
 				i = 0
-				for prob in sorted(segPlans):
+				for prob in sorted(failPlans):
 					i+=1
 					print("\t\t%s: %s"%(i,prob))
 					
 			if args.commands:
-				for cmd in segCmds:
+				for cmd in failCmds:
 					print(cmd)
 
 #Run Main Function

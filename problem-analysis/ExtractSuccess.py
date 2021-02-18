@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 #Author: Tony Allard
 #Date: 07 October 2016
 #Description: A Python script for extracting whether or not a planner was successful.
@@ -38,13 +38,13 @@ def checkPlanExists(log, planner, filename):
 			return
 		elif (AnalysisCommon.VALIDATOR_PLAN_EXECUTE_FAILURE in line) or \
 			(AnalysisCommon.VALIDATOR_PLAN_GOAL_FAILURE in line):
-			print "The following file produced a plan, but it was invalid:" +\
-					"\n\t%s: %s"%(planner, filename)
+			print("The following file produced a plan, but it was invalid:" +\
+					"\n\t%s: %s"%(planner, filename))
 			return
 		elif (planner in AnalysisCommon.PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES) and \
 			(AnalysisCommon.VALIDATOR_NO_PLAN in line):
-			print "%s: %s did not produce a plan, but that maybe ok as it could "%(planner, filename) +\
-					"have exhausted CPU/memory. Investigate."
+			print("%s: %s did not produce a plan, but that maybe ok as it could "%(planner, filename) +\
+					"have exhausted CPU/memory. Investigate.")
 			return
 	raise RuntimeError("Error! No plan assessed for %s: %s"%(planner, filename))
 
@@ -55,7 +55,7 @@ def checkPlanExistsLPGTD(log, filename):
 			return
 		elif (AnalysisCommon.VALIDATOR_PLAN_EXECUTE_FAILURE in line) or \
 			(AnalysisCommon.VALIDATOR_PLAN_GOAL_FAILURE in line):
-			print "The following file produced a plan, but it was invalid:\n\t%s"%filename
+			print("The following file produced a plan, but it was invalid:\n\t%s"%filename)
 			return
 	raise RuntimeError("Error! No plan assessed for %s"%filename)
 
@@ -84,7 +84,7 @@ def main(args):
 	logStructure = getLogStructure(inputPath)
 
 	for planner in logStructure:
-		print planner
+		print(planner)
 		for problemDomain in logStructure[planner]:
 			logPath = logStructure[planner][problemDomain]
 
@@ -104,9 +104,9 @@ def main(args):
 					success += 1
 				else:
 					failure += 1
-			print "\t%s"%problemDomain
-			print "\t\tSuccess: %i"%success
-			print "\t\tFailure: %i"%failure
+			print("\t%s"%problemDomain)
+			print("\t\tSuccess: %i"%success)
+			print("\t\tFailure: %i"%failure)
 
 #Run Main Function
 if __name__ == "__main__":
