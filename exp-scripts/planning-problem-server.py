@@ -343,10 +343,10 @@ def getProblemQueue(iterations=1, start=0):
 		#"tplanS2T1" : tplanS2T1,
 		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
 		#"tplanS3T1" : tplanS3T1,
-		"tplanS4T0" : tplanS4T0, #Operator Effects
-		"tplanS4T1" : tplanS4T1,
-		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		"tplanS5T1" : tplanS5T1
+		#"tplanS4T0" : tplanS4T0, #Operator Effects
+		#"tplanS4T1" : tplanS4T1,
+		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		#"tplanS5T1" : tplanS5T1
 	}
 	#iterate through planners
 	for planner in planners:
@@ -410,16 +410,67 @@ def getProblemQueue(iterations=1, start=0):
 			break
 	return q
 
-def getCurrentAllocationString(currentAllocation):
+"""
+	CurrentAllocation is a dict that holds information about each worker.
+	Information for each worker is stored in another dict that is indexed by ints, where:
+	0 - is the IP address of the worker
+	1 - is the hostname of the worker
+	2 - is the name of the problem being solved or the status of the worker
+	3 - is the iteration of that problem being solved
+	4 - is the time that problem was started
+	5 - is the number of problems solved by that worker
+"""
+
+def registerWorker(currentAllocation, _id, ip, hostname):
+	if _id not in currentAllocation:
+		currentAllocation[_id][0] = ip
+		currentAllocation[_id][1] = hostname
+		currentAllocation[_id][5] = 0
+
+	currentAllocation[_id][2] = WORKER_PAUSED
+	currentAllocation[_id][3] = 0
+	currentAllocation[_id][4] = time.time()
+	
+def updateWorker(currentAllocation, _id, state):
+	currentAllocation[_id][2] = state
+	currentAllocation[_id][3] = 0
+	currentAllocation[_id][4] = time.time()
+	
+def updateWorker(currentAllocation, _id, problemName, itr):
+	currentAllocation[_id][2] = problemName
+	currentAllocation[_id][3] = itr
+	currentAllocation[_id][4] = time.time()
+	currentAllocation[_id][5] += 1
+
+def getCurrentAllocationString(currentAllocation, startTime, queueSize):
 	result = ""
+	numberProcessed = 0
 	for _id in currentAllocation:
 		duration = time.time() - currentAllocation[_id][4]
-		result += "%s [%s] (%i): %s (%i) [%s]\n"%(currentAllocation[_id][1],
+		numberProcessed += currentAllocation[_id][5]
+		seconds_per_problem = numberProcessed / duration
+		result += "%s [%s] (%i): %s (%i) [%s] {%s sec / prob}\n"%(currentAllocation[_id][1],
 			currentAllocation[_id][0], _id, 
 			currentAllocation[_id][2], currentAllocation[_id][3], 
-			str(datetime.timedelta(seconds=duration)))
+			str(datetime.timedelta(seconds=duration)),
+			str(datetime.timedelta(seconds=seconds_per_problem)))
+
+	result += "There is %i problems remaining to be processed.\n"%queueSize
+	result += "This is estimated to take %s to complete"%getEstimatedTimeRemaining(currentAllocation, startTime, queueSize)
 
 	return result
+	
+def getEstimatedTimeRemaining(currentAllocation, startTime, queueSize):
+	numberProcessed = 0
+	for _id in currentAllocation:
+		numberProcessed += currentAllocation[_id][5]
+	
+	if numberProcessed < 2 * len(currentAllocation):
+		return "Calculating..."
+	
+	time_remaining = (time.time() - startTime) / numberProcessed * queueSize
+	
+	return str(datetime.timedelta(seconds=time_remaining))
 
 def getNumberOfWorkersExecuting(currentAllocation):
 	numExecutions = 0
@@ -464,6 +515,7 @@ def main(args):
 	#3: Problem Name (iteration)
 	#4: Timestamp of last command
 	currentAllocation = {}
+	startTime = time.time()
 
 	#create an INET, STREAMing socket
 	serversocket = socket.socket(
@@ -497,24 +549,22 @@ def main(args):
 		elif message.message == PROBLEM_QUEUE_SIZE:
 			printMessage("Queue size request recieved from machine %s with id %i"%(addr, 
 				message._id))
-			reply = getMessageString(_id, "Ack. Queue size is %i"%q.qsize())
+			reply = getMessageString(_id, "Ack. Queue size is %i. Estimated time remaining is %s"%(q.qsize(), getEstimatedTimeRemaining(currentAllocation, startTime, q.size()))
 		elif message.message == REQUEST_PROBLEM:
 			#Pause the worker because it is done.
-			currentAllocation[message._id] = (addr[0], message.hostname, WORKER_PAUSED, 0, 
-				time.time())
+			registerWorker(currentAllocation, message._id, addr[0], message.hostname)
 			
 			if q.empty(): #Tell the workers to terminate if done
 				printMessage("Received request from machine %s with id %i, but queue is empty. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0,
-					time.time())
+				
+				updateWorker(currentAllocation, message._id, WORKER_TERMINATED)
 			elif terminate:
 				printMessage("Received request from machine %s with id %i, but have been instructed to terminate workers. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				currentAllocation[message._id] = (addr[0], message.hostname, WORKER_TERMINATED, 0,
-					time.time())
+				updateWorker(currentAllocation, message._id, WORKER_TERMINATED)
 			elif paused:
 				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
 							message._id))
@@ -528,13 +578,20 @@ def main(args):
 				printMessage("Processing %s, %s for iteration %i on machine %s with id %i"%(job.plannerName, job.problemName, 
 					job.itr, addr, message._id))
 				reply = getMessageString(_id, job)
-				currentAllocation[message._id] = (addr[0], message.hostname, job.problemName, job.itr,
-					time.time())
+				updateWorker(currentAllocation, message._id, job.problemName, job.itr)
+					
+			if q.empty() and workersTerminated(currentAllocation):
+				printMessage("Queue is empty and all Workers have terminated. Shutting Down.")
+				conn.sendall(reply)
+				conn.shutdown(socket.SHUT_RDWR)
+				conn.close()
+				shutdownSocket(serversocket)
+				break
 		elif message.message == CURRENT_ALLOCATION:
 			printMessage("Received request from machine %s with id %i for current allocation."%(addr, 
 				message._id))
 			reply = getMessageString(_id, 
-				getCurrentAllocationString(currentAllocation))
+				getCurrentAllocationString(currentAllocation, startTime, q.qsize()))
 		elif message.message == PAUSE_WORKERS:
 			paused = True
 			printMessage("Pause cmd recieved from machine %s with id %i" %(addr, 
@@ -560,12 +617,6 @@ def main(args):
 			printMessage("Relax worker restriction cmd recieved from machine %s with id %i" %(addr, 
 				message._id))
 			reply = getMessageString(_id, "Ack. Setting workers free...")
-		elif q.empty() and workersTerminated():
-			printMessage("Queue is empty and all Workers have terminated. Shutting Down")
-			conn.shutdown(socket.SHUT_RDWR)
-			conn.close()
-			shutdownSocket(serversocket)
-			break
 
 		#Send the reply
 		conn.sendall(reply)
