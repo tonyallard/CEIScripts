@@ -11,12 +11,10 @@ import re
 import AnalysisCommon
 import ExtractSuccess
 import FindSegFaults
-
-timeout_check 		= re.compile(AnalysisCommon.TIMEOUT_DELIM)
-
-unsolvable_check 	= re.compile("%s|%s"%(	AnalysisCommon.SEARCH_FAILURE_DELIM, \
-											AnalysisCommon.UNSOLVABLE_TPLAN))
-invalidPlan_check 	= re.compile(AnalysisCommon.INVALID_PLAN_DELIM)
+import FindMemFails
+import FindTimeouts
+import FindUnsolvables
+import FindInvalidPlan
 
 class PlannerStats():
 	
@@ -131,27 +129,6 @@ class PlannerStats():
 		self.problems.add(problem)
 		self.FAILED_FOR_OTHER_REASONS_LIST[problem].append(filename)
 
-def isTimeOutFail(log):
-	for line in log:
-		#check problem for timeout
-		if timeout_check.search(line) is not None:
-			return True
-	return False
-
-def isUnsolvable(log):
-	for line in log:
-		#check problem for timeout
-		if unsolvable_check.search(line) is not None:
-			return True
-	return False
-
-def isInvalidPlan(log):
-	for line in log:
-		#check problem for timeout
-		if invalidPlan_check.search(line) is not None:
-			return True
-	return False
-
 def processLogs(logStructure):
 
 	results = {}
@@ -179,16 +156,16 @@ def processLogs(logStructure):
 					if FindSegFaults.isSegFault(buffer):
 						results[planner].addSegFaultProblem(problemDomain, filename)
 						results[planner].incrementSegFault(problemDomain)
-					elif isMemoryFail(buffer):
+					elif FindMemFails.isMemoryFail(buffer):
 						results[planner].addMemFailProblem(problemDomain, filename)
 						results[planner].incrementMemoryFailure(problemDomain)
-					elif isTimeOutFail(buffer):
+					elif FindTimeouts.isTimeout(buffer):
 						results[planner].addTimeoutFailProblem(problemDomain, filename)
 						results[planner].incrementTimeoutFailure(problemDomain)
-					elif isUnsolvable(buffer):
+					elif FindUnsolvables.isUnsolvable(buffer):
 						results[planner].addUnsolvableFailProblem(problemDomain, filename)
 						results[planner].incrementUnsolvableFailure(problemDomain)
-					elif isInvalidPlan(buffer):
+					elif FindInvalidPlan.isInvalidPlan(buffer):
 						results[planner].addInvalidFailProblem(problemDomain, filename)
 						results[planner].incrementInvalidFailure(problemDomain)
 					else:

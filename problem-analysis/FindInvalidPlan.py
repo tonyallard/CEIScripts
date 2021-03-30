@@ -2,7 +2,7 @@
 #Author: Tony Allard
 #Date: 15 November 2017
 #Last Updated: 09 Feb 2021
-#Description: A Python script for extracting segmentation faults from log files
+#Description: A Python script for extracting invalid plans from log files
 
 import sys
 import os
@@ -11,13 +11,12 @@ import re
 import gzip
 import AnalysisCommon
 
-segfault_check		= re.compile("%s|%s"%(	AnalysisCommon.SEGMENTATION_FAULT, \
-											AnalysisCommon.SEGMENTATION_FAULT_IN_SUB_CMD))
+invalidPlan_check 	= re.compile(AnalysisCommon.VALIDATOR_FAILURE)
 
-def isSegFault(log):
+def isInvalidPlan(log):
 	for line in log:
-		#check problem for memory crash
-		if segfault_check.search(line) is not None:
+		#check problem for timeout
+		if invalidPlan_check.search(line) is not None:
 			return True
 	return False
 
@@ -44,14 +43,16 @@ def main(args):
 
 
 	logStructure = AnalysisCommon.getLogStructure(args.path)
+	planStructure = AnalysisCommon.getPlanStructure(args.path)
 
 	for planner in sorted(logStructure):
 		print(planner)
 		for problemDomain in logStructure[planner]:
-			numSegs = 0
-			segPlans = []
-			segCmds = []
+			numFail = 0
+			failPlans = []
+			failCmds = []
 			logPath = logStructure[planner][problemDomain]
+			planPath = planStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
 				with gzip.open(fullQualified, 'rt') as f:
@@ -61,20 +62,32 @@ def main(args):
 						continue
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
-				if isSegFault(buffer):
-					numSegs += 1
-					segPlans.append(filename)
-					segCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
 					
-			print("\t%s: %s"%(problemDomain, numSegs))
+				fullQualifiedPlan = os.path.join(planPath, 
+					filename.replace(
+						AnalysisCommon.COMPRESSED_LOG_FILE_EXT,
+						AnalysisCommon.COMPRESSED_PLAN_FILE_EXT))
+						
+				with gzip.open(fullQualifiedPlan, 'rt') as p:
+					try:
+						planBuffer = AnalysisCommon.bufferFile(p)
+					except IOError:
+						continue
+						
+				if isInvalidPlan(buffer) and planBuffer:
+					numFail += 1
+					failPlans.append(filename)
+					failCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
+					
+			print("\t%s: %s"%(problemDomain, numFail))
 			if args.verbose:
 				i = 0
-				for prob in sorted(segPlans):
+				for prob in sorted(failPlans):
 					i+=1
 					print("\t\t%s: %s"%(i,prob))
 					
 			if args.commands:
-				for cmd in sorted(segCmds):
+				for cmd in sorted(failCmds):
 					print(cmd)
 
 #Run Main Function

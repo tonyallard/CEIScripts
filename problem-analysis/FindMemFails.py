@@ -11,8 +11,7 @@ import re
 import gzip
 import AnalysisCommon
 
-mem_check 			= re.compile("%s|%s|%s|%s"%(AnalysisCommon.MEMORY_ERROR_DELIM, \
-						AnalysisCommon.LPG_TIMEOUT_DELIM, \
+mem_check 			= re.compile("%s|%s|%s"%(AnalysisCommon.MEMORY_ERROR_DELIM, \
 						AnalysisCommon.MADAGASCAR_MEMORY_DELIM, \
 						AnalysisCommon.MADAGASCAR_OWN_ALLOC_MEMORY_DELIM))
 
@@ -76,7 +75,7 @@ def main(args):
 					print("\t\t%s: %s"%(i,prob))
 					
 			if args.commands:
-				for cmd in failCmds:
+				for cmd in sorted(failCmds):
 					print(cmd)
 
 #Run Main Function

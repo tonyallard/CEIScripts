@@ -6,26 +6,35 @@
 import os
 import re
 
-TIMEOUT_DELIM = "timeout: the monitored command dumped core"
-LPG_TIMEOUT_DELIM = "Max time exceeded."
-MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
-MADAGASCAR_MEMORY_DELIM = "ERROR: Could not allocate more memory"
-MADAGASCAR_OWN_ALLOC_MEMORY_DELIM = "MpC: clausesets.c:69: ownalloc: Assertion `ptr' failed."
-SEGMENTATION_FAULT = "Segmentation fault (core dumped)"
-SEGMENTATION_FAULT_IN_SUB_CMD = "Command terminated by signal 11"
+#Success Messages
 EHC_SUCCESS = "EHC Success!!!!"
 BFS_SUCCESS = "BFS Success!!!!"
 COLIN_SUCCESS_DELIM = ";;;; Solution Found"
+SEARCH_SUCCESS_DELIM = "g"
+LPGTD_SUCCESS_DELIM = " solution found: "
+
+#Timeout Error Messages
+TIMEOUT_DELIM = "timeout: the monitored command dumped core"
+LPG_TIMEOUT_DELIM = "Max time exceeded."
+
+#Memory Error Messages
+MEMORY_ERROR_DELIM = "terminate called after throwing an instance of \'std::bad_alloc\'"
+MADAGASCAR_MEMORY_DELIM = "ERROR: Could not allocate more memory"
+MADAGASCAR_OWN_ALLOC_MEMORY_DELIM = "MpC: clausesets.c:69: ownalloc: Assertion `ptr' failed."
+
+#Segmentation Fault Messages
+SEGMENTATION_FAULT = "Segmentation fault (core dumped)"
+SEGMENTATION_FAULT_IN_SUB_CMD = "Command terminated by signal 11"
+
+#Solution unable to be found
 UNSOVLEABLE_DELIM = ";; Problem unsolvable!"
 UNSOLVABLE_TPLAN = "Could not find solution."
-INVALID_PLAN_DELIM = "Plan failed to execute"
-TERMINATE_FLAGS = [TIMEOUT_DELIM, MEMORY_ERROR_DELIM, EHC_SUCCESS, BFS_SUCCESS, COLIN_SUCCESS_DELIM, UNSOVLEABLE_DELIM, "Beginning the replay"]
-SEARCH_SUCCESS_DELIM = "g"
 SEARCH_FAILURE_DELIM = "Problem Unsolvable"
-PDDL_FILE_EXT = ".pddl"
-LOG_FILE_EXT = ".pddl.txt"
+
+TERMINATE_FLAGS = [TIMEOUT_DELIM, MEMORY_ERROR_DELIM, EHC_SUCCESS, BFS_SUCCESS, COLIN_SUCCESS_DELIM, UNSOVLEABLE_DELIM, "Beginning the replay"]
+
+#Log File Delimiters
 LOG_FILE_START_SEQ = "==="
-LPGTD_SUCCESS_DELIM = " solution found: "
 SEARCH_BEGIN_DELIM = "Initial heuristic = "
 BRANCH_STRING_START = "[0-9]: "
 NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
@@ -33,6 +42,7 @@ RESORTING_TO_BFS = "Resorting to best-first search"
 COMMAND_DELIM = "===with Command \((.*)\)==="
 TIMEOUT_COMMAND = "timeout -s SIGXCPU 30m "
 
+#VAL Messages
 VALIDATOR_PLAN_EXECUTE_SUCCESS = "Plan executed successfully - checking goal"
 VALIDATOR_PLAN_EXECUTE_FAILURE = "Plan failed to execute"
 VALIDATOR_PLAN_GOAL_FAILURE = "Goal not satisfied"
@@ -41,12 +51,17 @@ VALIDATOR_NO_PLAN = "Bad plan file!"
 VALIDATOR_SUCCESS = "Successful plans:"
 VALIDATOR_FAILURE = "Failed plans:"
 
-PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
-
+#File Extentions
 SERVER_LOG_DELIM = "explog-"
-
-LOG_FILE_EXT = ".txt.gz"
+PDDL_FILE_EXT = ".pddl"
+LOG_FILE_EXT = ".pddl.txt"
+COMPRESSED_LOG_FILE_EXT = ".txt.gz"
+COMPRESSED_PLAN_FILE_EXT = ".plan.gz"
 OUTPUT_DIR = "output"
+PLANS_DIR = "plans"
+
+#Other Constants
+PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
 
 def filterBranchString(branch):
 	branch = re.sub(NEW_HVAL_STRING, "", branch) #remove hvals
@@ -61,7 +76,8 @@ def filterBranchString(branch):
 	branch = branch.partition("Beginning the replay")[0] #remove success
 	return branch
 	
-def getLogStructure(rootDir):
+def getLogStructure(rootDir, logs=True):
+	
 	IGNORED_PROBLEMS = [ 
 						"driverlogshift" #Driverlog shift is too different a format
 						]
@@ -80,8 +96,13 @@ def getLogStructure(rootDir):
 			if problem in IGNORED_PROBLEMS:
 				continue
 			logDir = os.path.join(plannerDir, problem, OUTPUT_DIR)
+			if (not logs):
+				logDir = os.path.join(plannerDir, problem, PLANS_DIR)
 			logStructure[planner][problem] = logDir
 	return logStructure
+	
+def getPlanStructure(rootDir):
+	return getLogStructure(rootDir, False)
 
 def extractCommand(logFile):
 	result = re.search(COMMAND_DELIM, logFile[1])
@@ -133,7 +154,7 @@ def isProblemFile(filename):
 	return False
 	
 def isProblemLog(filename, file):
-	if re.search(LOG_FILE_EXT, filename, re.IGNORECASE) and \
+	if re.search(COMPRESSED_LOG_FILE_EXT, filename, re.IGNORECASE) and \
 		LOG_FILE_START_SEQ in file[0][:3]:
 		return True
 	return False

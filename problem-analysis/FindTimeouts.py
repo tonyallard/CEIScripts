@@ -11,13 +11,13 @@ import re
 import gzip
 import AnalysisCommon
 
-segfault_check		= re.compile("%s|%s"%(	AnalysisCommon.SEGMENTATION_FAULT, \
-											AnalysisCommon.SEGMENTATION_FAULT_IN_SUB_CMD))
+timeout_check = re.compile("%s|%s"%(	AnalysisCommon.TIMEOUT_DELIM, \
+										AnalysisCommon.LPG_TIMEOUT_DELIM))
 
-def isSegFault(log):
+def isTimeout(log):
 	for line in log:
 		#check problem for memory crash
-		if segfault_check.search(line) is not None:
+		if timeout_check.search(line) is not None:
 			return True
 	return False
 
@@ -48,9 +48,9 @@ def main(args):
 	for planner in sorted(logStructure):
 		print(planner)
 		for problemDomain in logStructure[planner]:
-			numSegs = 0
-			segPlans = []
-			segCmds = []
+			numFail = 0
+			failPlans = []
+			failCmds = []
 			logPath = logStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
@@ -61,20 +61,20 @@ def main(args):
 						continue
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
-				if isSegFault(buffer):
-					numSegs += 1
-					segPlans.append(filename)
-					segCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
+				if isTimeout(buffer):
+					numFail += 1
+					failPlans.append(filename)
+					failCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
 					
-			print("\t%s: %s"%(problemDomain, numSegs))
+			print("\t%s: %s"%(problemDomain, numFail))
 			if args.verbose:
 				i = 0
-				for prob in sorted(segPlans):
+				for prob in sorted(failPlans):
 					i+=1
 					print("\t\t%s: %s"%(i,prob))
 					
 			if args.commands:
-				for cmd in segCmds:
+				for cmd in sorted(failCmds):
 					print(cmd)
 
 #Run Main Function

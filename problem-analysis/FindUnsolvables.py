@@ -2,7 +2,7 @@
 #Author: Tony Allard
 #Date: 15 November 2017
 #Last Updated: 09 Feb 2021
-#Description: A Python script for extracting segmentation faults from log files
+#Description: A Python script for extracting unsolvable problems from log files
 
 import sys
 import os
@@ -11,15 +11,17 @@ import re
 import gzip
 import AnalysisCommon
 
-segfault_check		= re.compile("%s|%s"%(	AnalysisCommon.SEGMENTATION_FAULT, \
-											AnalysisCommon.SEGMENTATION_FAULT_IN_SUB_CMD))
+unsolvable_check 	= re.compile("%s|%s|%s"%(	AnalysisCommon.SEARCH_FAILURE_DELIM, \
+												AnalysisCommon.UNSOLVABLE_TPLAN, \
+												AnalysisCommon.UNSOVLEABLE_DELIM))
 
-def isSegFault(log):
+def isUnsolvable(log):
 	for line in log:
-		#check problem for memory crash
-		if segfault_check.search(line) is not None:
+		#check log for unsolvable
+		if unsolvable_check.search(line) is not None:
 			return True
 	return False
+
 
 def main(args):
 
@@ -48,9 +50,9 @@ def main(args):
 	for planner in sorted(logStructure):
 		print(planner)
 		for problemDomain in logStructure[planner]:
-			numSegs = 0
-			segPlans = []
-			segCmds = []
+			numFail = 0
+			failPlans = []
+			failCmds = []
 			logPath = logStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
@@ -61,20 +63,20 @@ def main(args):
 						continue
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
-				if isSegFault(buffer):
-					numSegs += 1
-					segPlans.append(filename)
-					segCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
+				if isUnsolvable(buffer):
+					numFail += 1
+					failPlans.append(filename)
+					failCmds.append(AnalysisCommon.extractPlannerCommand(buffer))
 					
-			print("\t%s: %s"%(problemDomain, numSegs))
+			print("\t%s: %s"%(problemDomain, numFail))
 			if args.verbose:
 				i = 0
-				for prob in sorted(segPlans):
+				for prob in sorted(failPlans):
 					i+=1
 					print("\t\t%s: %s"%(i,prob))
 					
 			if args.commands:
-				for cmd in sorted(segCmds):
+				for cmd in sorted(failCmds):
 					print(cmd)
 
 #Run Main Function
