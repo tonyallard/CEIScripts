@@ -179,6 +179,18 @@ def tplanS5T0(domainFile, probFile, planFile="", confFile=""):
 	
 def tplanS5T1(domainFile, probFile, planFile="", confFile=""):
 	return base_tplan(5, 1, domainFile, probFile, planFile, confFile)
+	
+def tplanS6T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(6, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS6T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(6, 1, domainFile, probFile, planFile, confFile)
+	
+def tplanS7T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(7, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS7T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(7, 1, domainFile, probFile, planFile, confFile)
 		
 def base_tplan(strategy, application, domainFile, probFile, planFile="", confFile=""):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/")
@@ -288,7 +300,8 @@ CONF_FILE_NAMES = {	"satellite" : "satellite.conf",
 					"satellite-tighten" : "satellite.conf",
 					"pipesworld" : "pipesworld.conf",
 					"pipesworld-tighten" : "pipesworld.conf",
-					"mmcr-nometric" : "mmcr.conf"}
+					"mmcr-nometric" : "mmcr.conf",
+					"crewplanning" : "crewplanning.conf"}
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
 PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
@@ -316,16 +329,16 @@ def getProblemQueue(iterations=1, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
-		#"Colin-RPG" : colinRPG,
+		"Colin-RPG" : colinRPG,
 		#"NoSD-Colin-RPG" : colinRPGNoSD,
-		#"POPF-RPG" : popf,
+		"POPF-RPG" : popf,
 		#"NoSD-POPF-RPG" : popfNoSD,
 		#"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
 		#"lpg-td" : lpgtd,
-		#"Colin-TRH-Colin" : colinTRHcolin,
+		"Colin-TRH-Colin" : colinTRHcolin,
 		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		#"Popf-TRH-Popf" : popfTRHpopf,
+		"Popf-TRH-Popf" : popfTRHpopf,
 		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
@@ -335,18 +348,22 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		#"tplanS0T0" : tplanS0T0, #All Ground Operators
-		#"tplanS0T1" : tplanS0T1,
-		#"tplanS1T0" : tplanS1T0, #Selective Ground Operators
-		#"tplanS1T1" : tplanS1T1,
-		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
-		#"tplanS2T1" : tplanS2T1,
-		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
-		#"tplanS3T1" : tplanS3T1,
-		#"tplanS4T0" : tplanS4T0, #Operator Effects
-		#"tplanS4T1" : tplanS4T1,
-		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		#"tplanS5T1" : tplanS5T1
+		"tplanS0T0" : tplanS0T0, #All Ground Operators
+		"tplanS0T1" : tplanS0T1,
+		"tplanS1T0" : tplanS1T0, #Selective Ground Operators
+		"tplanS1T1" : tplanS1T1,
+		"tplanS2T0" : tplanS2T0, #Operator Add Effects
+		"tplanS2T1" : tplanS2T1,
+		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
+		"tplanS3T1" : tplanS3T1,
+		"tplanS4T0" : tplanS4T0, #Operator Effects
+		"tplanS4T1" : tplanS4T1,
+		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		"tplanS5T1" : tplanS5T1,
+		"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
+		"tplanS6T1" : tplanS6T1,
+		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
+		"tplanS7T1" : tplanS7T1
 	}
 	#iterate through planners
 	for planner in planners:
@@ -388,6 +405,11 @@ def getProblemQueue(iterations=1, start=0):
 						
 						planner_command = ""
 						if (planner in PLANNERS_NEEDING_EXTRA_CONF):
+							if subdir not in CONF_FILE_NAMES:
+								printMessage("Could not schedule %s - %s for %s as there\
+ was no associated conf file."%(subdir, prob, planner))
+								break #Can't schedule up this problem
+
 							confFileName = CONF_FILE_NAMES[subdir]
 							confFile = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS, 
 								CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
@@ -423,6 +445,7 @@ def getProblemQueue(iterations=1, start=0):
 
 def registerWorker(currentAllocation, _id, ip, hostname):
 	if _id not in currentAllocation:
+		currentAllocation[_id] = {}
 		currentAllocation[_id][0] = ip
 		currentAllocation[_id][1] = hostname
 		currentAllocation[_id][5] = 0
@@ -431,32 +454,34 @@ def registerWorker(currentAllocation, _id, ip, hostname):
 	currentAllocation[_id][3] = 0
 	currentAllocation[_id][4] = time.time()
 	
-def updateWorker(currentAllocation, _id, state):
+def updateWorkerState(currentAllocation, _id, state):
 	currentAllocation[_id][2] = state
 	currentAllocation[_id][3] = 0
 	currentAllocation[_id][4] = time.time()
 	
-def updateWorker(currentAllocation, _id, problemName, itr):
-	currentAllocation[_id][2] = problemName
+def updateWorkerJob(currentAllocation, _id, plannerName, problemName, itr):
+	currentAllocation[_id][2] = "%s - %s"%(plannerName, problemName)
 	currentAllocation[_id][3] = itr
 	currentAllocation[_id][4] = time.time()
 	currentAllocation[_id][5] += 1
 
 def getCurrentAllocationString(currentAllocation, startTime, queueSize):
 	result = ""
-	numberProcessed = 0
+	workerTotalTime = time.time() - startTime
 	for _id in currentAllocation:
 		duration = time.time() - currentAllocation[_id][4]
-		numberProcessed += currentAllocation[_id][5]
-		seconds_per_problem = numberProcessed / duration
-		result += "%s [%s] (%i): %s (%i) [%s] {%s sec / prob}\n"%(currentAllocation[_id][1],
-			currentAllocation[_id][0], _id, 
-			currentAllocation[_id][2], currentAllocation[_id][3], 
-			str(datetime.timedelta(seconds=duration)),
-			str(datetime.timedelta(seconds=seconds_per_problem)))
+		numberProcessed = currentAllocation[_id][5]
+		seconds_per_problem = workerTotalTime / numberProcessed
+		result += "%i: %s [%s]: %s-%i [Current Prob Time : %s] {Average Speed: %s / Prob}\n"%(_id,
+			currentAllocation[_id][1], #Hostname
+			currentAllocation[_id][0], #IP
+			currentAllocation[_id][2], #Current State / planner-problem
+			currentAllocation[_id][3], #Problem iteration
+			str(datetime.timedelta(seconds=duration)), #Elapsed time for this problem
+			str(datetime.timedelta(seconds=seconds_per_problem))) #Average problem speed
 
-	result += "There is %i problems remaining to be processed.\n"%queueSize
-	result += "This is estimated to take %s to complete"%getEstimatedTimeRemaining(currentAllocation, startTime, queueSize)
+	result += "\nThere is %i problems remaining to be processed and %i currently processing.\n"%(queueSize, getNumberOfWorkersExecuting(currentAllocation))
+	result += "\tThis is estimated to take %s to complete\n"%getEstimatedTimeRemaining(currentAllocation, startTime, queueSize)
 
 	return result
 	
@@ -466,9 +491,9 @@ def getEstimatedTimeRemaining(currentAllocation, startTime, queueSize):
 		numberProcessed += currentAllocation[_id][5]
 	
 	if numberProcessed < 2 * len(currentAllocation):
-		return "Calculating..."
+		return "calculating..."
 	
-	time_remaining = (time.time() - startTime) / numberProcessed * queueSize
+	time_remaining = ((time.time() - startTime) / numberProcessed) * queueSize
 	
 	return str(datetime.timedelta(seconds=time_remaining))
 
@@ -549,7 +574,8 @@ def main(args):
 		elif message.message == PROBLEM_QUEUE_SIZE:
 			printMessage("Queue size request recieved from machine %s with id %i"%(addr, 
 				message._id))
-			reply = getMessageString(_id, "Ack. Queue size is %i. Estimated time remaining is %s"%(q.qsize(), getEstimatedTimeRemaining(currentAllocation, startTime, q.size()))
+			reply = getMessageString(_id, "Ack. Queue size is %i. Estimated time remaining is %s"%(q.qsize(), \
+					getEstimatedTimeRemaining(currentAllocation, startTime, q.qsize())))
 		elif message.message == REQUEST_PROBLEM:
 			#Pause the worker because it is done.
 			registerWorker(currentAllocation, message._id, addr[0], message.hostname)
@@ -559,12 +585,12 @@ def main(args):
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
 				
-				updateWorker(currentAllocation, message._id, WORKER_TERMINATED)
+				updateWorkerState(currentAllocation, message._id, WORKER_TERMINATED)
 			elif terminate:
 				printMessage("Received request from machine %s with id %i, but have been instructed to terminate workers. Instructing worker to terminate."%(addr, 
 							message._id))
 				reply = getMessageString(_id, EXIT_PROCESS)
-				updateWorker(currentAllocation, message._id, WORKER_TERMINATED)
+				updateWorkerState(currentAllocation, message._id, WORKER_TERMINATED)
 			elif paused:
 				printMessage("Received request from machine %s with id %i, but computation is currently Paused. Instructing worker to wait."%(addr, 
 							message._id))
@@ -578,10 +604,10 @@ def main(args):
 				printMessage("Processing %s, %s for iteration %i on machine %s with id %i"%(job.plannerName, job.problemName, 
 					job.itr, addr, message._id))
 				reply = getMessageString(_id, job)
-				updateWorker(currentAllocation, message._id, job.problemName, job.itr)
+				updateWorkerJob(currentAllocation, message._id, job.plannerName, job.problemName, job.itr)
 					
 			if q.empty() and workersTerminated(currentAllocation):
-				printMessage("Queue is empty and all Workers have terminated. Shutting Down.")
+				printMessage("Queue is empty and all workers have terminated. Shutting Down.")
 				conn.sendall(reply)
 				conn.shutdown(socket.SHUT_RDWR)
 				conn.close()
