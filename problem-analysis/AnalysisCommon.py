@@ -40,7 +40,7 @@ BRANCH_STRING_START = "[0-9]: "
 NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
 RESORTING_TO_BFS = "Resorting to best-first search"
 COMMAND_DELIM = "===with Command \((.*)\)==="
-TIMEOUT_COMMAND = "timeout -s SIGXCPU 30m "
+TIMEOUT_COMMAND = "timeout -s SIGXCPU [0-9]+m "
 
 #VAL Messages
 VALIDATOR_PLAN_EXECUTE_SUCCESS = "Plan executed successfully - checking goal"
@@ -110,7 +110,7 @@ def extractCommand(logFile):
 
 def extractPlannerCommand(logFile):
 	fullCmd = extractCommand(logFile)
-	return fullCmd.split(TIMEOUT_COMMAND,1)[1]
+	return re.split(TIMEOUT_COMMAND, fullCmd)[1]
 
 def hasTimedOut(logFile):
 	for line in logFile:
