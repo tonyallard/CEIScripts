@@ -41,6 +41,7 @@ NEW_HVAL_STRING = " \([0-9]+.[0-9]+ \| [0-9]+.[0-9]+\)"
 RESORTING_TO_BFS = "Resorting to best-first search"
 COMMAND_DELIM = "===with Command \((.*)\)==="
 TIMEOUT_COMMAND = "timeout -s SIGXCPU [0-9]+m "
+PLAN_VALIDATION = "Plan Validation"
 
 #VAL Messages
 VALIDATOR_PLAN_EXECUTE_SUCCESS = "Plan executed successfully - checking goal"
@@ -55,6 +56,7 @@ VALIDATOR_FAILURE = "Failed plans:"
 SERVER_LOG_DELIM = "explog-"
 PDDL_FILE_EXT = ".pddl"
 LOG_FILE_EXT = ".pddl.txt"
+PLAN_FILE_EXT = ".plan"
 COMPRESSED_LOG_FILE_EXT = ".txt.gz"
 COMPRESSED_PLAN_FILE_EXT = ".plan.gz"
 OUTPUT_DIR = "output"
@@ -112,6 +114,14 @@ def extractPlannerCommand(logFile):
 	fullCmd = extractCommand(logFile)
 	return re.split(TIMEOUT_COMMAND, fullCmd)[1]
 
+def getDomain(logFile):
+	plannerCmd = extractPlannerCommand(logFile)
+	return re.split(" ", plannerCmd)[1]
+	
+def getProblem(logFile):
+	plannerCmd = extractPlannerCommand(logFile)
+	return re.split(" ", plannerCmd)[2]
+
 def hasTimedOut(logFile):
 	for line in logFile:
 		if TIMEOUT_DELIM in line:
@@ -149,18 +159,18 @@ def bufferFile(file):
 	return fileBuffer
 
 def isProblemFile(filename):
-	if PDDL_FILE_EXT.lower() in filename[-len(PROBFILE_DELIM):].lower():
+	if filename.lower().endswith(PDDL_FILE_EXT.lower()):
 		return True
 	return False
 	
 def isProblemLog(filename, file):
-	if re.search(COMPRESSED_LOG_FILE_EXT, filename, re.IGNORECASE) and \
+	if filename.lower().endswith(COMPRESSED_LOG_FILE_EXT.lower()) and \
 		LOG_FILE_START_SEQ in file[0][:3]:
 		return True
 	return False
 
 def isServerLog(filename):
-	if SERVER_LOG_DELIM in filename:
+	if filename.lower().endswith(SERVER_LOG_DELIM.lower()):
 		return True
 	return False
 
