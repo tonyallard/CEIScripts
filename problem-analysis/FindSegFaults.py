@@ -8,7 +8,6 @@ import sys
 import os
 import argparse
 import re
-import gzip
 import AnalysisCommon
 
 segfault_check		= re.compile("%s|%s"%(	AnalysisCommon.SEGMENTATION_FAULT, \
@@ -23,7 +22,7 @@ def isSegFault(log):
 
 def main(args):
 
-	parser = argparse.ArgumentParser(description='Determine problems that failed from execution logs.')
+	parser = argparse.ArgumentParser(description='Determine planner / problem combinations that failed due to encountering a segmentation fault during execution.')
 	parser.add_argument('path',
 	                    metavar='/path/to/logs/',
 						type=str,
@@ -54,11 +53,10 @@ def main(args):
 			logPath = logStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
-				with gzip.open(fullQualified, 'rt') as f:
-					try:
-						buffer = AnalysisCommon.bufferFile(f)
-					except IOError:
-						continue
+				buffer = AnalysisCommon.bufferCompressedFile(fullQualified)
+				if buffer == -1:
+					continue
+					
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
 				if isSegFault(buffer):

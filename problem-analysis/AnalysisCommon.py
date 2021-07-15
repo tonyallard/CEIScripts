@@ -5,6 +5,7 @@
 
 import os
 import re
+import gzip
 
 #Success Messages
 EHC_SUCCESS = "EHC Success!!!!"
@@ -102,9 +103,20 @@ def getLogStructure(rootDir, logs=True):
 				logDir = os.path.join(plannerDir, problem, PLANS_DIR)
 			logStructure[planner][problem] = logDir
 	return logStructure
-	
+
 def getPlanStructure(rootDir):
 	return getLogStructure(rootDir, False)
+
+def bufferCompressedFile(filename):
+	with gzip.open(filename, 'rt') as f:
+		try:
+			buffer = bufferFile(f)
+		except IOError:
+			print("There was an error reading %s!"%filename)
+			buffer = -1
+		f.close()
+		
+	return buffer
 
 def extractCommand(logFile):
 	result = re.search(COMMAND_DELIM, logFile[1])

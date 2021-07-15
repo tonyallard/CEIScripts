@@ -6,8 +6,8 @@
 
 import sys
 import os
+import argparse
 import re
-import gzip
 import AnalysisCommon
 
 DEAD_END_COUNT_DELIM = "#; Search encountered"
@@ -51,28 +51,21 @@ def extractDeadEndsManually(logBuffer):
 			break	
 	return int(deadEnds)
 
-def getLogStructure(rootDir):
-	logStructure = {}
-	for planner in os.listdir(rootDir):
-		plannerDir = os.path.join(rootDir, planner)
-		
-		if (not os.path.isdir(plannerDir)):
-			continue
-		
-		logStructure[planner] = {}
-
-		for problem in os.listdir(plannerDir):
-			#Driverlog shift is too different a format
-			if problem == "driverlogshift":
-				continue
-			logDir = os.path.join(plannerDir, problem, AnalysisCommon.OUTPUT_DIR)
-			logStructure[planner][problem] = logDir
-	return logStructure
-
 def main(args):
-	inputPath = args[0]
+	parser = argparse.ArgumentParser(description='A Python script for extracting the number of dead ends encountered by the planner.')
+	parser.add_argument('path',
+	                    metavar='/path/to/planner/logs/',
+						type=str,
+		                help='the location of the logs for a specific planner')
+	args = parser.parse_args()
+		                
+	if not os.path.isdir(args.path):
+		print("Error: %s is not a valid directory"%args.path)
+		sys.exit(-1)
+	
+	inputPath = args.path
 
-	logStructure = getLogStructure(inputPath)
+	logStructure = AnalysisCommon.getLogStructure(inputPath)
 
 	for planner in logStructure:
 		print planner
@@ -87,12 +80,10 @@ def main(args):
 
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
-				try:
-					with gzip.open(fullQualified, 'rb') as f:
-					
-						buffer = AnalysisCommon.bufferFile(f)
-				except IOError:
+				buffer = AnalysisCommon.bufferCompressedFile(fullQualified)
+				if buffer == -1:
 					continue
+				
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
 				tmpDeadEnds = extractDeadEndsManually(buffer)

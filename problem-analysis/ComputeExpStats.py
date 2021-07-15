@@ -6,8 +6,8 @@
 
 import sys
 import os
+import argparse
 import re
-import gzip
 import AnalysisCommon
 from ProblemDomainStats import *
 
@@ -43,35 +43,14 @@ def getMeanAndVar(data):
 	variance = meanDiff / (samples - 1)
 	return mean, variance
 
-def getLogStructure(rootDir):
-	logStructure = {}
-	for planner in os.listdir(rootDir):
-		plannerDir = os.path.join(rootDir, planner)
-		
-		if (not os.path.isdir(plannerDir)):
-			continue
-		
-		logStructure[planner] = {}
-		for problem in os.listdir(plannerDir):
-			#Driverlog shift is too different a format
-			if problem == "driverlogshift":
-				continue
-			logDir = os.path.join(plannerDir, problem, AnalysisCommon.OUTPUT_DIR)
-			logStructure[planner][problem] = logDir
-					
-	return logStructure
-
 def processProblemDomainStatistics(planner, problemDomain, logPath):
 
 	probDomStats = ProblemDomainStats(planner, problemDomain)
 
 	for filename in os.listdir(logPath):
 		fullQualified = os.path.join(logPath, filename)
-		try:
-			with gzip.open(fullQualified, 'rb') as f:
-			
-				buffer = AnalysisCommon.bufferFile(f)
-		except IOError:
+		buffer = AnalysisCommon.bufferCompressedFile(fullQualified)
+		if buffer == -1:
 			continue
 
 		if not AnalysisCommon.isProblemLog(filename, buffer):
@@ -84,12 +63,31 @@ def processProblemDomainStatistics(planner, problemDomain, logPath):
 
 def main(args):
 
-	rootLogPath = args[0]
-	csvPath = "."
-	if len(args) > 1:
-		csvPath = args[1]
+	parser = argparse.ArgumentParser(description='A Python script for aggregating planner statistics from logs to CSV files. Note, it creates one CSV file per planner / problem domain pair')
+	parser.add_argument('path',
+	                    metavar='/path/to/logs/',
+						type=str,
+		                help='the location of the experimental logs')
+	parser.add_argument('csv_path',
+	                    metavar='/path/to/save/csv/',
+						nargs='?',
+						type=str,
+		                help='the location to save the csv files')
+	args = parser.parse_args()
 
-	logStructure = getLogStructure(rootLogPath)
+	if not os.path.isdir(args.path):
+		print("Error: %s is not a valid directory"%args.path)
+		sys.exit(-1)
+
+	rootLogPath = args.path
+	csvPath = "."
+	if args.csv_path:
+		if not os.path.isdir(args.path):
+			print("Error: %s is not a valid directory"%args.csv_path)
+			sys.exit(-1)
+		csvPath = args.csv_path
+
+	logStructure = AnalysisCommon.getLogStructure(rootLogPath)
 					
 	for planner in logStructure:
 		print planner

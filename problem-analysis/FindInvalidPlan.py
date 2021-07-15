@@ -8,7 +8,6 @@ import sys
 import os
 import argparse
 import re
-import gzip
 import AnalysisCommon
 
 invalidPlan_check 	= re.compile(AnalysisCommon.VALIDATOR_FAILURE)
@@ -22,7 +21,7 @@ def isInvalidPlan(log):
 
 def main(args):
 
-	parser = argparse.ArgumentParser(description='Determine problems that failed from execution logs.')
+	parser = argparse.ArgumentParser(description='Extracts the planners that found sequences of actions they thought to be plans, but were found to be invalid.')
 	parser.add_argument('path',
 	                    metavar='/path/to/logs/',
 						type=str,
@@ -55,11 +54,10 @@ def main(args):
 			planPath = planStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
-				with gzip.open(fullQualified, 'rt') as f:
-					try:
-						buffer = AnalysisCommon.bufferFile(f)
-					except IOError:
-						continue
+				buffer = AnalysisCommon.bufferCompressedFile(fullQualified)
+				if buffer == -1:
+					continue
+				
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
 					
@@ -68,12 +66,10 @@ def main(args):
 						AnalysisCommon.COMPRESSED_LOG_FILE_EXT,
 						AnalysisCommon.COMPRESSED_PLAN_FILE_EXT))
 						
-				with gzip.open(fullQualifiedPlan, 'rt') as p:
-					try:
-						planBuffer = AnalysisCommon.bufferFile(p)
-					except IOError:
-						continue
-						
+				planBuffer = AnalysisCommon.bufferCompressedFile(fullQualifiedPlan)
+				if planBuffer == -1:
+					continue
+							
 				if isInvalidPlan(buffer) and planBuffer:
 					numFail += 1
 					failPlans.append(filename)

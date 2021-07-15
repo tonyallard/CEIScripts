@@ -8,7 +8,6 @@ import sys
 import os
 import argparse
 import re
-import gzip
 import AnalysisCommon
 
 unsolvable_check 	= re.compile("%s|%s|%s"%(	AnalysisCommon.SEARCH_FAILURE_DELIM, \
@@ -56,11 +55,10 @@ def main(args):
 			logPath = logStructure[planner][problemDomain]
 			for filename in os.listdir(logPath):
 				fullQualified = os.path.join(logPath, filename)
-				with gzip.open(fullQualified, 'rt') as f:
-					try:
-						buffer = AnalysisCommon.bufferFile(f)
-					except IOError:
-						continue
+				buffer = AnalysisCommon.bufferCompressedFile(fullQualified)
+				if buffer == -1:
+					continue
+					
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue
 				if isUnsolvable(buffer):

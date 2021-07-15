@@ -6,7 +6,6 @@
 import os
 import sys
 import argparse
-import gzip
 import re
 import AnalysisCommon
 import ExtractSuccess
@@ -103,12 +102,10 @@ def processLogs(logStructure):
 			for filename in os.listdir(logPath):
 				problem = filename[0:filename.upper().find(FILE_SUFFIX)]
 				fullQualified = os.path.join(logPath, filename)
-				
-				with gzip.open(fullQualified, 'rt') as f:
-					try:
-						buffer = AnalysisCommon.bufferFile(f)
-					except IOError:
-						continue
+				buffer = AnalysisCommon.bufferCompressedFile(fullQualified)
+				if buffer == -1:
+					continue
+					
 				
 				if not AnalysisCommon.isProblemLog(filename, buffer):
 					continue

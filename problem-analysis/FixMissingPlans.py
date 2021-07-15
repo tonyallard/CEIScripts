@@ -117,17 +117,6 @@ def getLogStructure(path):
 				
 	return logStructure
 	
-def bufferCompressedFile(filename):
-	with gzip.open(filename, 'rt') as f:
-		try:
-			buffer = AnalysisCommon.bufferFile(f)
-		except IOError:
-			print("There was an error reading %s!"%filename)
-			buffer = -1
-		f.close()
-		
-	return buffer
-
 def writeBuffer2File(filename, buffer):
 	with open(filename, 'wt') as f_out:
 		for line in buffer:
@@ -193,7 +182,7 @@ def main(args):
 			fullQualifiedPlan_compressed = os.path.join(planPath, planFilename + '.gz')
 			
 			#Check if the current plan file is empty
-			planBuffer = bufferCompressedFile(fullQualifiedPlan_compressed)
+			planBuffer = AnalysisCommon.bufferCompressedFile(fullQualifiedPlan_compressed)
 			if planBuffer == -1:
 				continue #File Read Error
 
@@ -205,7 +194,7 @@ def main(args):
 					continue
 					
 			#Read in the current logfile to get the plan
-			logBuffer = bufferCompressedFile(fullQualifiedLog)
+			logBuffer = AnalysisCommon.bufferCompressedFile(fullQualifiedLog)
 			if logBuffer == -1:
 				continue #File read error
 			

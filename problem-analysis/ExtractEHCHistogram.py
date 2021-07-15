@@ -30,8 +30,7 @@ def main(args):
 	csvFile = open('ehc-data.csv', 'w')
 	csvFile.write("Depth, Count\n")
 	histogram = {}
-	#path = "/mnt/data/160404-Colin-TRH-logs/"
-	path = "/home/tony/Desktop/Colin-RPG-logs/"
+	path = "/mnt/data/160404-Colin-TRH-logs/"
 	avgDepth = 0
 	probCount = 0
 	for filename in os.listdir(path):
