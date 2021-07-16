@@ -136,7 +136,7 @@ def opticSLFRP(domainFile, probFile, planFile="", confFile=""):
 
 def lpgtd(domainFile, probFile, planFile, confFile=""):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/lpg-td/")
-	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/lpg-td/lpg-td-1.0.1")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/lpg-td/lpg-td")
 	PLANNER_PARAMS = "-n 1"
 
 	return "(cd %s && %s && %s %s %s -o %s -f %s -out %s %s)"%(PLANNER_LOC,
@@ -329,16 +329,16 @@ def getProblemQueue(iterations=1, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
-		"Colin-RPG" : colinRPG,
+		#"Colin-RPG" : colinRPG,
 		#"NoSD-Colin-RPG" : colinRPGNoSD,
-		"POPF-RPG" : popf,
+		#"POPF-RPG" : popf,
 		#"NoSD-POPF-RPG" : popfNoSD,
-		#"Optic-RPG" : optic,
+		"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
-		#"lpg-td" : lpgtd,
-		"Colin-TRH-Colin" : colinTRHcolin,
+		"lpg-td" : lpgtd,
+		#"Colin-TRH-Colin" : colinTRHcolin,
 		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		"Popf-TRH-Popf" : popfTRHpopf,
+		#"Popf-TRH-Popf" : popfTRHpopf,
 		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
@@ -348,22 +348,22 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		"tplanS0T0" : tplanS0T0, #All Ground Operators
-		"tplanS0T1" : tplanS0T1,
-		"tplanS1T0" : tplanS1T0, #Selective Ground Operators
-		"tplanS1T1" : tplanS1T1,
-		"tplanS2T0" : tplanS2T0, #Operator Add Effects
-		"tplanS2T1" : tplanS2T1,
-		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
-		"tplanS3T1" : tplanS3T1,
-		"tplanS4T0" : tplanS4T0, #Operator Effects
-		"tplanS4T1" : tplanS4T1,
-		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		"tplanS5T1" : tplanS5T1,
-		"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
-		"tplanS6T1" : tplanS6T1,
-		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
-		"tplanS7T1" : tplanS7T1
+		#"tplanS0T0" : tplanS0T0, #All Ground Operators
+		#"tplanS0T1" : tplanS0T1,
+		#"tplanS1T0" : tplanS1T0, #Selective Ground Operators
+		#"tplanS1T1" : tplanS1T1,
+		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
+		#"tplanS2T1" : tplanS2T1,
+		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
+		#"tplanS3T1" : tplanS3T1,
+		#"tplanS4T0" : tplanS4T0, #Operator Effects
+		#"tplanS4T1" : tplanS4T1,
+		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		#"tplanS5T1" : tplanS5T1,
+		#"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
+		#"tplanS6T1" : tplanS6T1,
+		#"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
+		#"tplanS7T1" : tplanS7T1
 	}
 	#iterate through planners
 	for planner in planners:

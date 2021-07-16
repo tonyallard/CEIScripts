@@ -24,7 +24,7 @@ COLIN_LIKE_PLANNERS = [	"Colin-TRH-Colin",
 						"Popf-TRH-Popf", 
 						"Colin-RPG", 
 						"POPF-RPG", 
-						"Optic", 
+						"Optic-RPG", 
 						"Optic-SLFRP", 
 						"tplan",
 						"tplanS0T0", 
@@ -55,7 +55,6 @@ PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
 COLIN_PLAN_SYNTAX = "\d+\.*\d*:[\s]+\([0-9A-Za-z\-\_ ]+\)[\s]+\[\d+\.*\d*\]"
 COLIN_PLAN_REGEX = re.compile(COLIN_PLAN_SYNTAX)
 
-
 FD_PLAN_SYNTAX = "[0-9A-Za-z\-\_ ]+ \(1\)"
 FD_PLAN_REGEX = re.compile(FD_PLAN_SYNTAX)
 
@@ -73,8 +72,6 @@ def getPlan(planner, logFile, planFile):
 	matches = []
 	if planner in COLIN_LIKE_PLANNERS:
 		matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
-	elif planner in LPG_PLANNERS:
-		matches = [LPGTD_PLAN_REGEX.findall(line) for line in logFile]
 	elif planner in FD_PLANNERS:
 		matches = [FD_PLAN_REGEX.findall(line) for line in logFile]
 		for m in matches:
@@ -94,7 +91,7 @@ def getPlan(planner, logFile, planFile):
 			m[:] = [x.replace(",", " ") for x in m]
 			m[:] = ["(" + x for x in m]			
 	else:
-		print "Error: Unmatched Planner. Plans not extracted or validated."		
+		print "Error: Unmatched Planner (%s). Plans not extracted or validated."%planner		
 	
 	for ms in matches:
 		for m in ms:
