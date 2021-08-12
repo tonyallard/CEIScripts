@@ -109,7 +109,7 @@ class ProblemDomainStats:
 			self.avgHTime += hTime
 
 		#States Evaluated
-		statesEval, hStates, totalStates = ExtractStatesEval.extractStatesEvaluated(logBuffer)
+		statesEval, hStates, totalStates = ExtractStatesEval.getStatesEvaluated(self.plannerName, logBuffer)
 		self.stats[problemName][self.STATES_EVAL_IDX][probNumber] = statesEval
 		self.stats[problemName][self.H_STATES_EVAL_IDX][probNumber] = hStates
 		if statesEval is not None:
@@ -118,7 +118,7 @@ class ProblemDomainStats:
 			self.avgHStates += hStates
 
 		#Colin States
-		colinStates = ExtractStatesEval.genericExtractStatesEvaluated(logBuffer)
+		colinStates = ExtractStatesEval.getColinLikeStatesEvaluated(logBuffer)
 		self.stats[problemName][self.COLIN_STATES_EVAIL][probNumber] = colinStates
 		if colinStates is not None:
 			self.avgColinStates += colinStates
