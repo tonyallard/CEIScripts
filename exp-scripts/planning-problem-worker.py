@@ -100,19 +100,22 @@ def getPlan(planner, logFile, planFile):
 
 def processProblem(job):
 	#Open files for logging
-	buffSize = 0
-	log = open(job.logFile, "a+", buffSize)
+	log = open(job.logFile, "a+")
 
 	#Setup experiment
 	reps=1
 	call_args = """['%s'], stdout=stdout, stderr=stderr"""%(job.plannerCommand)
-	#Run Experiment
+	
 	log.write("===%s: Processing %s on %s===\n"%(time.
 		strftime("%d %m %Y - %H:%M:%S"), job.problemName, socket.gethostname()))
 	log.write("===with Command %s===\n" %job.plannerCommand)
+	log.flush()
+	
+	#Run Experiment
 	t = Timer(stmt = """subprocess.call(%s, shell=True)"""%call_args, 
 		setup="""import subprocess; stdout=open(\"%s\", 'a'); stderr=stdout"""%job.logFile)
 	timeTaken = t.timeit(reps)
+	
 	#Write Time Taken to Log
 	log.write("\n\n===TIME TAKEN===\n")
 	log.write("%f seconds\n"%timeTaken)
@@ -120,7 +123,7 @@ def processProblem(job):
 
 	#Check for lpg-td as this writes its own plan
 	if job.plannerName not in PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES:
-		plan = open(job.planFile, "a", buffSize)
+		plan = open(job.planFile, "a")
 		getPlan(job.plannerName, log, plan)
 		plan.close()
 	else:
