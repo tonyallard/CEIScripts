@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 import socket
 import time
@@ -14,20 +14,20 @@ BUFFER_SIZE = 8192
 _id = getInstanceID()
 
 while True:
-	print "What would you like to do?"
-	print "\t 1: Query problem queue size"
-	print "\t 2: Pause Workers"
-	print "\t 3: Resume Workers"
-	print "\t 4: Restrict Workers to %i"%RESTRICTED_WORKER_NUMBER
-	print "\t 5: Unrestrict Workers"
-	print "\t 6: Request a problem"
-	print "\t 7: Request Current Allocation"
-	print "\t 8: Terminate server"
-	print "\t 9: Terminate workers"
-	print "\t 0: Exit"
+	print ("What would you like to do?")
+	print ("\t 1: Query problem queue size")
+	print ("\t 2: Pause Workers")
+	print ("\t 3: Resume Workers")
+	print ("\t 4: Restrict Workers to %i"%RESTRICTED_WORKER_NUMBER)
+	print ("\t 5: Unrestrict Workers")
+	print ("\t 6: Request a problem")
+	print ("\t 7: Request Current Allocation")
+	print ("\t 8: Terminate server")
+	print ("\t 9: Terminate workers")
+	print ("\t 0: Exit")
 
 	cmd = input("Your choice: ")
-	if cmd == 1: #Query problem queue size
+	if cmd == "1": #Query problem queue size
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -42,7 +42,7 @@ while True:
 		printMessage("Received: %s, from machine with id %i"%(reply.message, 
 			reply._id))
 		clientsocket.close()
-	elif cmd == 2: #Pause Workers
+	elif cmd == "2": #Pause Workers
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -57,7 +57,7 @@ while True:
 		printMessage("Received: %s, from machine with id %i"%(reply.message, 
 			reply._id))
 		clientsocket.close()
-	elif cmd == 3: #Resume Workers
+	elif cmd == "3": #Resume Workers
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -72,7 +72,7 @@ while True:
 		printMessage("Received: %s, from machine with id %i"%(reply.message, 
 			reply._id))
 		clientsocket.close()
-	elif cmd == 4: #Restrict Workers
+	elif cmd == "4": #Restrict Workers
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -89,7 +89,7 @@ while True:
 			reply._id))
 		clientsocket.close()
 
-	elif cmd == 5: #Unrestrict Workers
+	elif cmd == "5": #Unrestrict Workers
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -104,7 +104,7 @@ while True:
 		printMessage("Received: %s, from machine with id %i"%(reply.message, 
 			reply._id))
 		clientsocket.close()
-	elif cmd == 6: #Request a Problem
+	elif cmd == "6": #Request a Problem
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -121,7 +121,7 @@ while True:
 			job.itr, reply._id))
 		clientsocket.close()
 
-	elif cmd == 7: #Request a Current Allocation
+	elif cmd == "7": #Request a Current Allocation
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
 		   	socket.AF_INET, socket.SOCK_STREAM)
@@ -137,7 +137,7 @@ while True:
 		printMessage("Received Current Allocation from machine with id %i:\n%s"%(reply._id,
 			reply.message))
 
-	elif cmd == 8: #Terminate server
+	elif cmd == "8": #Terminate server
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
    		socket.AF_INET, socket.SOCK_STREAM)
@@ -156,7 +156,7 @@ while True:
 		time.sleep(1)
 		sys.exit(0)
 
-	elif cmd == 9: #Terminate Workers
+	elif cmd == "9": #Terminate Workers
 		#create an INET, STREAMing socket
 		clientsocket = socket.socket(
    		socket.AF_INET, socket.SOCK_STREAM)
@@ -173,8 +173,8 @@ while True:
 			reply._id))
 		clientsocket.close()
 
-	elif cmd == 0: #Exit
+	elif cmd == "0": #Exit
 		sys.exit(0)
 		
 	else:
-		print "Error: %s is not a valid option"%cmd
+		print ("Error: %s is not a valid option"%cmd)

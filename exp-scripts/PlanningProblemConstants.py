@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 import pickle
-from cStringIO import StringIO
+from io import BytesIO
 import random
 from time import gmtime, strftime
 
@@ -31,14 +31,14 @@ class Message:
 
 def getMessageString(_id, message, hostname = ""):
 	m = Message(_id, hostname, message)
-	stream = StringIO() 
+	stream = BytesIO()
 	pickle.dump(m, stream)
 	messageStr = stream.getvalue()
 	stream.close()
 	return messageStr
 
 def getMessage(data):
-	stream = StringIO(data)
+	stream = BytesIO(data)
 	m = pickle.Unpickler(stream)
 	message = m.load()
 	return message
@@ -51,9 +51,9 @@ def seed():
 
 def getInstanceID():
 	seed()
-	return random.randint(0, sys.maxint)
+	return random.randint(0, sys.maxsize)
 
 def printMessage(text):
-	print "%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", gmtime()),
-		text)
+	print("%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+		text))
 	sys.stdout.flush()

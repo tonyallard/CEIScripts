@@ -1,6 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 import os
+import argparse
 import socket
 from multiprocessing import Queue
 import time
@@ -333,9 +334,9 @@ def getProblemQueue(iterations=1, start=0):
 		#"NoSD-Colin-RPG" : colinRPGNoSD,
 		#"POPF-RPG" : popf,
 		#"NoSD-POPF-RPG" : popfNoSD,
-		"Optic-RPG" : optic,
+		#"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
-		"lpg-td" : lpgtd,
+		#"lpg-td" : lpgtd,
 		#"Colin-TRH-Colin" : colinTRHcolin,
 		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
 		#"Popf-TRH-Popf" : popfTRHpopf,
@@ -348,22 +349,22 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		#"tplanS0T0" : tplanS0T0, #All Ground Operators
-		#"tplanS0T1" : tplanS0T1,
-		#"tplanS1T0" : tplanS1T0, #Selective Ground Operators
-		#"tplanS1T1" : tplanS1T1,
-		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
-		#"tplanS2T1" : tplanS2T1,
-		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
-		#"tplanS3T1" : tplanS3T1,
-		#"tplanS4T0" : tplanS4T0, #Operator Effects
-		#"tplanS4T1" : tplanS4T1,
-		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		#"tplanS5T1" : tplanS5T1,
-		#"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
-		#"tplanS6T1" : tplanS6T1,
-		#"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
-		#"tplanS7T1" : tplanS7T1
+		"tplanS0T0" : tplanS0T0, #All Ground Operators
+		"tplanS0T1" : tplanS0T1,
+		"tplanS1T0" : tplanS1T0, #Selective Ground Operators
+		"tplanS1T1" : tplanS1T1,
+		"tplanS2T0" : tplanS2T0, #Operator Add Effects
+		"tplanS2T1" : tplanS2T1,
+		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
+		"tplanS3T1" : tplanS3T1,
+		"tplanS4T0" : tplanS4T0, #Operator Effects
+		"tplanS4T1" : tplanS4T1,
+		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		"tplanS5T1" : tplanS5T1,
+		"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
+		"tplanS6T1" : tplanS6T1,
+		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
+		"tplanS7T1" : tplanS7T1
 	}
 	#iterate through planners
 	for planner in planners:
@@ -470,27 +471,35 @@ def getCurrentAllocationString(currentAllocation, startTime, queueSize):
 	workerTotalTime = time.time() - startTime
 	for _id in currentAllocation:
 		duration = time.time() - currentAllocation[_id][4]
-		numberProcessed = currentAllocation[_id][5]
-		seconds_per_problem = workerTotalTime / numberProcessed
+		seconds_per_problem = getEstimatedWorkerTimePerProblem(currentAllocation, _id, duration)
 		result += "%i: %s [%s]: %s-%i [Current Prob Time : %s] {Average Speed: %s / Prob}\n"%(_id,
 			currentAllocation[_id][1], #Hostname
 			currentAllocation[_id][0], #IP
 			currentAllocation[_id][2], #Current State / planner-problem
 			currentAllocation[_id][3], #Problem iteration
 			str(datetime.timedelta(seconds=duration)), #Elapsed time for this problem
-			str(datetime.timedelta(seconds=seconds_per_problem))) #Average problem speed
+			seconds_per_problem) #Average problem speed
 
 	result += "\nThere is %i problems remaining to be processed and %i currently processing.\n"%(queueSize, getNumberOfWorkersExecuting(currentAllocation))
-	result += "\tThis is estimated to take %s to complete\n"%getEstimatedTimeRemaining(currentAllocation, startTime, queueSize)
+	result += "\tEstimated time remaining is %s\n"%getEstimatedTimeRemaining(currentAllocation, startTime, queueSize)
 
 	return result
+
+def getEstimatedWorkerTimePerProblem(currentAllocation, _id, workerTotalTime):
+	numberProcessed = currentAllocation[_id][5]
 	
+	if not numberProcessed:
+		return "calculating..."
+	
+	seconds_per_problem = workerTotalTime / numberProcessed
+	return str(datetime.timedelta(seconds=seconds_per_problem))
+
 def getEstimatedTimeRemaining(currentAllocation, startTime, queueSize):
 	numberProcessed = 0
 	for _id in currentAllocation:
 		numberProcessed += currentAllocation[_id][5]
 	
-	if numberProcessed < 2 * len(currentAllocation):
+	if not numberProcessed or numberProcessed < 2 * len(currentAllocation):
 		return "calculating..."
 	
 	time_remaining = ((time.time() - startTime) / numberProcessed) * queueSize
@@ -517,15 +526,22 @@ def shutdownSocket(aSocket):
 
 def main(args):
 
+	parser = argparse.ArgumentParser(description='A server daemon for managing distributed experimentation.')
+	parser.add_argument('path',
+	                    metavar='/path/to/experimentation/dir',
+						type=str,
+		                help='the root directory of the experiment (contains planners, problems, and a place for logs')
+	args = parser.parse_args()
+
 	_id = getInstanceID()
 	printMessage("Started. My ID is %i"%_id)
 	
-	if len(args) > 1:
-		if os.path.isdir(args[1]):
+	if (args.path):
+		if os.path.isdir(args.path):
 			global DEFAULT_ROOT_DIR
-			DEFAULT_ROOT_DIR = args[1]
+			DEFAULT_ROOT_DIR = args.path
 		else:
-			printMessage("Error: Invalid direcory specified as experimentation directory: %s"%args[1])
+			printMessage("Error: Invalid direcory specified as experimentation directory: %s"%args.path)
 
 	printMessage("Experimentation directory set to %s"%DEFAULT_ROOT_DIR) 
 
@@ -625,7 +641,7 @@ def main(args):
 			reply = getMessageString(_id, "Ack. Pausing...")
 		elif message.message == TERMINATE_WORKERS:
 			terminate = True
-			printMessage("Terminate cmd recieved from machine %s with id %i" %(addr, 
+			printMessage("Terminate workers cmd recieved from machine %s with id %i" %(addr, 
 				message._id))
 			reply = getMessageString(_id, "Ack. Terminating...")
 		elif message.message == RESUME_WORKERS:

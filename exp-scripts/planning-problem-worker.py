@@ -1,9 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import sys
 import os
 import socket
-import pickle
-from cStringIO import StringIO
+import argparse
+import ipaddress
 import time
 from timeit import Timer
 import re
@@ -17,7 +17,8 @@ from PlanningProblemConstants import *
 from PlanningProblemJob import *
 
 #Socket parameters
-PORT = 50005
+DEFAULT_IP = '127.0.0.1'
+DEFAULT_PORT = 50005
 BUFFER_SIZE = 8192
 
 COLIN_LIKE_PLANNERS = [	"Colin-TRH-Colin", 
@@ -91,7 +92,7 @@ def getPlan(planner, logFile, planFile):
 			m[:] = [x.replace(",", " ") for x in m]
 			m[:] = ["(" + x for x in m]			
 	else:
-		print "Error: Unmatched Planner (%s). Plans not extracted or validated."%planner		
+		print ("Error: Unmatched Planner (%s). Plans not extracted or validated."%planner)
 	
 	for ms in matches:
 		for m in ms:
@@ -161,13 +162,34 @@ def shutdownSocket(aSocket):
 	try:
 		aSocket.shutdown(socket.SHUT_RDWR)
 		aSocket.close()
-	except socket.error, e:
-		print "Error shutting down socket"
+	except OSError as e:
+		print ("Error shutting down socket: %s"%str(e))
 	time.sleep(1)
 
 def main(args):
 
-	HOST = args[1]
+	parser = argparse.ArgumentParser(description='A worker daemon for completing experiments obtained from a server.')
+	parser.add_argument('server',
+						metavar='127.0.0.1',
+						nargs="?",
+						default=DEFAULT_IP,
+						type=str,
+						help='The IP address of the experimentation server')
+	parser.add_argument('port',
+						metavar='50005',
+						nargs="?",
+						default=DEFAULT_PORT,
+						type=int,
+						help='The port that the experimentation server is listening on')
+	args = parser.parse_args()
+
+	server = args.server
+	port = args.port
+	try:
+		server = str(ipaddress.ip_address(server))
+	except Exception as e:
+		print('Error: %s.' %(str(e)))
+		sys.exit(1)
 
 	_id = getInstanceID()
 	printMessage("Started. My ID is %i"%_id)
@@ -179,7 +201,7 @@ def main(args):
 			socket.SO_REUSEADDR, 1)
 		#bind the socket to a public host,
 		# and a well-known port
-		clientsocket.connect((HOST, PORT))
+		clientsocket.connect((server, port))
 		hostname = socket.gethostname()
 		msg = getMessageString(_id, REQUEST_PROBLEM, hostname)
 		clientsocket.sendall(msg)

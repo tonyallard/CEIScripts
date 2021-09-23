@@ -20,7 +20,8 @@ else
 fi
 
 echo "Initialising experimentation server"
-python "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" > "$EXP_ROOT_DIR"/server.log 2>&1 &
+source "$EXP_ROOT_DIR"/exp-scripts/bin/activate
+"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" > "$EXP_ROOT_DIR"/server.log 2>&1 &
 
 echo "Waiting for server to start..."
 sleep 3
@@ -28,7 +29,8 @@ sleep 3
 echo "Initialising experimentation workers"
 for i in $(eval echo {1..$1})
 do
-	"$EXP_ROOT_DIR"/exp-scripts/planning-problem-worker.py 127.0.0.1 > "$EXP_ROOT_DIR"/worker-$i.log 2>&1 &
+	"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-worker.py > "$EXP_ROOT_DIR"/worker-$i.log 2>&1 &
 	echo "Worker $i created"
 done
+deactivate
 
