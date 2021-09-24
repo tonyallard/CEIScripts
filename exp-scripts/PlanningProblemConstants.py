@@ -3,7 +3,7 @@ import sys
 import pickle
 from io import BytesIO
 import random
-from time import gmtime, strftime
+from time import localtime, strftime
 
 EXIT_PROCESS = "EXIT_PROCESS"
 REQUEST_PROBLEM = "REQUEST_PROBLEM"
@@ -19,7 +19,7 @@ WORKER_EXECUTING_JOB = "WORKER_EXECUTING_JOB"
 WORKER_PAUSED = "WORKER_PAUSED"
 WORKER_TERMINATED = "WORKER_TERMINATED"
 
-RESTRICTED_WORKER_NUMBER = 5
+RESTRICTED_WORKER_NUMBER = 8
 
 SEEDED = False
 
@@ -54,6 +54,6 @@ def getInstanceID():
 	return random.randint(0, sys.maxsize)
 
 def printMessage(text):
-	print("%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+	print("%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", localtime()),
 		text))
 	sys.stdout.flush()
