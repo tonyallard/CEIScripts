@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 import sys
-from pddl_common import *
-from pddl_proposition import proposition
-from pddl_function import function
-from pddl_effects import *
-from pddl_goals import *
-from pddl_operators import durative_action
-from pddl_metric import *
-from pddl_domain import *
-from pddl_problem import *
-from pddl_file_writer import *
+from pddl.common import *
+from pddl.proposition import proposition
+from pddl.function import function
+from pddl.effects import *
+from pddl.goals import *
+from pddl.operators import durative_action
+from pddl.metric import *
+from pddl.domain import *
+from pddl.problem import *
+from pddl.pddl_file_writer import *
 
 
 def main(args):

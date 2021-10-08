@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from pddl_common import MINIMIZE
+from pddl.common import MINIMIZE
 
 class metric:
 	def __init__(self, function, optimization=MINIMIZE):

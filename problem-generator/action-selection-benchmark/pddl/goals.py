@@ -1,7 +1,7 @@
 #!/usr/bin/python3
-from pddl_common import POLARITY
-from pddl_common import POS
-from pddl_common import NEG
+from pddl.common import POLARITY
+from pddl.common import POS
+from pddl.common import NEG
 
 class goal:
 	pass

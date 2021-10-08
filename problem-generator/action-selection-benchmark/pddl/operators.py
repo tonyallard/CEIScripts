@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from pddl_symbols import operator_symbol
+from pddl.symbols import operator_symbol
 
 class operator:
 	def __init__(self, name, parameters, condition, effect):

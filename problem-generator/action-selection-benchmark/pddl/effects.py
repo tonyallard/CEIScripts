@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-from pddl_common import POS, AT
+from pddl.common import POS, AT
 
 class effect:
 	pass

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-from pddl_symbols import pred_symbol, var_symbol
-from pddl_common import ARG_VOCAB
+from pddl.symbols import pred_symbol, var_symbol
+from pddl.common import ARG_VOCAB
 
 class proposition:
 

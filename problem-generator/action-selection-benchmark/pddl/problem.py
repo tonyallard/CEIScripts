@@ -17,7 +17,7 @@ class problem:
 {t2})
 {t2}(:goal {goal}
 {t2})
-{t2}{metric}
+{metric}
 {t})""".format(
 	t="\t"*tab_depth,
 	t2="\t"*(tab_depth+1),
