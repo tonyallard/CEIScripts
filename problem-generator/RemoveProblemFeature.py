@@ -1,4 +1,7 @@
 #!/usr/bin/python
+'''
+A script for removing specific PDDL features from domain/problem files
+'''
 import sys
 import os
 import re

@@ -4,6 +4,11 @@ import os
 import re
 from shutil import copyfile
 
+'''
+Iteratively tightens TIL constrains in a problem file
+uses a list that describes the tightening schedule.
+'''
+
 TIL = "\(at [0-9]+\.?[0-9]* \([a-zA-Z0-9\-_ \(\)]+\)"
 MAYBE_DECIMAL_NUMBER = "[0-9]+\.?[0-9]*"
 PREDICATE = "\([a-zA-Z0-9\-_ ]+\)"
