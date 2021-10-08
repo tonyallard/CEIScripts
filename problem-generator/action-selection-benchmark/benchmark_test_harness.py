@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import sys
+import os
+import argparse
 from pddl.common import *
 from pddl.proposition import proposition
 from pddl.function import function
@@ -14,6 +16,35 @@ from pddl.pddl_file_writer import *
 
 def main(args):
 	
+	parser = argparse.ArgumentParser(description='Test harness to create a simple benchmark domain.')
+	parser.add_argument('domain',
+	                    metavar='/path/to/domain.pddl',
+						type=str,
+		                help='the location and name of domain file')
+	parser.add_argument('problem',
+	                    metavar='/path/to/problem.pddl',
+						type=str,
+		                help='the location and name of problem file')
+	
+	args = parser.parse_args()
+
+	domain_path = os.path.dirname(args.domain)
+	if (not os.path.isdir(domain_path)):
+		print("Error: {path} is not a valid path.".format(
+			path=domain_path
+		))
+		sys.exit(-1)
+
+	problem_path = os.path.dirname(args.problem)
+	if (not os.path.isdir(problem_path)):
+		print("Error: {path} is not a valid path.".format(
+			path=problem_path
+		))
+		sys.exit(-1)
+
+	domain_file = args.domain
+	problem_file = args.problem
+
 	dom = domain("n-choices")
 	reqs = [
 		REQUIREMENTS[0], #strips
@@ -88,10 +119,10 @@ def main(args):
 	dom.operators.extend(actions)
 
 	prob = problem("Prob1", dom.name)
-	prob.init = conj_effect(
+	prob.init = [
 		simple_effect(proposition("P")),
-		timed_initial_literal(5, simple_effect("Q", NEG))
-	)
+		timed_initial_literal(5, simple_effect(proposition("Q"), NEG))
+	]
 	prob.goal = conj_goal(
 		simple_goal(proposition("A")),
 		simple_goal(proposition("B")),
@@ -103,8 +134,8 @@ def main(args):
 	)
 
 	
-	write_domain(dom, sys.stdout)
-	write_problem(prob, sys.stdout)
+	write_domain(dom, open(domain_file, 'w'))
+	write_problem(prob, open(problem_file, 'w'))
 
 #Run Main Function
 if __name__ == "__main__":

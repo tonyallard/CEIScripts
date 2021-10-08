@@ -56,7 +56,7 @@ class timed_initial_literal(timed_effect):
 		return "{t}(AT {ts} {eff})".format(
 			t="\t"*tab_depth,
 			ts=self.time_step,
-			prop=self.effect.toString()
+			eff=self.effect.toString()
 		)
 
 	def __str__(self):

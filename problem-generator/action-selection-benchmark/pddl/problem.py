@@ -13,9 +13,11 @@ class problem:
 	def toString(self, tab_depth=0):
 		return """{t}(define (problem {name})
 {t2}(:domain {domain})
-{t2}(:objects {objs}
+{t2}(:objects \n{objs}
 {t2})
-{t2}(:goal {goal}
+{t2}(:init \n{init}
+{t2})
+{t2}(:goal \n{goal}
 {t2})
 {metric}
 {t})""".format(
@@ -24,6 +26,7 @@ class problem:
 	name = self.name,
 	domain = self.domain,
 	objs="".join(map(str, self.objects)),
+	init="\n".join(f.toString(tab_depth+2) for f in self.init),
 	goal=self.goal.toString(tab_depth+2),
 	metric=self.metric.toString(tab_depth+1) if self.metric is not None else ""
 	)

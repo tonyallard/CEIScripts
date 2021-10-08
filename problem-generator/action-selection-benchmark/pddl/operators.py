@@ -15,15 +15,15 @@ class action(operator):
 	def toString(self, tab_depth=0):
 		return """{t}(:action {name}
 {t2}:parameters ({params})
-{t2}:precondition {cond}
-{t2}:effect {effect}
+{t2}{precond}
+{t2}:effect \n{effect}
 {t})\n""".format(
 	t="\t"*tab_depth,
 	t2="\t"*tab_depth,
 	name=self.name,
 	params=" ".join(self.parameters),
-	cond=self.condition.toString(tab_depth+1),
-	effect=self.effect.toString(tab_depth+1)
+	precond=":precondition \n{cond}".format(cond=self.condition.toString(tab_depth+2)) if self.condition is not None else "",
+	effect=self.effect.toString(tab_depth+2)
 )
 
 	def __str__(self):
@@ -38,16 +38,16 @@ class durative_action(operator):
 		return """{t}(:durative-action {name}
 {t2}:parameters ({params})
 {t2}:duration (= ?duration {dur})
-{t2}:condition {cond}
-{t2}:effect {effect}
+{t2}{cond}
+{t2}:effect \n{effect}
 {t})""".format(
 	t="\t"*tab_depth,
 	t2="\t"*(tab_depth+1),
 	name=self.name,
 	params=" ".join(self.parameters),
 	dur=self.duration,
-	cond=self.condition.toString(tab_depth+1) if self.condition is not None else "()",
-	effect=self.effect.toString(tab_depth+1)
+	cond=":condition \n{cond}".format(cond=self.condition.toString(tab_depth+2)) if self.condition is not None else "",
+	effect=self.effect.toString(tab_depth+2)
 )
 
 	def __str__(self):
