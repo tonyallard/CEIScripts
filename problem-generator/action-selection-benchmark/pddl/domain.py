@@ -13,7 +13,9 @@ class domain:
 		return """{t}(define (domain {name})
 {t2}(:requirements {req})
 {t2}(:types {types})
-{t2}(:predicates {preds}\n{t2})
+{t2}(:predicates 
+{preds}
+{t2})
 {ops}
 {t})""".format(
 	t="\t"*tab_depth,
@@ -21,7 +23,7 @@ class domain:
 	name=self.name,
 	req=" ".join(self.requirements),
 	types="\n".join(map(str, self.types)),
-	preds="\n".join(p.toString(tab_depth+1) for p in self.predicates),
+	preds="\n".join(p.toString(tab_depth+2) for p in self.predicates),
 	ops="\n".join(o.toString(tab_depth+1) for o in self.operators)
 	)
 

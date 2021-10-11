@@ -120,7 +120,7 @@ def main(args):
 
 	prob = problem("Prob1", dom.name)
 	prob.init = [
-		simple_effect(proposition("P")),
+		simple_effect(proposition("Q")),
 		timed_initial_literal(5, simple_effect(proposition("Q"), NEG))
 	]
 	prob.goal = conj_goal(

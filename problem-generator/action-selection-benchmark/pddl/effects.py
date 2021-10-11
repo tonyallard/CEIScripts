@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 from pddl.common import POS, AT
+from pddl.common import POLARITY
+from pddl.common import POS
+from pddl.common import NEG
 
 class effect:
 	pass
@@ -12,9 +15,9 @@ class simple_effect(effect):
 	def toString(self, tab_depth=0):
 		return "{t}{n_h}{prop}{n_f}".format(
 			t="\t"*tab_depth,
-			n_h="(not " if self.polrty == True else "",
+			n_h="(not " if self.polrty == NEG else "",
 			prop = str(self.proposition),
-			n_f=")" if self.polrty == True else ""
+			n_f=")" if self.polrty == NEG else ""
 		)
 	
 	def __str__(self):

@@ -14,9 +14,9 @@ class simple_goal:
 	def toString(self, tab_depth=0):
 		return "{t}{n_h}{prop}{n_f}".format(
 			t="\t"*tab_depth,
-			n_h="(not " if self.polrty == True else "",
+			n_h="(not " if self.polrty == NEG else "",
 			prop = self.proposition.toString(),
-			n_f=")" if self.polrty == True else ""
+			n_f=")" if self.polrty == NEG else ""
 		)
 	
 	def __str__(self):
