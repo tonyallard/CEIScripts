@@ -14,7 +14,7 @@ from PlanningProblemJob import *
 
 #Socket Parameters
 HOST = "" #Don't restrict listener to any machine
-PORT = 50005
+DEFAULT_PORT = 50005
 BUFFER_SIZE = 8192
 QUEUED_CONNECTIONS = 50 #Have set this to the number of workers
 
@@ -193,17 +193,37 @@ def tplanS7T0(domainFile, probFile, planFile="", confFile=""):
 def tplanS7T1(domainFile, probFile, planFile="", confFile=""):
 	return base_tplan(7, 1, domainFile, probFile, planFile, confFile)
 		
-def base_tplan(strategy, application, domainFile, probFile, planFile="", confFile=""):
+def base_tplan(strategy, application, domainFile, probFile, planFile="", confFile="", subplanner=0):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/")
 	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/compile/planner/tplan")
-	PLANNER_PARAMS = "-v 5 -s %i -t %i"%(strategy, application)
+	PLANNER_PARAMS = "-v 5 -s %i -t %i -b %i"%(strategy, application, subplanner)
 	if len(confFile) > 0:
 		PLANNER_PARAMS = PLANNER_PARAMS + " -c"
-	
+
 	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS, confFile)
-			
+
+#tPlan with FD Subplanner
+def tplanS0T0_FD(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(0, 0, domainFile, probFile, planFile, confFile, 1)
+
+def tplanS0T1_FD(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(0, 1, domainFile, probFile, planFile, confFile, 1)
+
+def tplanS6T0_FD(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(6, 0, domainFile, probFile, planFile, confFile, 1)
+
+def tplanS6T1_FD(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(6, 1, domainFile, probFile, planFile, confFile, 1)
+
+def tplanS7T0_FD(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(7, 0, domainFile, probFile, planFile, confFile, 1)
+
+def tplanS7T1_FD(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(7, 1, domainFile, probFile, planFile, confFile, 1)
+
+
 def metricff(domainFile, probFile, planFile=""):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Metric-FF-v2.1")
 	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Metric-FF-v2.1/ff")
@@ -349,22 +369,29 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		"tplanS0T0" : tplanS0T0, #All Ground Operators
-		"tplanS0T1" : tplanS0T1,
-		"tplanS1T0" : tplanS1T0, #Selective Ground Operators
-		"tplanS1T1" : tplanS1T1,
-		"tplanS2T0" : tplanS2T0, #Operator Add Effects
-		"tplanS2T1" : tplanS2T1,
-		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
-		"tplanS3T1" : tplanS3T1,
-		"tplanS4T0" : tplanS4T0, #Operator Effects
-		"tplanS4T1" : tplanS4T1,
-		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		"tplanS5T1" : tplanS5T1,
-		"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
-		"tplanS6T1" : tplanS6T1,
-		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
-		"tplanS7T1" : tplanS7T1
+		#"tplanS0T0" : tplanS0T0, #All Ground Operators
+		#"tplanS0T1" : tplanS0T1,
+		#"tplanS1T0" : tplanS1T0, #Selective Ground Operators
+		#"tplanS1T1" : tplanS1T1,
+		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
+		#"tplanS2T1" : tplanS2T1,
+		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
+		#"tplanS3T1" : tplanS3T1,
+		#"tplanS4T0" : tplanS4T0, #Operator Effects
+		#"tplanS4T1" : tplanS4T1,
+		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		#"tplanS5T1" : tplanS5T1,
+		#"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
+		#"tplanS6T1" : tplanS6T1,
+		#"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
+		#"tplanS7T1" : tplanS7T1,
+		#tplan with FD Subplanner
+		"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
+		"tplanS0T1_FD" : tplanS0T1_FD,
+		"tplanS6T0_FD" : tplanS6T0_FD, #End-Snap Action Ground Operator Effects
+		"tplanS6T1_FD" : tplanS6T1_FD,
+		"tplanS7T0_FD" : tplanS7T0_FD, #Start-Snap Action Ground Operator Effects
+		"tplanS7T1_FD" : tplanS7T1_FD
 	}
 	#iterate through planners
 	for planner in planners:
@@ -531,11 +558,21 @@ def main(args):
 	                    metavar='/path/to/experimentation/dir',
 						type=str,
 		                help='the root directory of the experiment (contains planners, problems, and a place for logs')
+	parser.add_argument('port',
+						metavar='50005',
+						nargs="?",
+						default=DEFAULT_PORT,
+						type=int,
+						help='The port that the experimentation server is listening on')
+	
 	args = parser.parse_args()
 
 	_id = getInstanceID()
 	printMessage("Started. My ID is %i"%_id)
 	
+	host = HOST
+	port = DEFAULT_PORT
+
 	if (args.path):
 		if os.path.isdir(args.path):
 			global DEFAULT_ROOT_DIR
@@ -565,10 +602,10 @@ def main(args):
 		socket.SO_REUSEADDR, 1)
 	#bind the socket to a public host,
 	# and a well-known port
-	serversocket.bind((HOST, PORT))
+	serversocket.bind((host, port))
 	paused = False
 	terminate = False
-	restrictWorkers = False
+	restrictWorkers = True
 	#Listen for workers and give them work
 	serversocket.listen(QUEUED_CONNECTIONS)
 	while True:
