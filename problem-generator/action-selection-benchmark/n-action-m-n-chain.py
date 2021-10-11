@@ -32,19 +32,20 @@ def create_time_window_TIL(goal_pred, time_window):
 		time_window, 
 		simple_effect(goal_pred, NEG))
 
-def create_setup_action(action_name, condition_proposition, effect_proposition, duration, namer):
+def create_setup_action(action_name, condition_proposition, effect_propositions, duration, namer):
+	timed_effects = []
+	for prop in effect_propositions:
+		timed_effects.append(timed_effect(AT_END, prop))
+	
 	return durative_action(
 		namer.get_name(action_name),
 		[],
 		duration,
 		conj_goal(timed_goal(AT_START, condition_proposition)) if condition_proposition is not None else None,
-		timed_effect(
-			AT_END,
-			simple_effect(effect_proposition)
-		)
+		conj_effect(*timed_effects)
 	)
 
-def create_goal_achieving_action(action_name, conditions, goal_pred, duration, namer):
+def create_goal_achieving_action(action_name, conditions, goal_pred, duration, namer):	
 	return durative_action(
 		namer.get_name(action_name),
 		[],
@@ -56,49 +57,78 @@ def create_goal_achieving_action(action_name, conditions, goal_pred, duration, n
 		)
 	)
 
-def create_n_actions(action_name, num_actions, condition_proposition, effect_proposition, duration_mean, duration_variance, namer):
+def create_n_actions(action_name, num_actions, condition_proposition, effect_proposition, duration_mean, duration_variance, all_action_goals, namer):
 	actions = []
+	propositions = []
+	goals = []
 	for x in range(0, num_actions):
+		action_name = "{name}-{num}".format(
+			name=action_name,
+			num=str(x)
+		)
+
+		effects = []
+		effects.append(effect_proposition)
+		if all_action_goals:
+			action_goal = proposition("{n}-prop".format(
+				n = action_name
+			))
+			propositions.append(action_goal)
+			effects.append(action_goal)
+			goals.append(action_goal)
+
 		act = create_setup_action(
-			"{name}-{num}".format(
-				name=action_name,
-				num=str(x)
-			),
+			action_name,
 			condition_proposition,
-			effect_proposition,
+			effects,
 			round(random.uniform(duration_mean-duration_variance, duration_mean+duration_variance), 2),
 			namer
 		)
 		actions.append(act)
-	return actions
+	return actions, propositions, goals
 
-def create_chain(chain_num, chain_len, num_actions, time_window, namer):
+def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goals, namer):
 	
 	#add a bit more to keep some planners happy
 	#colin like planners fail when actions fit exactly inside the time window
 	action_duration = round(time_window / (chain_len + 0.2), 2)
 	actions = []
 	propositions = []
+	goals = []
 	#Create chain of actions
 	previous_support_prop = None
 	for x in range(0, chain_len-1):
+		action_name = "setup-action-{cl}-{cn}".format(
+				cl = x,
+				cn = chain_num
+			)
+		
 		support_precond_pred = proposition("P-{cl}-{cn}".format(
 			cl = x,
 			cn = chain_num
 		))
 		propositions.append(support_precond_pred)
-		setup_action = create_setup_action("setup-action-{cl}-{cn}".format(
-				cl = x,
-				cn = chain_num
-			), 
+
+		effects = []
+		effects.append(support_precond_pred)
+		if (all_action_goals):
+			action_goal = proposition("{n}-prop".format(
+				n = action_name
+			))
+			propositions.append(action_goal)
+			effects.append(action_goal)
+			goals.append(action_goal)
+
+		setup_action = create_setup_action(
+			action_name,
 			previous_support_prop,
-			support_precond_pred, 
+			effects, 
 			action_duration, 
 			namer)
 		actions.append(setup_action)
 
 		#create n-trick actions to throw planners off
-		n_actions = create_n_actions("rand-actions-{cl}-{cn}".format(
+		n_actions, n_act_props, n_act_goals = create_n_actions("rand-actions-{cl}-{cn}".format(
 				cl = x,
 				cn = chain_num
 			),
@@ -107,8 +137,11 @@ def create_chain(chain_num, chain_len, num_actions, time_window, namer):
 			support_precond_pred,
 			action_duration+1.1,
 			1,
+			all_action_goals,
 			namer)
 		actions.extend(n_actions)
+		propositions.extend(n_act_props)
+		goals.extend(n_act_goals)
 
 		#update state for next cycle
 		previous_support_prop = support_precond_pred
@@ -117,12 +150,13 @@ def create_chain(chain_num, chain_len, num_actions, time_window, namer):
 		cn = chain_num
 	))
 	propositions.append(goal)
-	
+	goals.append(goal)
+
 	goal_action_timed_pred = proposition("T-{cn}".format(
 		cn = chain_num
 	))
 	propositions.append(goal_action_timed_pred)
-		
+			
 	#Create final action to achieve goal
 	goal_action = create_goal_achieving_action(
 		"goal-action-{cn}".format(
@@ -143,7 +177,7 @@ def create_chain(chain_num, chain_len, num_actions, time_window, namer):
 		namer)
 	actions.append(goal_action)
 	
-	return actions, propositions, goal_action_timed_pred, goal	
+	return actions, propositions, goal_action_timed_pred, goals
 
 def main(args):
 	
@@ -184,6 +218,11 @@ def main(args):
 						nargs="?",
 						default=5,
 		                help='the duration of the time window (this affects the duration of actions')
+	parser.add_argument('--all-action-goals',
+						'-g',
+						action='store_true',
+						default=False,
+		                help='Whether all actions must be achieved in the goal state')
 	parser.add_argument('--readable',
 						action='store_true',
 						default=False,
@@ -214,6 +253,7 @@ def main(args):
 	num_actions = args.num_actions
 	chain_length = args.chain_length
 	num_chains = args.num_chains
+	all_action_goals = args.all_action_goals
 
 	dom = domain("action-{n}-choices".format(
 		n = num_actions
@@ -237,7 +277,15 @@ def main(args):
 	#Create the chains here
 	goals = []
 	for chain_num in range(0, num_chains):
-		action_chain, propositions, goal_pred, goal = create_chain(chain_num, chain_length, num_actions, time_window, namer)
+		
+		action_chain, propositions, goal_pred, chain_goals = create_chain(
+			chain_num, 
+			chain_length, 
+			num_actions, 
+			time_window, 
+			all_action_goals, 
+			namer)
+
 		#Add actions and propositions to domain
 		dom.operators.extend(action_chain)
 		dom.predicates.extend(propositions)
@@ -249,7 +297,8 @@ def main(args):
 		prob.init.append(time_window_start)
 		prob.init.append(time_window_end)
 		#add goal to goal list for later
-		goals.append(simple_goal(goal))
+		for goal in chain_goals:
+			goals.append(simple_goal(goal))
 	
 	#add goal list to problem
 	prob.goal = conj_goal(*goals)
