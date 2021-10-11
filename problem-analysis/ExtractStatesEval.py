@@ -18,6 +18,8 @@ HEURISTIC_STATE_DELIM = "#; Heuristic States Evaluated: "
 STATE_DELIM = "#; States evaluated: "
 INITIAL_STATE_STATES_EVAL = "#; Initial State - heuristic states evaluated:"
 TPLAN_STATE_DELIM = r"[0-9]+ \| [0-9\-]+ [0-9\:]+\: \[info\][\s]+Sub\-problem iteration [0-9]+"
+#000013 | 2021-06-04 14:59:03: [info]	27 conflicted constraints found.
+TPLAN_HSTATE_DELIM = r"[0-9]+ \| [0-9\-]+ [0-9\:]+\: \[info\][\s]+([0-9]+) conflicted constraints found."
 
 COLIN_LIKE_STATES = [
 	"Colin-RPG", 
@@ -113,10 +115,14 @@ def getColinLikeStatesEvaluated(logBuffer):
 
 def getTPlanStatesEvaluated(logfile):
 	statesEval = 0
+	hStatesEval = 0
 	for line in logfile:
 		if re.match(TPLAN_STATE_DELIM, line):
 			statesEval += 1
-	return statesEval
+		hStatesMatch = re.match(TPLAN_HSTATE_DELIM, line)
+		if hStatesMatch:
+			hStatesEval += int(hStatesMatch.group(1))
+	return statesEval, hStatesEval, hStatesEval + statesEval
 
 def getStatesEvaluated(planner, logfile):
 	if planner in COLIN_LIKE_STATES:
@@ -125,8 +131,7 @@ def getStatesEvaluated(planner, logfile):
 	elif planner in TRH_LIKE_STATES:
 		return getTRHStatesEvaluated(logfile)
 	elif planner in TPLAN_LIKE_STATES:
-		states = getTPlanStatesEvaluated(logfile)
-		return states, 0, states #Currently we do not detect heuristic states
+		return getTPlanStatesEvaluated(logfile) #Note heuristic states is the total length of no-goods
 	else:
 		raise RuntimeError("Error! Unrecognised planner: %s"%planner)
 
