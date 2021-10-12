@@ -32,54 +32,44 @@ def create_time_window_TIL(goal_pred, time_window):
 		time_window, 
 		simple_effect(goal_pred, NEG))
 
-def create_setup_action(action_name, condition_proposition, effect_propositions, duration, namer):
-	timed_effects = []
-	for prop in effect_propositions:
-		timed_effects.append(timed_effect(AT_END, prop))
-	
+def create_condition(time_spec, pred):
+	if pred is None:
+		return None
+	else:
+		return conj_goal(timed_goal(time_spec, pred))
+
+def create_action(action_name, condition, effects, duration, namer):
+		
 	return durative_action(
 		namer.get_name(action_name),
 		[],
 		duration,
-		conj_goal(timed_goal(AT_START, condition_proposition)) if condition_proposition is not None else None,
-		conj_effect(*timed_effects)
+		condition,
+		conj_effect(*effects)
 	)
 
-def create_goal_achieving_action(action_name, conditions, goal_pred, duration, namer):	
-	return durative_action(
-		namer.get_name(action_name),
-		[],
-		duration,
-		conditions,
-		timed_effect(
-			AT_END,
-			simple_effect(goal_pred)
-		)
-	)
-
-def create_n_actions(action_name, num_actions, condition_proposition, effect_proposition, duration_mean, duration_variance, all_action_goals, namer):
+def create_n_similar_actions(orig_name, num_actions, condition, effect, duration_mean, duration_variance, all_action_goals, namer):
 	actions = []
 	propositions = []
 	goals = []
 	for x in range(0, num_actions):
 		action_name = "{name}-{num}".format(
-			name=action_name,
+			name=orig_name,
 			num=str(x)
 		)
 
-		effects = []
-		effects.append(effect_proposition)
+		effects = [effect]
 		if all_action_goals:
 			action_goal = proposition("{n}-prop".format(
 				n = action_name
 			))
 			propositions.append(action_goal)
-			effects.append(action_goal)
+			effects.append(timed_effect(AT_END, action_goal))
 			goals.append(action_goal)
 
-		act = create_setup_action(
+		act = create_action(
 			action_name,
-			condition_proposition,
+			condition,
 			effects,
 			round(random.uniform(duration_mean-duration_variance, duration_mean+duration_variance), 2),
 			namer
@@ -99,44 +89,45 @@ def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goal
 	previous_support_prop = None
 	for x in range(0, chain_len-1):
 		action_name = "setup-action-{cl}-{cn}".format(
-				cl = x,
-				cn = chain_num
-			)
+			cl = x,
+			cn = chain_num
+		)
 		
 		support_precond_pred = proposition("P-{cl}-{cn}".format(
 			cl = x,
 			cn = chain_num
 		))
 		propositions.append(support_precond_pred)
-
-		effects = []
-		effects.append(support_precond_pred)
+		next_action_support_effect = timed_effect(AT_END, support_precond_pred)
+		effects = [next_action_support_effect]
+		condition = create_condition(AT_START, previous_support_prop)
 		if (all_action_goals):
 			action_goal = proposition("{n}-prop".format(
 				n = action_name
 			))
 			propositions.append(action_goal)
-			effects.append(action_goal)
+			effects.append(timed_effect(AT_END, action_goal))
 			goals.append(action_goal)
 
-		setup_action = create_setup_action(
+		setup_action = create_action(
 			action_name,
-			previous_support_prop,
+			condition,
 			effects, 
 			action_duration, 
 			namer)
 		actions.append(setup_action)
 
 		#create n-trick actions to throw planners off
-		n_actions, n_act_props, n_act_goals = create_n_actions("rand-actions-{cl}-{cn}".format(
+		n_actions, n_act_props, n_act_goals = create_n_similar_actions(
+			"rand-actions-{cl}-{cn}".format(
 				cl = x,
 				cn = chain_num
 			),
 			num_actions, 
-			previous_support_prop,
-			support_precond_pred,
-			action_duration+1.1,
-			1,
+			condition,
+			next_action_support_effect,
+			action_duration+1.2,
+			0.5,
 			all_action_goals,
 			namer)
 		actions.extend(n_actions)
@@ -158,21 +149,19 @@ def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goal
 	propositions.append(goal_action_timed_pred)
 			
 	#Create final action to achieve goal
-	goal_action = create_goal_achieving_action(
+	goal_action = create_action(
 		"goal-action-{cn}".format(
 			cn = chain_num
 		), 
-		conj_goal(
-			timed_goal(
-				AT_START,
-				simple_goal(previous_support_prop)
-			),
-			timed_goal(
-				AT_END,
-				simple_goal(goal_action_timed_pred)
-			)
+		conj_goal(timed_goal(
+			AT_START,
+			simple_goal(previous_support_prop)
 		),
-		goal, 
+		timed_goal(
+			AT_END,
+			simple_goal(goal_action_timed_pred)
+		)),
+		[timed_goal(AT_END, goal)], 
 		action_duration,
 		namer)
 	actions.append(goal_action)
