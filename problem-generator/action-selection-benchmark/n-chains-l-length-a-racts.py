@@ -77,7 +77,7 @@ def create_n_similar_actions(orig_name, num_actions, condition, effect, duration
 		actions.append(act)
 	return actions, propositions, goals
 
-def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goals, namer):
+def create_chain(time_window, chain_num, chain_len, num_rand_actions, all_action_goals, namer):
 	
 	#add a bit more to keep some planners happy
 	#colin like planners fail when actions fit exactly inside the time window
@@ -85,8 +85,13 @@ def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goal
 	actions = []
 	propositions = []
 	goals = []
+
+	chain_init_prop = proposition("P-Init-{cn}".format(
+		cn = chain_num
+	))
+	propositions.append(chain_init_prop)
 	#Create chain of actions
-	previous_support_prop = None
+	previous_support_prop = chain_init_prop
 	for x in range(0, chain_len-1):
 		action_name = "setup-action-{cl}-{cn}".format(
 			cl = x,
@@ -123,7 +128,7 @@ def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goal
 				cl = x,
 				cn = chain_num
 			),
-			num_actions, 
+			num_rand_actions, 
 			condition,
 			next_action_support_effect,
 			action_duration+1.2,
@@ -166,7 +171,71 @@ def create_chain(chain_num, chain_len, num_actions, time_window, all_action_goal
 		namer)
 	actions.append(goal_action)
 	
-	return actions, propositions, goal_action_timed_pred, goals
+	return actions, propositions, goal_action_timed_pred, goals, chain_init_prop
+
+def create_problem_instance(domain_file, problem_file, time_window, num_chains, chain_length, num_rand_actions, all_action_goals, namer):
+
+	dom = domain("action-{cn}-chains-{cl}-length-{ra}-racts{acg}".format(
+		cn = num_chains,
+		cl = chain_length,
+		ra = num_rand_actions,
+		acg = "" if not all_action_goals else "-aag"
+	))
+
+	reqs = [
+		REQUIREMENTS[0], #strips
+		REQUIREMENTS[1], #equality
+		REQUIREMENTS[2], #typing
+		REQUIREMENTS[4], #durative-actions
+		REQUIREMENTS[5], #TILs
+	]
+
+	dom.requirements.extend(reqs)
+
+	prob = problem("{n}-problem".format(
+		n=dom.name), dom)
+	
+	prob.metric = metric(
+		function("total-time")
+	)
+
+	#Create the chains here
+	goals = []
+	for chain_num in range(0, num_chains):
+		
+		action_chain, propositions, goal_pred, chain_goals, chain_init = create_chain(
+			time_window, 
+			chain_num, 
+			chain_length, 
+			num_rand_actions, 
+			all_action_goals, 
+			namer)
+
+		#Add actions and propositions to domain
+		dom.operators.extend(action_chain)
+		dom.predicates.extend(propositions)
+		#Add initial state and goals to problem
+
+		#Create the time window for goal action
+		time_window_start = simple_effect(goal_pred)
+		time_window_end = create_time_window_TIL(goal_pred, time_window)
+		prob.init.append(time_window_start)
+		prob.init.append(time_window_end)
+		prob.init.append(simple_effect(chain_init))
+		#add goal to goal list for later
+		for goal in chain_goals:
+			goals.append(simple_goal(goal))
+	
+	#add goal list to problem
+	prob.goal = conj_goal(*goals)
+
+	#Randomise the domain operators to avoid 
+	#fortunate selections by ordering in domain file
+	random.shuffle(dom.operators)
+	
+	#Write domain and problem to disk
+	write_domain(dom, open(domain_file, 'w'))
+	write_problem(prob, open(problem_file, 'w'))
 
 def main(args):
 	
@@ -193,13 +262,13 @@ def main(args):
 						nargs="?",
 						default=1,
 		                help='the number of action chains in the domain')
-	parser.add_argument('--num-actions',
+	parser.add_argument('--num-rand-actions',
 						'-a',
 	                    metavar='1',
 						type=int,
 						nargs="?",
 						default=0,
-		                help='the number of extra actions to make per action per action chain')
+		                help='the number of extra random actions to make per action per action chain')
 	parser.add_argument('--duration',
 						'-d',
 	                    metavar='5',
@@ -235,70 +304,26 @@ def main(args):
 
 	namer = element_namer(args.readable)
 
+
 	domain_file = args.domain
 	problem_file = args.problem
 
 	time_window = args.duration
-	num_actions = args.num_actions
+	num_rand_actions = args.num_rand_actions
 	chain_length = args.chain_length
 	num_chains = args.num_chains
 	all_action_goals = args.all_action_goals
 
-	dom = domain("action-{n}-choices".format(
-		n = num_actions
-	))
-	reqs = [
-		REQUIREMENTS[0], #strips
-		REQUIREMENTS[1], #equality
-		REQUIREMENTS[2], #typing
-		REQUIREMENTS[4], #durative-actions
-		REQUIREMENTS[5], #TILs
-	]
-
-	dom.requirements.extend(reqs)
-
-	prob = problem("action-{n}-choices-problem".format(n=num_actions), dom.name)
-	
-	prob.metric = metric(
-		function("total-time")
+	create_problem_instance(
+		domain_file,
+		problem_file,
+		time_window,
+		num_chains,
+		chain_length,
+		num_rand_actions,
+		all_action_goals,
+		namer
 	)
-
-	#Create the chains here
-	goals = []
-	for chain_num in range(0, num_chains):
-		
-		action_chain, propositions, goal_pred, chain_goals = create_chain(
-			chain_num, 
-			chain_length, 
-			num_actions, 
-			time_window, 
-			all_action_goals, 
-			namer)
-
-		#Add actions and propositions to domain
-		dom.operators.extend(action_chain)
-		dom.predicates.extend(propositions)
-		#Add initial state and goals to problem
-
-		#Create the time window for goal action
-		time_window_start = simple_effect(goal_pred)
-		time_window_end = create_time_window_TIL(goal_pred, time_window)
-		prob.init.append(time_window_start)
-		prob.init.append(time_window_end)
-		#add goal to goal list for later
-		for goal in chain_goals:
-			goals.append(simple_goal(goal))
-	
-	#add goal list to problem
-	prob.goal = conj_goal(*goals)
-
-	#Randomise the domain operators to avoid 
-	#fortunate selections by ordering in domain file
-	random.shuffle(dom.operators)
-	
-	#Write domain and problem to disk
-	write_domain(dom, open(domain_file, 'w'))
-	write_problem(prob, open(problem_file, 'w'))
 
 #Run Main Function
 if __name__ == "__main__":
