@@ -292,8 +292,14 @@ OUTPUT_FOLDER = "output"
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive", "archive2", "archive3", "constraints_def"]
-AIRPORT_PROBLEM = ["airport", "airport-tighten"]
-NO_GOODS_PROBLEM = ["mmcr-no-metric-no-goods", "mmcr-no-metric-no-goods-10Cargo"]
+
+PROBLEM_HAS_UNIQUE_DOMAIN = {
+	"airport" : getAirportDomain, 
+	"airport-tighten" : getAirportDomain,
+	"mmcr-no-metric-no-goods" : getMMCRNoGoodsDomain,
+	"mmcr-no-metric-no-goods-10Cargo" : getMMCRNoGoodsDomain,
+	"action-chains-benchmark" : getActionChainsBenchmarkDomain
+}
 
 PLANNERS_NEEDING_EXTRA_CONF = [	"tplanS1T0", 
 								"tplanS1T1", 
@@ -327,6 +333,15 @@ CONF_FILE_NAMES = {	"satellite" : "satellite.conf",
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
 PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
 
+def getAirportDomain(problemFileName):
+	return problemFileName[0:4] + DOMAIN_FILE
+	
+def getMMCRNoGoodsDomain(probFileName):
+	return probFileName[:-5] + "-" + DOMAIN_FILE
+
+def getActionChainsBenchmarkDomain(probFileName):
+	return probFileName.replace("problem", "domain")
+
 def setupFolderStructure(plansdir_fullpath, outputdir_fullpath):
 	if not os.path.exists(plansdir_fullpath):
 		os.makedirs(plansdir_fullpath)
@@ -350,16 +365,16 @@ def getProblemQueue(iterations=1, start=0):
 	#The Queue
 	q = Queue()
 	planners = {
-		#"Colin-RPG" : colinRPG,
+		"Colin-RPG" : colinRPG,
 		#"NoSD-Colin-RPG" : colinRPGNoSD,
-		#"POPF-RPG" : popf,
+		"POPF-RPG" : popf,
 		#"NoSD-POPF-RPG" : popfNoSD,
-		#"Optic-RPG" : optic,
+		"Optic-RPG" : optic,
 		#"Optic-SLFRP" : opticSLFRP,
-		#"lpg-td" : lpgtd,
-		#"Colin-TRH-Colin" : colinTRHcolin,
+		"lpg-td" : lpgtd,
+		"Colin-TRH-Colin" : colinTRHcolin,
 		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
-		#"Popf-TRH-Popf" : popfTRHpopf,
+		"Popf-TRH-Popf" : popfTRHpopf,
 		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
 		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
@@ -369,29 +384,29 @@ def getProblemQueue(iterations=1, start=0):
 		#"fd_FF": fd_FF,
 		#"fd_blind" : fd_blind,
 		#"madagascar" : madagascar
-		#"tplanS0T0" : tplanS0T0, #All Ground Operators
-		#"tplanS0T1" : tplanS0T1,
-		#"tplanS1T0" : tplanS1T0, #Selective Ground Operators
-		#"tplanS1T1" : tplanS1T1,
-		#"tplanS2T0" : tplanS2T0, #Operator Add Effects
-		#"tplanS2T1" : tplanS2T1,
-		#"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
-		#"tplanS3T1" : tplanS3T1,
-		#"tplanS4T0" : tplanS4T0, #Operator Effects
-		#"tplanS4T1" : tplanS4T1,
-		#"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
-		#"tplanS5T1" : tplanS5T1,
-		#"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
-		#"tplanS6T1" : tplanS6T1,
-		#"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
-		#"tplanS7T1" : tplanS7T1,
+		"tplanS0T0" : tplanS0T0, #All Ground Operators
+		"tplanS0T1" : tplanS0T1,
+		"tplanS1T0" : tplanS1T0, #Selective Ground Operators
+		"tplanS1T1" : tplanS1T1,
+		"tplanS2T0" : tplanS2T0, #Operator Add Effects
+		"tplanS2T1" : tplanS2T1,
+		"tplanS3T0" : tplanS3T0, #Most Recent Operator Add Effects
+		"tplanS3T1" : tplanS3T1,
+		"tplanS4T0" : tplanS4T0, #Operator Effects
+		"tplanS4T1" : tplanS4T1,
+		"tplanS5T0" : tplanS5T0, #Most Recent Operator Effects
+		"tplanS5T1" : tplanS5T1,
+		"tplanS6T0" : tplanS6T0, #End-Snap Action Ground Operator Effects
+		"tplanS6T1" : tplanS6T1,
+		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
+		"tplanS7T1" : tplanS7T1,
 		#tplan with FD Subplanner
-		"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
-		"tplanS0T1_FD" : tplanS0T1_FD,
-		"tplanS6T0_FD" : tplanS6T0_FD, #End-Snap Action Ground Operator Effects
-		"tplanS6T1_FD" : tplanS6T1_FD,
-		"tplanS7T0_FD" : tplanS7T0_FD, #Start-Snap Action Ground Operator Effects
-		"tplanS7T1_FD" : tplanS7T1_FD
+		#"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
+		#"tplanS0T1_FD" : tplanS0T1_FD,
+		#"tplanS6T0_FD" : tplanS6T0_FD, #End-Snap Action Ground Operator Effects
+		#"tplanS6T1_FD" : tplanS6T1_FD,
+		#"tplanS7T0_FD" : tplanS7T0_FD, #Start-Snap Action Ground Operator Effects
+		#"tplanS7T1_FD" : tplanS7T1_FD
 	}
 	#iterate through planners
 	for planner in planners:
@@ -419,13 +434,10 @@ def getProblemQueue(iterations=1, start=0):
 					probFile = os.path.join(subdir_fullpath, prob)
 					#Domain file
 					domainFile = os.path.join(subdir_fullpath, DOMAIN_FILE)
-					#Special case for the Airport domain
-					#As this has a domain file for each problem file
-					if subdir in AIRPORT_PROBLEM:
-						domainFile = os.path.join(subdir_fullpath,  prob[0:4] + DOMAIN_FILE)
-					elif subdir in NO_GOODS_PROBLEM:
-						domainFile = os.path.join(subdir_fullpath,  prob[:-5] + "-" + DOMAIN_FILE)
-						
+					#Special case for problem domains that hava a unique file per problem
+					if subdir in list(PROBLEM_HAS_UNIQUE_DOMAIN.keys()):
+						domainFile = os.path.join(subdir_fullpath, PROBLEM_HAS_UNIQUE_DOMAIN[subdir](prob))
+											
 					for itr in range(start, start+iterations):
 						#Plan file
 						planFileName = "%s-%i.plan"%(prob, itr)						
