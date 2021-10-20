@@ -20,6 +20,9 @@ INITIAL_STATE_STATES_EVAL = "#; Initial State - heuristic states evaluated:"
 TPLAN_STATE_DELIM = r"[0-9]+ \| [0-9\-]+ [0-9\:]+\: \[info\][\s]+Sub\-problem iteration [0-9]+"
 #000013 | 2021-06-04 14:59:03: [info]	27 conflicted constraints found.
 TPLAN_HSTATE_DELIM = r"[0-9]+ \| [0-9\-]+ [0-9\:]+\: \[info\][\s]+([0-9]+) conflicted constraints found."
+#............... search limit exceeded. Restart using null plan
+LPG_TD_STATE_DELIM = r"^([\.]+) search limit exceeded.[Restart using null plan]?"
+LPG_TD_STATES_PER_DOT = 50
 
 COLIN_LIKE_STATES = [
 	"Colin-RPG", 
@@ -32,6 +35,11 @@ TRH_LIKE_STATES = [
 	"Colin-TRH-Colin", 
 	"Popf-TRH-Popf"
 ]
+
+LPG_LIKE_STATES = [
+	"lpg-td"
+]
+
 
 TPLAN_LIKE_STATES = [
 	"tplan",
@@ -124,6 +132,14 @@ def getTPlanStatesEvaluated(logfile):
 			hStatesEval += int(hStatesMatch.group(1))
 	return statesEval, hStatesEval, hStatesEval + statesEval
 
+def getlpgtdStatesEvaluated(logfile):
+	statesEval = 0
+	hStatesEval = 0 #at the moment we can't calculate this
+	for line in logfile:
+		if re.match(LPG_TD_STATE_DELIM, line):
+			statesEval += len(re.match(LPG_TD_STATE_DELIM, line).group(1)) * LPG_TD_STATES_PER_DOT
+	return statesEval, hStatesEval, hStatesEval + statesEval
+
 def getStatesEvaluated(planner, logfile):
 	if planner in COLIN_LIKE_STATES:
 		states = getColinLikeStatesEvaluated(logfile) 
@@ -132,6 +148,8 @@ def getStatesEvaluated(planner, logfile):
 		return getTRHStatesEvaluated(logfile)
 	elif planner in TPLAN_LIKE_STATES:
 		return getTPlanStatesEvaluated(logfile) #Note heuristic states is the total length of no-goods
+	elif planner in LPG_LIKE_STATES:
+		return getlpgtdStatesEvaluated(logfile)
 	else:
 		raise RuntimeError("Error! Unrecognised planner: %s"%planner)
 
