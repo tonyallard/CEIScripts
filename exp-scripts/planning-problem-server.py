@@ -293,14 +293,6 @@ OUTPUT_FOLDER = "output"
 DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive", "archive2", "archive3", "constraints_def"]
 
-PROBLEM_HAS_UNIQUE_DOMAIN = {
-	"airport" : getAirportDomain, 
-	"airport-tighten" : getAirportDomain,
-	"mmcr-no-metric-no-goods" : getMMCRNoGoodsDomain,
-	"mmcr-no-metric-no-goods-10Cargo" : getMMCRNoGoodsDomain,
-	"action-chains-benchmark" : getActionChainsBenchmarkDomain
-}
-
 PLANNERS_NEEDING_EXTRA_CONF = [	"tplanS1T0", 
 								"tplanS1T1", 
 								"tplanS2T0", 
@@ -341,6 +333,14 @@ def getMMCRNoGoodsDomain(probFileName):
 
 def getActionChainsBenchmarkDomain(probFileName):
 	return probFileName.replace("problem", "domain")
+
+PROBLEM_HAS_UNIQUE_DOMAIN = {
+	"airport" : getAirportDomain, 
+	"airport-tighten" : getAirportDomain,
+	"mmcr-no-metric-no-goods" : getMMCRNoGoodsDomain,
+	"mmcr-no-metric-no-goods-10Cargo" : getMMCRNoGoodsDomain,
+	"action-chains-benchmark" : getActionChainsBenchmarkDomain
+}
 
 def setupFolderStructure(plansdir_fullpath, outputdir_fullpath):
 	if not os.path.exists(plansdir_fullpath):
