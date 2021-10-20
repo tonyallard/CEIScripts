@@ -123,21 +123,22 @@ def create_chain(time_window, chain_num, chain_len, num_rand_actions, all_action
 		actions.append(setup_action)
 
 		#create n-trick actions to throw planners off
-		n_actions, n_act_props, n_act_goals = create_n_similar_actions(
-			"rand-actions-{cl}-{cn}".format(
-				cl = x,
-				cn = chain_num
-			),
-			num_rand_actions, 
-			condition,
-			next_action_support_effect,
-			action_duration+1.2,
-			0.5,
-			all_action_goals,
-			namer)
-		actions.extend(n_actions)
-		propositions.extend(n_act_props)
-		goals.extend(n_act_goals)
+		if (num_rand_actions):
+			n_actions, n_act_props, n_act_goals = create_n_similar_actions(
+				"rand-actions-{cl}-{cn}".format(
+					cl = x,
+					cn = chain_num
+				),
+				num_rand_actions, 
+				condition,
+				next_action_support_effect,
+				action_duration+1.2,
+				0.5,
+				all_action_goals,
+				namer)
+			actions.extend(n_actions)
+			propositions.extend(n_act_props)
+			goals.extend(n_act_goals)
 
 		#update state for next cycle
 		previous_support_prop = support_precond_pred
@@ -193,7 +194,7 @@ def create_problem_instance(domain_file, problem_file, time_window, num_chains, 
 	dom.requirements.extend(reqs)
 
 	prob = problem("{n}-problem".format(
-		n=dom.name), dom)
+		n=dom.name), dom.name)
 	
 	prob.metric = metric(
 		function("total-time")
