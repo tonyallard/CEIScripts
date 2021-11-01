@@ -102,7 +102,7 @@ def main(args):
 			if not rand_actions_max:
 				addJob(queue, chain, chain_length, time_window, 0, action_goals)
 			else :
-				for num_rand_actions in range (1, rand_actions_max+1):
+				for num_rand_actions in range (0, rand_actions_max+1):
 					addJob(queue, chain, chain_length, time_window, num_rand_actions, action_goals)
 			
 	for job in queue:
