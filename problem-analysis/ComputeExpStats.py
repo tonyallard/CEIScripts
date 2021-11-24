@@ -57,7 +57,17 @@ def processProblemDomainStatistics(planner, problemDomain, logPath):
 			continue
 
 		problemName, probNumber = getProblemDetails(filename)
-		probDomStats.processProblemLog(problemName, probNumber, buffer)
+		try:
+			probDomStats.processProblemLog(problemName, probNumber, buffer)
+		except RuntimeError as err:
+			print "There was an error processing file: {file} containing {plan} : {prob} : {num}.\n\t{msg}".format(
+				file = filename,
+				plan = planner,
+				prob = problemName,
+				num = probNumber,
+				msg = err
+			)
+			sys.exit()
 
 	return probDomStats
 
