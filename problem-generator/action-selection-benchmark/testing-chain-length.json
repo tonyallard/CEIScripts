@@ -1,0 +1,18 @@
+{
+	"name" : "Standard1-5",
+	"time-window" : 50,
+	"num-chains" : {
+		"min" : 1,
+		"max" : 1
+	},
+	"chain-length" : {
+		"min" : 1,
+		"max" : 50
+	},
+	"num-rand-actions" : {
+		"min" : 2,
+		"max" : 2
+	},
+	"action-goals" : "both",
+	"readable" : false
+}

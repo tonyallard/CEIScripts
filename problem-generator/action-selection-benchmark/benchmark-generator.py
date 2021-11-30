@@ -2,12 +2,24 @@
 import sys
 import os
 import argparse
+import json
 import importlib  
 n_chains = importlib.import_module("n-chains-l-length-a-racts")
 
 ALL_ACTION_GOAL_PARAM = ['all', 'chains_only', 'both']
 AAG_TRUE = [ALL_ACTION_GOAL_PARAM[0], ALL_ACTION_GOAL_PARAM[2]]
 AAG_BOTH = ALL_ACTION_GOAL_PARAM[2]
+
+TIME_WINDOW = "time-window"
+NUM_CHAINS = "num-chains"
+CHAIN_LENGTH = "chain-length"
+NUM_RAND_ACTIONS = "num-rand-actions"
+ACTION_GOALS = "action-goals"
+READABLE = "readable"
+
+MIN = "min"
+MAX = "max"
+
 
 class Job:
 	def __init__(self, chain_num, chain_length, time_window, num_rand_actions=0, all_action_goals=True):
@@ -39,70 +51,59 @@ def main(args):
 	                    metavar='/path/to/folder',
 						type=str,
 		                help='the path to store pddl files')
-	parser.add_argument('--chain-length-max',
-						'-c',
-	                    metavar='2',
-						type=int,
-						nargs="?",
-						default=2,
-		                help='the maximum number of actions the domain should have in total')
-	parser.add_argument('--num-chains-max',
-						'-n',
-	                    metavar='1',
-						type=int,
-						nargs="?",
-						default=1,
-		                help='the maximum number of action chains in the domain')
-	parser.add_argument('--rand-actions-max',
-						'-a',
-	                    metavar='1',
-						type=int,
-						nargs="?",
-						default=0,
-		                help='the maximum number of extra random actions to make per action per action chain')
-	parser.add_argument('--duration',
-						'-d',
-	                    metavar='5',
-						type=int,
-						nargs="?",
-						default=5,
-		                help='the duration of the time window (this affects the duration of actions')
-	parser.add_argument('--action-goals',
-						'-g',
-						choices=ALL_ACTION_GOAL_PARAM,
-						default='all',
-		                help='Which actions must be achieved in the goal state. Both creates the two problem variants.')
-	parser.add_argument('--readable',
-						action='store_true',
-						default=False,
-		                help='Whether to use std or readable action names')
+	parser.add_argument('-c',
+						'--config',
+						required=True,
+						type=str,
+						metavar='/path/to/config/file.json',
+						help='Config file that defines the problems to produce')
 	
 	args = parser.parse_args()
 
 	path = os.path.dirname(args.path)
 	if (len(path) and not os.path.isdir(path)):
 		print("Error: {p} is not a valid path.".format(
-			p=path
+			p = path
+		))
+		sys.exit(-1)
+		
+	if not os.path.isfile(args.config):
+		print("Error: {c} is not a valid configuration file".format(
+			c = args.config
 		))
 		sys.exit(-1)
 
-	namer = n_chains.element_namer(args.readable)
+	with open(args.config) as f:
+		config = json.load(f)
+	
+	print("Configuration used: {cn} ({cf})".format(
+		cn = config["name"],
+		cf = args.config
+	))
+	
+	
+	time_window = config[TIME_WINDOW]
+	num_chains_min = config[NUM_CHAINS][MIN]
+	num_chains_max = config[NUM_CHAINS][MAX]
+	chain_length_min = config[CHAIN_LENGTH][MIN]
+	chain_length_max = config[CHAIN_LENGTH][MAX]	
+	num_rand_actions_min = config[NUM_RAND_ACTIONS][MIN]
+	num_rand_actions_max = config[NUM_RAND_ACTIONS][MAX]
+	action_goals = config[ACTION_GOALS]
+	readable = config[READABLE]
 
-	time_window = args.duration
-	num_chains_max = args.num_chains_max
-	chain_length_max = args.chain_length_max
-	rand_actions_max = args.rand_actions_max
-	action_goals = args.action_goals
-
+	print (action_goals)
+	
+	namer = n_chains.element_namer(readable)
 	
 	queue = []
 
-	for chain in range(1, num_chains_max+1):
-		for chain_length in range(1, chain_length_max+1):
-			if not rand_actions_max:
+	for chain in range(num_chains_min, num_chains_max+1):
+		for chain_length in range(num_chains_min, chain_length_max+1):
+			if not num_rand_actions_max:
 				addJob(queue, chain, chain_length, time_window, 0, action_goals)
 			else :
-				for num_rand_actions in range (0, rand_actions_max+1):
+				for num_rand_actions in range (num_rand_actions_min, num_rand_actions_max+1):
 					addJob(queue, chain, chain_length, time_window, num_rand_actions, action_goals)
 			
 	for job in queue:
