@@ -54,6 +54,8 @@ def getInstanceID():
 	return random.randint(0, sys.maxsize)
 
 def printMessage(text):
-	print("%s: %s"%(strftime("%Y-%m-%d %H:%M:%S", localtime()),
-		text))
+	print("{t}: {m}".format(
+		t = strftime("%Y-%m-%d %H:%M:%S", localtime()),
+		m = text
+	))
 	sys.stdout.flush()

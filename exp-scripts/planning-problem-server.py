@@ -2,6 +2,7 @@
 import sys
 import os
 import argparse
+import json
 import socket
 from multiprocessing import Queue
 import time
@@ -275,9 +276,9 @@ def validate(domainFile, probFile, planFile):
 		VALIDATOR_PARAMS, domainFile, probFile, planFile)
 
 #Limit Commands
-TIMEOUT_CMD="timeout -s SIGXCPU 30m" #30mins
+TIMEOUT_CMD="timeout -s SIGXCPU %im" #30mins
 TIME_CMD = "time -p"
-MEMLIMIT_CMD="ulimit -Sv 4000000" #4GB
+MEMLIMIT_CMD="ulimit -Sv %i" #4GB
 
 #Validation Parameters
 VALIDATOR_EXEC = "VAL/validate"
@@ -361,29 +362,29 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(iterations=1, start=0):
+def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 	#The Queue
 	q = Queue()
-	planners = {
+	planner_exec = {
 		"Colin-RPG" : colinRPG,
-		#"NoSD-Colin-RPG" : colinRPGNoSD,
+		"NoSD-Colin-RPG" : colinRPGNoSD,
 		"POPF-RPG" : popf,
-		#"NoSD-POPF-RPG" : popfNoSD,
+		"NoSD-POPF-RPG" : popfNoSD,
 		"Optic-RPG" : optic,
-		#"Optic-SLFRP" : opticSLFRP,
+		"Optic-SLFRP" : opticSLFRP,
 		"lpg-td" : lpgtd,
 		"Colin-TRH-Colin" : colinTRHcolin,
-		#"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
+		"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
 		"Popf-TRH-Popf" : popfTRHpopf,
-		#"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
-		#"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
-		#"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
-		#"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
-		#"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD,
-		#"MetricFF": metricff,
-		#"fd_FF": fd_FF,
-		#"fd_blind" : fd_blind,
-		#"madagascar" : madagascar
+		"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
+		"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
+		"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
+		"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,
+		"NoSD-ablation-Popf-TRH-Popf" : popfTRHpopfAblationNoSD,
+		"MetricFF": metricff,
+		"fd_FF": fd_FF,
+		"fd_blind" : fd_blind,
+		"madagascar" : madagascar,
 		"tplanS0T0" : tplanS0T0, #All Ground Operators
 		"tplanS0T1" : tplanS0T1,
 		"tplanS1T0" : tplanS1T0, #Selective Ground Operators
@@ -401,75 +402,80 @@ def getProblemQueue(iterations=1, start=0):
 		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
 		"tplanS7T1" : tplanS7T1,
 		#tplan with FD Subplanner
-		#"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
-		#"tplanS0T1_FD" : tplanS0T1_FD,
-		#"tplanS6T0_FD" : tplanS6T0_FD, #End-Snap Action Ground Operator Effects
-		#"tplanS6T1_FD" : tplanS6T1_FD,
-		#"tplanS7T0_FD" : tplanS7T0_FD, #Start-Snap Action Ground Operator Effects
-		#"tplanS7T1_FD" : tplanS7T1_FD
+		"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
+		"tplanS0T1_FD" : tplanS0T1_FD,
+		"tplanS6T0_FD" : tplanS6T0_FD, #End-Snap Action Ground Operator Effects
+		"tplanS6T1_FD" : tplanS6T1_FD,
+		"tplanS7T0_FD" : tplanS7T0_FD, #Start-Snap Action Ground Operator Effects
+		"tplanS7T1_FD" : tplanS7T1_FD
 	}
 	#iterate through planners
 	for planner in planners:
+		if planner not in planner_exec:
+			printMessage("Error: {p} is not a supported planner".format(
+				p = planner
+			))
+			sys.exit(-1)
 		#Get function to create planner command
-		f = planners[planner]
+		f = planner_exec[planner]
 		#iterate through problem sets
-		problemDir = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS)
+		problemSetsDir = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS)
 		
-		for root, dirs, files in os.walk(problemDir):
-			for subdir in dirs:
-				if subdir in IGNORE_SET_LIST:
-					continue
-				#Get full problem path
-				subdir_fullpath = os.path.join(root, subdir)
-				#Ger full path for plan and logs
-				plansdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, subdir, PLANS_FOLDER)
-				outputdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, subdir, OUTPUT_FOLDER)
-				#Create missing folders, if any
-				setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
-				
-				problems = getProblemFiles(subdir_fullpath)
+		for problem_domain in problem_domains:
+			#Get full problem path
+			problemDomainDir = os.path.join(problemSetsDir, problem_domain)
+			if not os.path.exists(problemDomainDir):
+				printMessage("Error: {p} is not a supported problem domain".format(
+				p = problem_domain
+				))
+				sys.exit(-1)
+			
+			#Ger full path for plan and logs
+			plansdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, problem_domain, PLANS_FOLDER)
+			outputdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, problem_domain, OUTPUT_FOLDER)
+			#Create missing folders, if any
+			setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
+			
+			problems = getProblemFiles(problemDomainDir)
 
-				for prob in problems:
-					#Problem file
-					probFile = os.path.join(subdir_fullpath, prob)
-					#Domain file
-					domainFile = os.path.join(subdir_fullpath, DOMAIN_FILE)
-					#Special case for problem domains that hava a unique file per problem
-					if subdir in list(PROBLEM_HAS_UNIQUE_DOMAIN.keys()):
-						domainFile = os.path.join(subdir_fullpath, PROBLEM_HAS_UNIQUE_DOMAIN[subdir](prob))
-											
-					for itr in range(start, start+iterations):
-						#Plan file
-						planFileName = "%s-%i.plan"%(prob, itr)						
-						planFile = os.path.join(plansdir_fullpath, planFileName)
-						
-						planner_command = ""
-						if (planner in PLANNERS_NEEDING_EXTRA_CONF):
-							if subdir not in CONF_FILE_NAMES:
-								printMessage("Could not schedule %s - %s for %s as there\
- was no associated conf file."%(subdir, prob, planner))
-								break #Can't schedule up this problem
+			for prob in problems:
+				#Problem file
+				probFile = os.path.join(problemDomainDir, prob)
+				#Domain file
+				domainFile = os.path.join(problemDomainDir, DOMAIN_FILE)
+				#Special case for problem domains that hava a unique file per problem
+				if problem_domain in list(PROBLEM_HAS_UNIQUE_DOMAIN.keys()):
+					domainFile = os.path.join(problemDomainDir, PROBLEM_HAS_UNIQUE_DOMAIN[problem_domain](prob))
+										
+				for itr in range(start, start+iterations):
+					#Plan file
+					planFileName = "%s-%i.plan"%(prob, itr)						
+					planFile = os.path.join(plansdir_fullpath, planFileName)
+					
+					planner_command = ""
+					if (planner in PLANNERS_NEEDING_EXTRA_CONF):
+						if problem_domain not in CONF_FILE_NAMES:
+							printMessage("Could not schedule %s - %s for %s as there\
+was no associated conf file."%(problem_domain, prob, planner))
+							break #Can't schedule up this problem
 
-							confFileName = CONF_FILE_NAMES[subdir]
-							confFile = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS, 
-								CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
-							planner_command = f(domainFile, probFile, planFile, confFile)
-						else:
-							#Planner command
-							planner_command = f(domainFile, probFile, planFile)
+						confFileName = CONF_FILE_NAMES[problem_domain]
+						confFile = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS, 
+							CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
+						planner_command = f(domainFile, probFile, planFile, confFile)
+					else:
+						#Planner command
+						planner_command = f(domainFile, probFile, planFile)
 
-						#Validate command
-						validate_command = validate(domainFile, probFile, planFile)
-						#Log file
-						logFileName = "%s-%i.txt"%(prob, itr)
-						logFile = os.path.join(outputdir_fullpath, logFileName)
-						#Generate job
-						job = Job(planner, prob, itr, planner_command, 
-							validate_command, logFile, planFile)
-						q.put(job)
-	
-			#The first entry has all the dirs
-			break
+					#Validate command
+					validate_command = validate(domainFile, probFile, planFile)
+					#Log file
+					logFileName = "%s-%i.txt"%(prob, itr)
+					logFile = os.path.join(outputdir_fullpath, logFileName)
+					#Generate job
+					job = Job(planner, prob, itr, planner_command, 
+						validate_command, logFile, planFile)
+					q.put(job)
 	return q
 
 """
@@ -576,6 +582,12 @@ def main(args):
 						default=DEFAULT_PORT,
 						type=int,
 						help='The port that the experimentation server is listening on')
+	parser.add_argument('-c',
+						'--config',
+						required=True,
+						type=str,
+						metavar='/path/to/config/file.json',
+						help='Config file that defines the experiment')
 	
 	args = parser.parse_args()
 
@@ -591,11 +603,37 @@ def main(args):
 			DEFAULT_ROOT_DIR = args.path
 		else:
 			printMessage("Error: Invalid direcory specified as experimentation directory: %s"%args.path)
+	
+	if not os.path.isfile(args.config):
+		print("Error: {c} is not a valid configuration file".format(
+			c = args.config
+		))
+		sys.exit(-1)
 
-	printMessage("Experimentation directory set to %s"%DEFAULT_ROOT_DIR) 
+	with open(args.config) as f:
+		config = json.load(f)
+
+	printMessage("Experimentation directory set to %s"%DEFAULT_ROOT_DIR)
+	printMessage("Using experiment configuration from \"{cf}\": {cn}".format(
+		cn = config["name"],
+		cf = args.config
+	))
+
+	time_limit = config["planning-time-limit"]
+	mem_limit = config["planning-mem-limit"]
+	planners = config["planners"]
+	problem_domains = config["problem-domains"]
+	iterations = config["iterations"]
+	startItr = config["start-itr"]
+
+	#Set experimentation runtime parameters
+	global MEMLIMIT_CMD
+	MEMLIMIT_CMD = MEMLIMIT_CMD%(mem_limit * 1000000) #ulimit is in 1024-byte blocks
+	global TIMEOUT_CMD
+	TIMEOUT_CMD = TIMEOUT_CMD%time_limit
 
 	#Get problems ready for computation
-	q = getProblemQueue()
+	q = getProblemQueue(planners, problem_domains, iterations, startItr)
 	printMessage("Problem queue initialised with %i problems."%q.qsize())
 	#Current allocation data structure
 	#Indexed by id, then list. Elements:

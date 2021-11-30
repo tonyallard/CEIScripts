@@ -1,6 +1,15 @@
 #!/bin/bash
 
 EXP_ROOT_DIR=$(pwd)
+CONFIG_FILE=""
+
+re='^[0-9]+$'
+if ! [[ $1 =~ $re ]] ; then
+	echo "Error: First parameter needs to be number of worker threads." >&2
+	exit 1
+else
+	echo "Number of worker threads set to $1."
+fi
 
 if [[ -d "$2" ]]; then
    EXP_ROOT_DIR=$(realpath "$2")
@@ -11,17 +20,17 @@ else
    exit 2
 fi
 
-re='^[0-9]+$'
-if ! [[ $1 =~ $re ]] ; then
-	echo "Error: First parameter needs to be number of worker threads." >&2
-	exit 1
+if [[ -f "$3" ]]; then
+	CONFIG_FILE=$(realpath "$3")
+	echo "Using config file $CONFIG_FILE"
 else
-	echo "Number of worker threads set to $1."
+	echo "Error: Third parameter needs to be the config file for experiment." >&2
+	exit 3
 fi
 
 echo "Initialising experimentation server"
 source "$EXP_ROOT_DIR"/exp-scripts/bin/activate
-"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" > "$EXP_ROOT_DIR"/server.log 2>&1 &
+"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" -c "$CONFIG_FILE" > "$EXP_ROOT_DIR"/server.log 2>&1 &
 
 echo "Waiting for server to start..."
 sleep 3
