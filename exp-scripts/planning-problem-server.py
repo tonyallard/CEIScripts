@@ -340,7 +340,8 @@ PROBLEM_HAS_UNIQUE_DOMAIN = {
 	"airport-tighten" : getAirportDomain,
 	"mmcr-no-metric-no-goods" : getMMCRNoGoodsDomain,
 	"mmcr-no-metric-no-goods-10Cargo" : getMMCRNoGoodsDomain,
-	"action-chains-benchmark" : getActionChainsBenchmarkDomain
+	"action-chains-benchmark" : getActionChainsBenchmarkDomain,
+	"acb-chainlength-50" : getActionChainsBenchmarkDomain
 }
 
 def setupFolderStructure(plansdir_fullpath, outputdir_fullpath):
