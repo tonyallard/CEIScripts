@@ -21,36 +21,38 @@ DEFAULT_IP = '127.0.0.1'
 DEFAULT_PORT = 50005
 BUFFER_SIZE = 8192
 
-COLIN_LIKE_PLANNERS = [	"Colin-TRH-Colin", 
-						"Popf-TRH-Popf", 
-						"Colin-RPG", 
-						"POPF-RPG", 
-						"Optic-RPG", 
-						"Optic-SLFRP", 
-						"tplan",
-						"tplanS0T0", 
-						"tplanS0T1",
-						"tplanS1T0",
-						"tplanS1T1",
-						"tplanS2T0",
-						"tplanS2T1",
-						"tplanS3T0",
-						"tplanS3T1",
-						"tplanS4T0",
-						"tplanS4T1",
-						"tplanS5T0",
-						"tplanS5T1",
-						"tplanS6T0",
-						"tplanS6T1",
-						"tplanS7T0",
-						"tplanS7T1"
-						 ]
+COLIN_LIKE_PLANNERS = [	
+		"Colin-TRH-Colin", 
+		"Popf-TRH-Popf", 
+		"Colin-RPG", 
+		"POPF-RPG", 
+		"Optic-RPG", 
+		"Optic-SLFRP", 
+		"tplan",
+		"tplanS0T0", 
+		"tplanS0T1",
+		"tplanS1T0",
+		"tplanS1T1",
+		"tplanS2T0",
+		"tplanS2T1",
+		"tplanS3T0",
+		"tplanS3T1",
+		"tplanS4T0",
+		"tplanS4T1",
+		"tplanS5T0",
+		"tplanS5T1",
+		"tplanS6T0",
+		"tplanS6T1",
+		"tplanS7T0",
+		"tplanS7T1",
+		"itsat"
+	 ]
 LPG_PLANNERS = ["lpg-td"]
 FD_PLANNERS = ["fd_FF", "fd_blind"]
 METRICFF_PLANNERS = ["MetricFF"]
 MADAGASCAR_PLANNERS = ["madagascar"]
 
-PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td"]
+PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td", "itsat"]
 
 #Regex to find plan
 COLIN_PLAN_SYNTAX = "\d+\.*\d*:[\s]+\([0-9A-Za-z\-\_ ]+\)[\s]+\[\d+\.*\d*\]"

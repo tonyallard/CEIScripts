@@ -269,6 +269,15 @@ def madagascar(domainFile, probFile, planFile=""):
 	return "(cd %s && %s && %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
 		domainFile, probFile, PLANNER_PARAMS)
+		
+def itsat(domainFile, probFile, planFile, confFile=""):
+	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/itsat/")
+	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/itsat/gccRelease/itsat.exe")
+	PLANNER_PARAMS = "-m 1"
+
+	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
+		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,
+		PLANNER_PARAMS, domainFile, probFile, planFile)
 
 def validate(domainFile, probFile, planFile):
 	VALIDATOR_EXEC_CMD = os.path.join(DEFAULT_ROOT_DIR, VALIDATOR_EXEC)
@@ -294,34 +303,39 @@ OUTPUT_FOLDER = "output"
 DOMAIN_FILE = "DOMAIN.PDDL"
 IGNORE_SET_LIST = ["archive", "archive2", "archive3", "constraints_def"]
 
-PLANNERS_NEEDING_EXTRA_CONF = [	"tplanS1T0", 
-								"tplanS1T1", 
-								"tplanS2T0", 
-								"tplanS2T1",
-								"tplanS3T0", 
-								"tplanS3T1",
-								"tplanS4T0", 
-								"tplanS4T1",
-								"tplanS5T0", 
-								"tplanS5T1"]
-CONF_FILE_DIR = "constraints_def"
-CONF_FILE_SUBDIR = {"tplanS1T0" : "1", 
-					"tplanS1T1" : "1", 
-					"tplanS2T0" : "2", 
-					"tplanS2T1" : "2", 
-					"tplanS3T0" : "2", 
-					"tplanS3T1" : "2", 
-					"tplanS4T0" : "3", 
-					"tplanS4T1" : "3", 
-					"tplanS5T0" : "3", 
-					"tplanS5T1" : "3"}
+PLANNERS_NEEDING_EXTRA_CONF = [
+			"tplanS1T0", 
+			"tplanS1T1", 
+			"tplanS2T0", 
+			"tplanS2T1",
+			"tplanS3T0", 
+			"tplanS3T1",
+			"tplanS4T0", 
+			"tplanS4T1",
+			"tplanS5T0", 
+			"tplanS5T1"]
 
-CONF_FILE_NAMES = {	"satellite" : "satellite.conf",
-					"satellite-tighten" : "satellite.conf",
-					"pipesworld" : "pipesworld.conf",
-					"pipesworld-tighten" : "pipesworld.conf",
-					"mmcr-nometric" : "mmcr.conf",
-					"crewplanning" : "crewplanning.conf"}
+CONF_FILE_DIR = "constraints_def"
+
+CONF_FILE_SUBDIR = {
+		"tplanS1T0" : "1", 
+		"tplanS1T1" : "1", 
+		"tplanS2T0" : "2", 
+		"tplanS2T1" : "2", 
+		"tplanS3T0" : "2", 
+		"tplanS3T1" : "2", 
+		"tplanS4T0" : "3", 
+		"tplanS4T1" : "3", 
+		"tplanS5T0" : "3", 
+		"tplanS5T1" : "3"}
+
+CONF_FILE_NAMES = {	
+		"satellite" : "satellite.conf",
+		"satellite-tighten" : "satellite.conf",
+		"pipesworld" : "pipesworld.conf",
+		"pipesworld-tighten" : "pipesworld.conf",
+		"mmcr-nometric" : "mmcr.conf",
+		"crewplanning" : "crewplanning.conf"}
 
 PROBLEM_FILE_SYNTAX = "\(define *\t*\(problem *\t*[a-zA-Z0-9_\-]*\)"
 PROBLEM_FILE_REGEX = re.compile(PROBLEM_FILE_SYNTAX)
@@ -408,7 +422,8 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"tplanS6T0_FD" : tplanS6T0_FD, #End-Snap Action Ground Operator Effects
 		"tplanS6T1_FD" : tplanS6T1_FD,
 		"tplanS7T0_FD" : tplanS7T0_FD, #Start-Snap Action Ground Operator Effects
-		"tplanS7T1_FD" : tplanS7T1_FD
+		"tplanS7T1_FD" : tplanS7T1_FD,
+		"itsat" : itsat
 	}
 	#iterate through planners
 	for planner in planners:
