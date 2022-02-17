@@ -21,39 +21,6 @@ DEFAULT_IP = '127.0.0.1'
 DEFAULT_PORT = 50005
 BUFFER_SIZE = 8192
 
-COLIN_LIKE_PLANNERS = [	
-		"Colin-TRH-Colin", 
-		"Popf-TRH-Popf", 
-		"Colin-RPG", 
-		"POPF-RPG", 
-		"Optic-RPG", 
-		"Optic-SLFRP", 
-		"tplan",
-		"tplanS0T0", 
-		"tplanS0T1",
-		"tplanS1T0",
-		"tplanS1T1",
-		"tplanS2T0",
-		"tplanS2T1",
-		"tplanS3T0",
-		"tplanS3T1",
-		"tplanS4T0",
-		"tplanS4T1",
-		"tplanS5T0",
-		"tplanS5T1",
-		"tplanS6T0",
-		"tplanS6T1",
-		"tplanS7T0",
-		"tplanS7T1",
-		"itsat"
-	 ]
-LPG_PLANNERS = ["lpg-td"]
-FD_PLANNERS = ["fd_FF", "fd_blind"]
-METRICFF_PLANNERS = ["MetricFF"]
-MADAGASCAR_PLANNERS = ["madagascar"]
-
-PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES = ["lpg-td", "itsat"]
-
 #Regex to find plan
 COLIN_PLAN_SYNTAX = "\d+\.*\d*:[\s]+\([0-9A-Za-z\-\_ ]+\)[\s]+\[\d+\.*\d*\]"
 COLIN_PLAN_REGEX = re.compile(COLIN_PLAN_SYNTAX)
@@ -67,38 +34,120 @@ METRICFF_PLAN_REGEX = re.compile(METRICFF_PLAN_SYNTAX)
 MADAGASCAR_PLAN_SYNTAX = "([0-9A-Za-z\-\_]+\([0-9A-Za-z\-\_\,]+\))+"
 MADAGASCAR_PLAN_REGEX = re.compile(MADAGASCAR_PLAN_SYNTAX)
 
-def getPlan(planner, logFile, planFile):
+def colinPlanFileHandler(logFile, planFileName):
+	planFile = open(planFileName, "a")
 	#Read the plan found
 	#Reset file pointer to read
 	logFile.seek(0,0)
 	#Output Plan
-	matches = []
-	if planner in COLIN_LIKE_PLANNERS:
-		matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
-	elif planner in FD_PLANNERS:
-		matches = [FD_PLAN_REGEX.findall(line) for line in logFile]
-		for m in matches:
-			if len(m) > 0:
-				m[0] = m[0].replace(" (1)", ")")
-				m[0] = "(" + m[0]
-	elif planner in METRICFF_PLANNERS:
-		matches = [METRICFF_PLAN_REGEX.findall(line) for line in logFile]
-		for m in matches:
-			if len(m) > 0:
-				m[0] = re.sub("\d+: ", "(", m[0])
-				m[0] = m[0].replace("\n", ")")
-	elif planner in MADAGASCAR_PLANNERS:
-		matches = [MADAGASCAR_PLAN_REGEX.findall(line) for line in logFile]
-		for m in matches:
-			m[:] = [x.replace("(", " ") for x in m]
-			m[:] = [x.replace(",", " ") for x in m]
-			m[:] = ["(" + x for x in m]			
-	else:
-		print ("Error: Unmatched Planner (%s). Plans not extracted or validated."%planner)
-	
+	matches = [COLIN_PLAN_REGEX.findall(line) for line in logFile]
 	for ms in matches:
 		for m in ms:
 			planFile.write("%s\n"%m)
+	planFile.close()
+
+def fdPlanFileHanlder(logFile, planFileName):
+	planFile = open(planFileName, "a")
+	#Read the plan found
+	#Reset file pointer to read
+	logFile.seek(0,0)
+	#Output Plan
+	matches = [FD_PLAN_REGEX.findall(line) for line in logFile]
+	for m in matches:
+		if len(m) > 0:
+			m[0] = m[0].replace(" (1)", ")")
+			m[0] = "(" + m[0]
+
+	for ms in matches:
+		for m in ms:
+			planFile.write("%s\n"%m)
+	planFile.close()
+
+def ffPlanFileHandler(logFile, planFileName):
+	planFile = open(planFileName, "a")
+	#Read the plan found
+	#Reset file pointer to read
+	logFile.seek(0,0)
+	#Output Plan
+	matches = [METRICFF_PLAN_REGEX.findall(line) for line in logFile]
+	for m in matches:
+		if len(m) > 0:
+			m[0] = re.sub("\d+: ", "(", m[0])
+			m[0] = m[0].replace("\n", ")")
+
+	for ms in matches:
+		for m in ms:
+			planFile.write("%s\n"%m)
+	planFile.close()
+
+def madagascarPlanFileHandler(logFile, planFileName):
+	planFile = open(planFileName, "a")
+	#Read the plan found
+	#Reset file pointer to read
+	logFile.seek(0,0)
+	#Output Plan
+	matches = [MADAGASCAR_PLAN_REGEX.findall(line) for line in logFile]
+	for m in matches:
+		m[:] = [x.replace("(", " ") for x in m]
+		m[:] = [x.replace(",", " ") for x in m]
+		m[:] = ["(" + x for x in m]	
+
+	for ms in matches:
+		for m in ms:
+			planFile.write("%s\n"%m)
+	planFile.close()
+
+def lpgtdPlanFileHandler(logFile, planFileName):
+	#remove extra plan files as appropriate
+	for x in range(1, 3):
+		extraFile = "%s_%i.SOL"%(planFile, x)
+		extraPlanFilePath = Path(extraFile)
+		if extraPlanFilePath.is_file():
+			os.remove(extraFile)
+
+def itsatPlanFileHandler(logFile, planFile):
+	#Move plan file to match naming convention
+	itsat_plan_filename = f"{planFile}.1"
+	shutil.move(itsat_plan_filename, planFile)
+	#Remove redundant files
+	itsat_planx = f"{os.path.splitext(planFile)[0]}.planx"
+	itsat_orders = f"{os.path.splitext(planFile)[0]}-orders.txt"
+	if Path(itsat_planx).is_file():
+			os.remove(itsat_planx)
+	if Path(itsat_orders).is_file():
+		os.remove(itsat_orders)
+
+PLAN_FILE_HANDLERS = {
+	"Colin-TRH-Colin" : colinPlanFileHandler,
+	"Popf-TRH-Popf" : colinPlanFileHandler, 
+	"Colin-RPG" : colinPlanFileHandler, 
+	"POPF-RPG" : colinPlanFileHandler, 
+	"Optic-RPG" : colinPlanFileHandler, 
+	"Optic-SLFRP" : colinPlanFileHandler, 
+	"tplan" : colinPlanFileHandler,
+	"tplanS0T0" : colinPlanFileHandler, 
+	"tplanS0T1" : colinPlanFileHandler,
+	"tplanS1T0" : colinPlanFileHandler,
+	"tplanS1T1" : colinPlanFileHandler,
+	"tplanS2T0" : colinPlanFileHandler,
+	"tplanS2T1" : colinPlanFileHandler,
+	"tplanS3T0" : colinPlanFileHandler,
+	"tplanS3T1" : colinPlanFileHandler,
+	"tplanS4T0" : colinPlanFileHandler,
+	"tplanS4T1" : colinPlanFileHandler,
+	"tplanS5T0" : colinPlanFileHandler,
+	"tplanS5T1" : colinPlanFileHandler,
+	"tplanS6T0" : colinPlanFileHandler,
+	"tplanS6T1" : colinPlanFileHandler,
+	"tplanS7T0" : colinPlanFileHandler,
+	"tplanS7T1" : colinPlanFileHandler,
+	"fd_FF" : fdPlanFileHanlder,
+	"fd_blind" : fdPlanFileHanlder,
+	"MetricFF" : ffPlanFileHandler,
+	"madagascar" : madagascarPlanFileHandler,
+	"lpg-td" : lpgtdPlanFileHandler,
+	"itsat" : itsatPlanFileHandler
+	}
 
 def processProblem(job):
 	#Open files for logging
@@ -122,22 +171,14 @@ def processProblem(job):
 	log.write("\n\n===TIME TAKEN===\n")
 	log.write("%f seconds\n"%timeTaken)
 	log.write("====================\n\n")
-
-	#Check for lpg-td as this writes its own plan
-	if job.plannerName not in PLANNERS_THAT_WRITE_THEIR_OWN_PLAN_FILES:
-		plan = open(job.planFile, "a")
-		getPlan(job.plannerName, log, plan)
-		plan.close()
-	else:
-		#remove extra plan files as appropriate
-		for x in range(1, 3):
-			extraFile = "%s_%i.SOL"%(job.planFile, x)
-			extraPlanFilePath = Path(extraFile)
-			if extraPlanFilePath.is_file():
-				os.remove(extraFile)
-
+	
+	#Select appropriate plan file handler
+	planFileHandler = PLAN_FILE_HANDLERS[job.plannerName]
+	planFileHandler(log, job.planFile)
+		
 	#Validate the plan
 	log.write("Plan Validation\n")
+	log.flush()
 	call_args = "%s"%(job.validatorCommand)
 	subprocess.call(call_args, shell=True, stdout=log, stderr=log)
 	
