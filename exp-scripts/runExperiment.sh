@@ -33,7 +33,7 @@ source "$EXP_ROOT_DIR"/exp-scripts/bin/activate
 "$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" -c "$CONFIG_FILE" > "$EXP_ROOT_DIR"/server.log 2>&1 &
 
 echo "Waiting for server to start..."
-sleep 3
+sleep 5
 
 echo "Initialising experimentation workers"
 for i in $(eval echo {1..$1})
