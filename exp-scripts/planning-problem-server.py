@@ -31,32 +31,50 @@ def getColinStylePlannerCommand(plannerDir, plannerExecLocation,
 
 #Planner Parameters
 #Colin-TRH
-def colinTRHcolin(domainFile, probFile, planFile="", confFile=""):
+def colinTRHcolin(domainFile, probFile, planFile="", confFile="", other_params=""):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Colin2-trh-colin/")
 	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/Colin2-trh-colin/release/colin/colin-clp")
+	params = f"{COLIN_PLANNER_PARAMS} {other_params}"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+		PLANNER_EXEC_LOC, domainFile, probFile, params)
 
-#Colin-TRH-Ablation
-def colinTRHcolinAblation(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin-trh-ablation/")
-	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/colin-trh-ablation/release/colin/colin-clp")
-	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+#Colin-TRH No Early Termination
+def colinTRHcolin_NoET(domainFile, probFile, planFile="", confFile=""):
+	other_params = "-4"
+	return colinTRHcolin(domainFile, probFile, planFile, confFile, other_params)
+
+#Colin-TRH Use Num Iterations
+def colinTRHcolin_NumIterations(domainFile, probFile, planFile="", confFile=""):
+	other_params = "-5"
+	return colinTRHcolin(domainFile, probFile, planFile, confFile, other_params)
+
+#Colin-TRH Use Num Iterations, No Early Termination
+def colinTRHcolin_NumIterations_NoET(domainFile, probFile, planFile="", confFile=""):
+	other_params = "-4 -5"
+	return colinTRHcolin(domainFile, probFile, planFile, confFile, other_params)
 
 #Popf-TRH
-def popfTRHpopf(domainFile, probFile, planFile="", confFile=""):
+def popfTRHpopf(domainFile, probFile, planFile="", confFile="", other_params=""):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-popf/")
 	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-popf/compile/popf2/popf3-clp")
+	params = f"{COLIN_PLANNER_PARAMS} {other_params}"
 	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+		PLANNER_EXEC_LOC, domainFile, probFile, params)
 
-#Popf-TRH-Ablation
-def popfTRHpopfAblation(domainFile, probFile, planFile="", confFile=""):
-	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-ablation/")
-	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/popf-trh-ablation/compile/popf2/popf3-clp")
-	return getColinStylePlannerCommand(PLANNER_LOC, 
-		PLANNER_EXEC_LOC, domainFile, probFile)
+#Popf-TRH No Early Termination
+def popfTRHpopf_NoET(domainFile, probFile, planFile="", confFile=""):
+	other_params = "-4"
+	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
+
+#Popf-TRH Use Num Iterations
+def popfTRHpopf_NumIterations(domainFile, probFile, planFile="", confFile=""):
+	other_params = "-5"
+	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
+
+#Popf-TRH Use Num Iterations, No Early Termination
+def popfTRHpopf_NumIterations_NoET(domainFile, probFile, planFile="", confFile=""):
+	other_params = "-4 -5"
+	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
 
 #Colin-TRH No Steepest Descent
 def colinTRHcolinNoSD(domainFile, probFile, planFile="", confFile=""):
@@ -389,9 +407,13 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"Optic-SLFRP" : opticSLFRP,
 		"lpg-td" : lpgtd,
 		"Colin-TRH-Colin" : colinTRHcolin,
-		"ablation-Colin-TRH-Colin": colinTRHcolinAblation,
+		"Colin-TRH-Colin_NoET": colinTRHcolin_NoET,
+		"Colin-TRH-Colin_NumIterations": colinTRHcolin_NumIterations,
+		"Colin-TRH-Colin_NumIterations_NoET": colinTRHcolin_NumIterations_NoET,
 		"Popf-TRH-Popf" : popfTRHpopf,
-		"ablation-Popf-TRH-Popf" : popfTRHpopfAblation,
+		"Popf-TRH-Popf_NoET": popfTRHpopf_NoET,
+		"Popf-TRH-Popf_NumIterations": popfTRHpopf_NumIterations,
+		"Popf-TRH-Popf_NumIterations_NoET": popfTRHpopf_NumIterations_NoET,
 		"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
 		"NoSD-ablation-Colin-TRH-Colin": colinTRHcolinAblationNoSD,
 		"NoSD-Popf-TRH-Popf" : popfTRHpopfNoSD,

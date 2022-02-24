@@ -119,8 +119,13 @@ def itsatPlanFileHandler(logFile, planFile):
 
 PLAN_FILE_HANDLERS = {
 	"Colin-TRH-Colin" : colinPlanFileHandler,
+	"Colin-TRH-Colin_NoET" : colinPlanFileHandler, 
+	"Colin-TRH-Colin_NumIterations" : colinPlanFileHandler, 
+	"Colin-TRH-Colin_NumIterations_NoET" : colinPlanFileHandler, 
 	"Popf-TRH-Popf" : colinPlanFileHandler, 
-	"Colin-RPG" : colinPlanFileHandler, 
+	"Popf-TRH-Popf_NoET" : colinPlanFileHandler, 
+	"Popf-TRH-Popf_NumIterations" : colinPlanFileHandler, 
+	"Popf-TRH-Popf_NumIterations_NoET" : colinPlanFileHandler, 
 	"POPF-RPG" : colinPlanFileHandler, 
 	"Optic-RPG" : colinPlanFileHandler, 
 	"Optic-SLFRP" : colinPlanFileHandler, 
