@@ -28,6 +28,9 @@ else
 	exit 3
 fi
 
+echo "Clearing ramdisk..."
+rm -f /mnt/ramdisk/*
+
 echo "Initialising experimentation server"
 source "$EXP_ROOT_DIR"/exp-scripts/bin/activate
 "$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" -c "$CONFIG_FILE" > "$EXP_ROOT_DIR"/server.log 2>&1 &

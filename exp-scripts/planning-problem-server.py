@@ -20,6 +20,7 @@ BUFFER_SIZE = 8192
 QUEUED_CONNECTIONS = 50 #Have set this to the number of workers
 
 DEFAULT_ROOT_DIR = "/exp"
+DEFAULT_RAM_DISK_DIR = "/mnt/ramdisk"
 
 #Function to make command like most colin planners
 COLIN_PLANNER_PARAMS = "-v1"
@@ -602,6 +603,24 @@ def workersTerminated(currentAllocation):
 			return False
 	return True
 	
+#Deletes temp files from the ram disk that have not been accessed for x hours 
+def clear_ramdisk_old_files(ramdisk_dir, hours_old = 2):
+
+	now = time.time()
+	remove_count = 0
+	for f in os.listdir(ramdisk_dir):
+		try:
+			access_time = os.path.getatime(os.path.join(ramdisk_dir, f))
+			if (now - access_time) > (hours_old * 60 * 60):
+				if os.path.isfile(os.path.join(ramdisk_dir, f)):
+					os.remove(os.path.join(ramdisk_dir, f))
+					remove_count += 1
+		except FileNotFoundError:
+			pass #ignore errors as files are being removed constantly
+	
+	if remove_count > 0:
+		printMessage(f"Info: There were {remove_count} files, accessed more than {hours_old} hours ago, removed form ram disk: {ramdisk_dir}.")	
+	
 def shutdownSocket(aSocket):
 	aSocket.shutdown(socket.SHUT_RDWR)
 	aSocket.close()
@@ -626,6 +645,20 @@ def main(args):
 						type=str,
 						metavar='/path/to/config/file.json',
 						help='Config file that defines the experiment')
+	parser.add_argument(	'-r',
+				'--ramdisk',
+	               	metavar='/path/to/ram/disk/dir',
+				required=False,
+				type=str,
+				default=DEFAULT_RAM_DISK_DIR,
+				help='the mount point of ram disk for temp files')
+				
+	parser.add_argument(	'--clear-ramdisk',
+				required=False,
+				type=bool,
+				default=True,
+				help='Specifies whether the ram disk will be periodically cleared. Defaults to True.')
+	
 	
 	args = parser.parse_args()
 
@@ -641,12 +674,19 @@ def main(args):
 			DEFAULT_ROOT_DIR = args.path
 		else:
 			printMessage("Error: Invalid direcory specified as experimentation directory: %s"%args.path)
+			sys.exit(-1)
 	
 	if not os.path.isfile(args.config):
 		print("Error: {c} is not a valid configuration file".format(
 			c = args.config
 		))
-		sys.exit(-1)
+		sys.exit(-2)
+
+	ram_disk_dir = ""
+	if (args.clear_ramdisk):
+		if not os.path.isdir(args.ramdisk):
+			printMessage("Error: Invalid direcory specified as ram disk directory: %s"%args.ramdisk)
+			sys.exit(-3)
 
 	with open(args.config) as f:
 		config = json.load(f)
@@ -656,6 +696,8 @@ def main(args):
 		cn = config["name"],
 		cf = args.config
 	))
+	if args.clear_ramdisk:
+		printMessage("Ram Disk directory set to %s"%args.ramdisk)
 
 	time_limit = config["planning-time-limit"]
 	mem_limit = config["planning-mem-limit"]
@@ -789,6 +831,9 @@ def main(args):
 		conn.sendall(reply)
 		#Close and get ready for next conn
 		conn.close()
+		#Clear ramdisk of old files
+		if args.clear_ramdisk:
+			clear_ramdisk_old_files(args.ramdisk)
 
 #Run Main Function
 if __name__ == "__main__":
