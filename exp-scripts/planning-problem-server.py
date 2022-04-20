@@ -292,7 +292,7 @@ def madagascar(domainFile, probFile, planFile=""):
 def itsat(domainFile, probFile, planFile, confFile=""):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/itsat/")
 	PLANNER_EXEC_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/itsat/gccRelease/tsat.exe")
-	PLANNER_PARAMS = "-m 1"
+	PLANNER_PARAMS = "-m 1 -t* 1.5"
 
 	return "(cd %s && %s && %s %s %s %s %s %s %s)"%(PLANNER_LOC,
 		MEMLIMIT_CMD, TIME_CMD, TIMEOUT_CMD, PLANNER_EXEC_LOC,

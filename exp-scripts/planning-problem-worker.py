@@ -108,10 +108,12 @@ def lpgtdPlanFileHandler(logFile, planFileName):
 def itsatPlanFileHandler(logFile, planFile):
 	#Move plan file to match naming convention
 	itsat_plan_filename = f"{planFile}.1"
-	shutil.move(itsat_plan_filename, planFile)
+	if Path(itsat_plan_filename).is_file():
+		shutil.move(itsat_plan_filename, planFile)
 	#Remove redundant files
 	itsat_planx = f"{os.path.splitext(planFile)[0]}.planx"
 	itsat_orders = f"{os.path.splitext(planFile)[0]}-orders.txt"
+	
 	if Path(itsat_planx).is_file():
 			os.remove(itsat_planx)
 	if Path(itsat_orders).is_file():
