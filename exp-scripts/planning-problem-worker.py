@@ -100,7 +100,7 @@ def madagascarPlanFileHandler(logFile, planFileName):
 def lpgtdPlanFileHandler(logFile, planFileName):
 	#remove extra plan files as appropriate
 	for x in range(1, 3):
-		extraFile = "%s_%i.SOL"%(planFile, x)
+		extraFile = "%s_%i.SOL"%(planFileName, x)
 		extraPlanFilePath = Path(extraFile)
 		if extraPlanFilePath.is_file():
 			os.remove(extraFile)
