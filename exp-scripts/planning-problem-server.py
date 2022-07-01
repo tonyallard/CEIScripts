@@ -54,13 +54,13 @@ def colinTRHcolin_NumIterations_NoET(domainFile, probFile, planFile="", confFile
 	other_params = "-4 -5"
 	return colinTRHcolin(domainFile, probFile, planFile, confFile, other_params)
 
-#Colin-TRH Use Total Final Relaxation
-def colinTRHcolin_TotalFinalRelax(domainFile, probFile, planFile="", confFile=""):
+#Colin-TRH Use Total Edges in Conflict
+def colinTRHcolin_TotalEdgesInConflict(domainFile, probFile, planFile="", confFile=""):
 	other_params = "-6"
 	return colinTRHcolin(domainFile, probFile, planFile, confFile, other_params)
 
-#Colin-TRH Use Total Final Relaxation, No Early Termination
-def colinTRHcolin_TotalFinalRelax_NoET(domainFile, probFile, planFile="", confFile=""):
+#Colin-TRH Use Total Edges in Conflict, No Early Termination
+def colinTRHcolin_TotalEdgesInConflict_NoET(domainFile, probFile, planFile="", confFile=""):
 	other_params = "-4 -6"
 	return colinTRHcolin(domainFile, probFile, planFile, confFile, other_params)
 
@@ -97,13 +97,13 @@ def popfTRHpopf_NumIterations_NoET(domainFile, probFile, planFile="", confFile="
 	other_params = "-4 -5"
 	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
 
-#Popf-TRH Use Total Final Relaxation
-def popfTRHpopf_TotalFinalRelax(domainFile, probFile, planFile="", confFile=""):
+#Popf-TRH Use Total Edges in Conflict
+def popfTRHpopf_TotalEdgesInConflict(domainFile, probFile, planFile="", confFile=""):
 	other_params = "-6"
 	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
 
-#Popf-TRH Use Total Final Relaxation, No Early Termination
-def popfTRHpopf_TotalFinalRelax_NoET(domainFile, probFile, planFile="", confFile=""):
+#Popf-TRH Use Total Edges in Conflict, No Early Termination
+def popfTRHpopf_TotalEdgesInConflict_NoET(domainFile, probFile, planFile="", confFile=""):
 	other_params = "-4 -6"
 
 #Popf-TRH Use Accumulative Relaxation
@@ -449,16 +449,16 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"Colin-TRH-Colin_NoET": colinTRHcolin_NoET,
 		"Colin-TRH-Colin_NumIterations": colinTRHcolin_NumIterations,
 		"Colin-TRH-Colin_NumIterations_NoET": colinTRHcolin_NumIterations_NoET,
-		"Colin-TRH-Colin_TotalFinalRelax": colinTRHcolin_TotalFinalRelax,
-		"Colin-TRH-Colin_TotalFinalRelax_NoET": colinTRHcolin_TotalFinalRelax_NoET,
+		"Colin-TRH-Colin_TotalEdgesInConflict": colinTRHcolin_TotalEdgesInConflict,
+		"Colin-TRH-Colin_TotalEdgesInConflict_NoET": colinTRHcolin_TotalEdgesInConflict_NoET,
 		"Colin-TRH-Colin_AccumulativeRelax": colinTRHcolin_AccumulativeRelax,
 		"Colin-TRH-Colin_AccumulativeRelax_NoET": colinTRHcolin_AccumulativeRelax_NoET,
 		"Popf-TRH-Popf" : popfTRHpopf,
 		"Popf-TRH-Popf_NoET": popfTRHpopf_NoET,
 		"Popf-TRH-Popf_NumIterations": popfTRHpopf_NumIterations,
 		"Popf-TRH-Popf_NumIterations_NoET": popfTRHpopf_NumIterations_NoET,
-		"Popf-TRH-Popf_TotalFinalRelax": popfTRHpopf_TotalFinalRelax,
-		"Popf-TRH-Popf_TotalFinalRelax_NoET": popfTRHpopf_TotalFinalRelax_NoET,
+		"Popf-TRH-Popf_TotalEdgesInConflict": popfTRHpopf_TotalEdgesInConflict,
+		"Popf-TRH-Popf_TotalEdgesInConflict_NoET": popfTRHpopf_TotalEdgesInConflict_NoET,
 		"Popf-TRH-Popf_AccumulativeRelax": popfTRHpopf_AccumulativeRelax,
 		"Popf-TRH-Popf_AccumulativeRelax_NoET": popfTRHpopf_AccumulativeRelax_NoET,
 		"NoSD-Colin-TRH-Colin" : colinTRHcolinNoSD,
