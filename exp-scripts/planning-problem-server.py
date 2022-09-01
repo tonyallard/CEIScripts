@@ -114,6 +114,7 @@ def popfTRHpopf_AccumulativeRelax(domainFile, probFile, planFile="", confFile=""
 #Popf-TRH Use Accumulative Relaxation, No Early Termination
 def popfTRHpopf_AccumulativeRelax_NoET(domainFile, probFile, planFile="", confFile=""):
 	other_params = "-4 -7"
+	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
 
 #Colin-TRH No Steepest Descent
 def colinTRHcolinNoSD(domainFile, probFile, planFile="", confFile=""):
