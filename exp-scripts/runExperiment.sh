@@ -33,7 +33,7 @@ rm -f /mnt/ramdisk/*
 
 echo "Initialising experimentation server"
 source "$EXP_ROOT_DIR"/exp-scripts/bin/activate
-"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" -c "$CONFIG_FILE" > "$EXP_ROOT_DIR"/server.log 2>&1 &
+"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" -c "$CONFIG_FILE" > "$EXP_ROOT_DIR"/logs/server.log 2>&1 &
 
 echo "Waiting for server to start..."
 sleep 5
@@ -41,7 +41,7 @@ sleep 5
 echo "Initialising experimentation workers"
 for i in $(eval echo {1..$1})
 do
-	"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-worker.py > "$EXP_ROOT_DIR"/worker-$i.log 2>&1 &
+	"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-worker.py > "$EXP_ROOT_DIR"/logs/worker-$i.log 2>&1 &
 	echo "Worker $i created"
 done
 deactivate
