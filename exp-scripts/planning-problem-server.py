@@ -552,24 +552,24 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"tplanS6T1" : tplanS6T1,
 		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
 		"tplanS7T1" : tplanS7T1,
-		"tplanS7T0" : tplanS8T0, #AddEffectStrategy
-		"tplanS7T1" : tplanS8T1,
-		"tplanS7T0" : tplanS9T0, #DelEffectStrategy
-		"tplanS7T1" : tplanS9T1,
-		"tplanS7T0" : tplanS10T0, #BothEffectStrategy
-		"tplanS7T1" : tplanS10T1,
-		"tplanS7T0" : tplanS11T0, #MostRecentAddEffectResourceStrategy
-		"tplanS7T1" : tplanS11T1,
-		"tplanS7T0" : tplanS12T0, #MostRecentDelEffectResourceStrategy
-		"tplanS7T1" : tplanS12T1,
-		"tplanS7T0" : tplanS13T0, #MostRecentBothEffectResourceStrategy
-		"tplanS7T1" : tplanS13T1,
-		"tplanS7T0" : tplanS14T0, #MostRecentAddEffectStrategy
-		"tplanS7T1" : tplanS14T1,
-		"tplanS7T0" : tplanS15T0, #MostRecentDelEffectStrategy
-		"tplanS7T1" : tplanS15T1,
-		"tplanS7T0" : tplanS16T0, #MostRecentEffectStrategy
-		"tplanS7T1" : tplanS16T1,
+		"tplanS8T0" : tplanS8T0, #AddEffectStrategy
+		"tplanS8T1" : tplanS8T1,
+		"tplanS9T0" : tplanS9T0, #DelEffectStrategy
+		"tplanS9T1" : tplanS9T1,
+		"tplanS10T0" : tplanS10T0, #BothEffectStrategy
+		"tplanS10T1" : tplanS10T1,
+		"tplanS11T0" : tplanS11T0, #MostRecentAddEffectResourceStrategy
+		"tplanS11T1" : tplanS11T1,
+		"tplanS12T0" : tplanS12T0, #MostRecentDelEffectResourceStrategy
+		"tplanS12T1" : tplanS12T1,
+		"tplanS13T0" : tplanS13T0, #MostRecentBothEffectResourceStrategy
+		"tplanS13T1" : tplanS13T1,
+		"tplanS14T0" : tplanS14T0, #MostRecentAddEffectStrategy
+		"tplanS14T1" : tplanS14T1,
+		"tplanS15T0" : tplanS15T0, #MostRecentDelEffectStrategy
+		"tplanS15T1" : tplanS15T1,
+		"tplanS16T0" : tplanS16T0, #MostRecentEffectStrategy
+		"tplanS16T1" : tplanS16T1,
 		#tplan with FD Subplanner
 		"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
 		"tplanS0T1_FD" : tplanS0T1_FD,
