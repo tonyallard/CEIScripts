@@ -250,6 +250,60 @@ def tplanS7T0(domainFile, probFile, planFile="", confFile=""):
 	
 def tplanS7T1(domainFile, probFile, planFile="", confFile=""):
 	return base_tplan(7, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS8T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(8, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS8T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(8, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS9T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(9, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS9T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(9, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS10T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(10, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS10T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(10, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS11T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(11, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS11T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(11, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS12T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(12, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS12T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(12, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS13T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(13, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS13T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(13, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS14T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(14, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS14T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(14, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS15T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(15, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS15T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(15, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS16T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(16, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS16T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(16, 1, domainFile, probFile, planFile, confFile)
 		
 def base_tplan(strategy, application, domainFile, probFile, planFile="", confFile="", subplanner=0):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/")
@@ -370,7 +424,13 @@ PLANNERS_NEEDING_EXTRA_CONF = [
 			"tplanS4T0", 
 			"tplanS4T1",
 			"tplanS5T0", 
-			"tplanS5T1"]
+			"tplanS5T1",
+			"tplanS11T0", 
+			"tplanS11T1",
+			"tplanS12T0", 
+			"tplanS12T1",
+			"tplanS13T0", 
+			"tplanS13T1"]
 
 CONF_FILE_DIR = "constraints_def"
 
@@ -384,7 +444,13 @@ CONF_FILE_SUBDIR = {
 		"tplanS4T0" : "3", 
 		"tplanS4T1" : "3", 
 		"tplanS5T0" : "3", 
-		"tplanS5T1" : "3"}
+		"tplanS5T1" : "3",
+		"tplanS11T0" : "4", 
+		"tplanS11T1" : "4",
+		"tplanS12T0" : "4", 
+		"tplanS12T1" : "4",
+		"tplanS13T0" : "4", 
+		"tplanS13T1" : "4"}
 
 CONF_FILE_NAMES = {	
 		"satellite" : "satellite.conf",
@@ -485,6 +551,24 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"tplanS6T1" : tplanS6T1,
 		"tplanS7T0" : tplanS7T0, #Start-Snap Action Ground Operator Effects
 		"tplanS7T1" : tplanS7T1,
+		"tplanS7T0" : tplanS8T0, #AddEffectStrategy
+		"tplanS7T1" : tplanS8T1,
+		"tplanS7T0" : tplanS9T0, #DelEffectStrategy
+		"tplanS7T1" : tplanS9T1,
+		"tplanS7T0" : tplanS10T0, #BothEffectStrategy
+		"tplanS7T1" : tplanS10T1,
+		"tplanS7T0" : tplanS11T0, #MostRecentAddEffectResourceStrategy
+		"tplanS7T1" : tplanS11T1,
+		"tplanS7T0" : tplanS12T0, #MostRecentDelEffectResourceStrategy
+		"tplanS7T1" : tplanS12T1,
+		"tplanS7T0" : tplanS13T0, #MostRecentBothEffectResourceStrategy
+		"tplanS7T1" : tplanS13T1,
+		"tplanS7T0" : tplanS14T0, #MostRecentAddEffectStrategy
+		"tplanS7T1" : tplanS14T1,
+		"tplanS7T0" : tplanS15T0, #MostRecentDelEffectStrategy
+		"tplanS7T1" : tplanS15T1,
+		"tplanS7T0" : tplanS16T0, #MostRecentEffectStrategy
+		"tplanS7T1" : tplanS16T1,
 		#tplan with FD Subplanner
 		"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
 		"tplanS0T1_FD" : tplanS0T1_FD,
