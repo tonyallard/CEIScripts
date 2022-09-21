@@ -105,6 +105,7 @@ def popfTRHpopf_TotalEdgesInConflict(domainFile, probFile, planFile="", confFile
 #Popf-TRH Use Total Edges in Conflict, No Early Termination
 def popfTRHpopf_TotalEdgesInConflict_NoET(domainFile, probFile, planFile="", confFile=""):
 	other_params = "-4 -6"
+	return popfTRHpopf(domainFile, probFile, planFile, confFile, other_params)
 
 #Popf-TRH Use Accumulative Relaxation
 def popfTRHpopf_AccumulativeRelax(domainFile, probFile, planFile="", confFile=""):
