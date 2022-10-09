@@ -27,10 +27,15 @@ class element_namer:
 			return readable_name
 		return random.choice(string.ascii_letters) + str(uuid.uuid1())
 
-def create_time_window_TIL(goal_pred, time_window):
-	return timed_initial_literal(
-		time_window, 
-		simple_effect(goal_pred, NEG))
+def create_time_window_TIL(goal_pred, time_window, pos=True):
+	if (pos):
+		return timed_initial_literal(
+			time_window, 
+			simple_effect(goal_pred, POS))
+	else:
+		return timed_initial_literal(
+			time_window, 
+			simple_effect(goal_pred, NEG))
 
 def create_condition(time_spec, pred):
 	if pred is None:
@@ -218,7 +223,8 @@ def create_problem_instance(domain_file, problem_file, time_window, num_chains, 
 		#Add initial state and goals to problem
 
 		#Create the time window for goal action
-		time_window_start = simple_effect(goal_pred)
+		time_window_start_time = time_window - round(time_window / (chain_length + 0.2), 2)
+		time_window_start = create_time_window_TIL(goal_pred, time_window_start_time)
 		time_window_end = create_time_window_TIL(goal_pred, time_window)
 		prob.init.append(time_window_start)
 		prob.init.append(time_window_end)
