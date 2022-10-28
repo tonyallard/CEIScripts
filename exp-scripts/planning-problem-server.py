@@ -306,6 +306,24 @@ def tplanS16T0(domainFile, probFile, planFile="", confFile=""):
 	
 def tplanS16T1(domainFile, probFile, planFile="", confFile=""):
 	return base_tplan(16, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS17T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(17, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS17T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(17, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS18T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(18, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS18T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(18, 1, domainFile, probFile, planFile, confFile)
+
+def tplanS19T0(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(19, 0, domainFile, probFile, planFile, confFile)
+	
+def tplanS19T1(domainFile, probFile, planFile="", confFile=""):
+	return base_tplan(19, 1, domainFile, probFile, planFile, confFile)
 		
 def base_tplan(strategy, application, domainFile, probFile, planFile="", confFile="", subplanner=0):
 	PLANNER_LOC= os.path.join(DEFAULT_ROOT_DIR, "planners/tplan/")
@@ -414,6 +432,7 @@ OUTPUT_FOLDER = "output"
 
 #Constants
 DOMAIN_FILE = "DOMAIN.PDDL"
+DOMAIN_FILE_LOWER = "domain.pddl"
 IGNORE_SET_LIST = ["archive", "archive2", "archive3", "constraints_def"]
 
 PLANNERS_NEEDING_EXTRA_CONF = [
@@ -432,7 +451,13 @@ PLANNERS_NEEDING_EXTRA_CONF = [
 			"tplanS12T0", 
 			"tplanS12T1",
 			"tplanS13T0", 
-			"tplanS13T1"]
+			"tplanS13T1", 
+			"tplanS17T0",
+			"tplanS17T1", 
+			"tplanS18T0",
+			"tplanS18T1", 
+			"tplanS19T0",
+			"tplanS19T1",]
 
 CONF_FILE_DIR = "constraints_def"
 
@@ -452,7 +477,13 @@ CONF_FILE_SUBDIR = {
 		"tplanS12T0" : "4", 
 		"tplanS12T1" : "4",
 		"tplanS13T0" : "4", 
-		"tplanS13T1" : "4"}
+		"tplanS13T1" : "4",
+		"tplanS17T0" : "4", 
+		"tplanS17T1" : "4",
+		"tplanS18T0" : "4", 
+		"tplanS18T1" : "4",
+		"tplanS19T0" : "4", 
+		"tplanS19T1" : "4"}
 
 CONF_FILE_NAMES = {	
 		"satellite" : "satellite.conf",
@@ -474,13 +505,22 @@ def getMMCRNoGoodsDomain(probFileName):
 def getActionChainsBenchmarkDomain(probFileName):
 	return probFileName.replace("problem", "domain")
 
+def getParcPrinterDomain(probFileName):
+	return probFileName[:-5] + "-" + DOMAIN_FILE_LOWER
+
 PROBLEM_HAS_UNIQUE_DOMAIN = {
 	"airport" : getAirportDomain, 
 	"airport-tighten" : getAirportDomain,
 	"mmcr-no-metric-no-goods" : getMMCRNoGoodsDomain,
 	"mmcr-no-metric-no-goods-10Cargo" : getMMCRNoGoodsDomain,
 	"action-chains-benchmark" : getActionChainsBenchmarkDomain,
-	"acb-chainlength-50" : getActionChainsBenchmarkDomain
+	"acb-chainlength-50" : getActionChainsBenchmarkDomain,
+	"acb-chain-len-test" : getActionChainsBenchmarkDomain,
+	"acb-num-chains-test" : getActionChainsBenchmarkDomain,
+	"parcprinter-strips" : getParcPrinterDomain,
+	"elevators-strips" : getParcPrinterDomain,
+	"sokoban-strips" : getParcPrinterDomain,
+	"openstacks-strips" : getParcPrinterDomain
 }
 
 def setupFolderStructure(plansdir_fullpath, outputdir_fullpath):
@@ -571,6 +611,12 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"tplanS15T1" : tplanS15T1,
 		"tplanS16T0" : tplanS16T0, #MostRecentEffectStrategy
 		"tplanS16T1" : tplanS16T1,
+		"tplanS17T0" : tplanS17T0, #AddEffectResourceStrategy
+		"tplanS17T1" : tplanS17T1,
+		"tplanS18T0" : tplanS18T0, #DelEffectResourceStrategy
+		"tplanS18T1" : tplanS18T1,
+		"tplanS19T0" : tplanS19T0, #EffectResourceStrategy
+		"tplanS19T1" : tplanS19T1,
 		#tplan with FD Subplanner
 		"tplanS0T0_FD" : tplanS0T0_FD, #All Ground Operators
 		"tplanS0T1_FD" : tplanS0T1_FD,
@@ -626,7 +672,7 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 					planner_command = ""
 					if (planner in PLANNERS_NEEDING_EXTRA_CONF):
 						if problem_domain not in CONF_FILE_NAMES:
-							printMessage("Could not schedule %s - %s for %s as there\
+							printMessage("Could not schedule %s - %s for %s as there \
 was no associated conf file."%(problem_domain, prob, planner))
 							break #Can't schedule up this problem
 
