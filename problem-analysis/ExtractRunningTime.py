@@ -108,7 +108,7 @@ def main(args):
 	logStructure = AnalysisCommon.getLogStructure(inputPath)
 
 	for planner in logStructure:
-		print planner
+		print (planner)
 		for problemDomain in logStructure[planner]:
 			logPath = logStructure[planner][problemDomain]
 
@@ -128,8 +128,8 @@ def main(args):
 			avgRunTime = 0
 			if numProbs > 0:
 				avgRunTime = totalRunTime/numProbs
-			print "\t%s"%problemDomain
-			print "\t\tAvg Wall Clock Time: %f"%avgRunTime
+			print ("\t%s"%problemDomain)
+			print ("\t\tAvg Wall Clock Time: %f"%avgRunTime)
 
 #Run Main Function
 if __name__ == "__main__":

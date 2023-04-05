@@ -68,7 +68,7 @@ def main(args):
 	logStructure = AnalysisCommon.getLogStructure(inputPath)
 
 	for planner in logStructure:
-		print planner
+		print (planner)
 		if planner == "lpg-td":
 			continue
 		for problemDomain in logStructure[planner]:
@@ -95,9 +95,9 @@ def main(args):
 				
 				probsConsidered += 1
 				
-			print "\t%s"%problemDomain
-			print "\t\tAvg Dead Ends: %f"%(deadEnds/probsConsidered)
-			print "\t\tAvg Initial State Dead Ends: %f"%(initialState_deadEnds/probsConsidered)
+			print ("\t%s"%problemDomain)
+			print ("\t\tAvg Dead Ends: %f"%(deadEnds/probsConsidered))
+			print ("\t\tAvg Initial State Dead Ends: %f"%(initialState_deadEnds/probsConsidered))
 
 #Run Main Function
 if __name__ == "__main__":

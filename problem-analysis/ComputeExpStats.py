@@ -60,13 +60,13 @@ def processProblemDomainStatistics(planner, problemDomain, logPath):
 		try:
 			probDomStats.processProblemLog(problemName, probNumber, buffer)
 		except RuntimeError as err:
-			print "There was an error processing file: {file} containing {plan} : {prob} : {num}.\n\t{msg}".format(
+			print("There was an error processing file: {file} containing {plan} : {prob} : {num}.\n\t{msg}".format(
 				file = filename,
 				plan = planner,
 				prob = problemName,
 				num = probNumber,
 				msg = err
-			)
+			))
 			sys.exit()
 
 	return probDomStats
@@ -100,7 +100,7 @@ def main(args):
 	logStructure = AnalysisCommon.getLogStructure(rootLogPath)
 					
 	for planner in logStructure:
-		print planner
+		print(planner)
 		for problemDomain in logStructure[planner]:
 			logPath = logStructure[planner][problemDomain]
 
@@ -110,7 +110,7 @@ def main(args):
 
 			probDomStats = processProblemDomainStatistics(planner, 
 				problemDomain, logPath)
-			print "\t%s %s"%(probDomStats.problemDomain, probDomStats.totalProbs)
+			print("\t%s %s"%(probDomStats.problemDomain, probDomStats.totalProbs))
 			if (probDomStats.totalProbs <= 0):
 				continue
 			#Print problem statistics to CSV file
