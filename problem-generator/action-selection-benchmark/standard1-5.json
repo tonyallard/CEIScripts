@@ -9,7 +9,7 @@
 		"min" : 1,
 		"max" : 5
 	},
-	"num-rand-actions" : {
+	"num-distracting-actions" : {
 		"min" : 1,
 		"max" : 5
 	},

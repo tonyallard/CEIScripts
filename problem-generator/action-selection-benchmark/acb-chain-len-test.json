@@ -1,0 +1,18 @@
+{
+	"name" : "A config to test performance as chain length increases",
+	"time-window" : 5,
+	"num-chains" : {
+		"min" : 5,
+		"max" : 5
+	},
+	"chain-length" : {
+		"min" : 25,
+		"max" : 50
+	},
+	"num-distracting-actions" : {
+		"min" : 5,
+		"max" : 5
+	},
+	"action-goals" : "chains_only",
+	"readable" : false
+}

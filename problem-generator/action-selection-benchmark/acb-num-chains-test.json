@@ -1,0 +1,18 @@
+{
+	"name" : "Testing performance as number of chains increases (others constant)",
+	"time-window" : 5,
+	"num-chains" : {
+		"min" : 25,
+		"max" : 50
+	},
+	"chain-length" : {
+		"min" : 10,
+		"max" : 10
+	},
+	"num-distracting-actions" : {
+		"min" : 5,
+		"max" : 5
+	},
+	"action-goals" : "chains_only",
+	"readable" : false
+}

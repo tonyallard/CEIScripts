@@ -16,6 +16,9 @@ from pddl.domain import *
 from pddl.problem import *
 from pddl.pddl_file_writer import *
 
+GOOD_CHAIN_DILATION = 0.99
+DISTRACTING_CHAIN_DILATION_LOWER = 1.1
+DISTRACTING_CHAIN_DILATION_UPPER = 1.2
 
 class element_namer:
 	
@@ -53,7 +56,7 @@ def create_action(action_name, condition, effects, duration, namer):
 		conj_effect(*effects)
 	)
 
-def create_n_similar_actions(orig_name, num_actions, condition, effect, duration_mean, duration_variance, all_action_goals, namer):
+def create_n_similar_actions(orig_name, num_actions, condition, effect, duration_low, duration_high, all_action_goals, namer):
 	actions = []
 	propositions = []
 	goals = []
@@ -76,17 +79,19 @@ def create_n_similar_actions(orig_name, num_actions, condition, effect, duration
 			action_name,
 			condition,
 			effects,
-			round(random.uniform(duration_mean-duration_variance, duration_mean+duration_variance), 2),
+			round(random.uniform(duration_low, duration_high), 2),
 			namer
 		)
 		actions.append(act)
 	return actions, propositions, goals
 
-def create_chain(time_window, chain_num, chain_len, num_rand_actions, all_action_goals, namer):
+def create_chain(time_window, chain_num, chain_len, num_distracting_actions, all_action_goals, namer):
 	
 	#add a bit more to keep some planners happy
 	#colin like planners fail when actions fit exactly inside the time window
-	action_duration = round(time_window / (chain_len + 0.2), 2)
+	action_duration = round((time_window * GOOD_CHAIN_DILATION) / chain_len, 2)
+	distracting_action_duration_lower = round((time_window * DISTRACTING_CHAIN_DILATION_LOWER) / chain_len, 2)
+	distracting_action_duration_upper = round((time_window * DISTRACTING_CHAIN_DILATION_UPPER) / chain_len, 2)
 	actions = []
 	propositions = []
 	goals = []
@@ -128,17 +133,17 @@ def create_chain(time_window, chain_num, chain_len, num_rand_actions, all_action
 		actions.append(setup_action)
 
 		#create n-trick actions to throw planners off
-		if (num_rand_actions):
+		if (num_distracting_actions):
 			n_actions, n_act_props, n_act_goals = create_n_similar_actions(
 				"rand-actions-{cl}-{cn}".format(
 					cl = x,
 					cn = chain_num
 				),
-				num_rand_actions, 
+				num_distracting_actions, 
 				condition,
 				next_action_support_effect,
-				action_duration+1.2,
-				0.5,
+				distracting_action_duration_lower,
+				distracting_action_duration_upper,
 				all_action_goals,
 				namer)
 			actions.extend(n_actions)
@@ -179,12 +184,12 @@ def create_chain(time_window, chain_num, chain_len, num_rand_actions, all_action
 	
 	return actions, propositions, goal_action_timed_pred, goals, chain_init_prop
 
-def create_problem_instance(domain_file, problem_file, time_window, num_chains, chain_length, num_rand_actions, all_action_goals, namer):
+def create_problem_instance(domain_file, problem_file, time_window, num_chains, chain_length, num_distracting_actions, all_action_goals, namer):
 
-	dom = domain("action-{cn}-chains-{cl}-length-{ra}-racts{acg}".format(
+	dom = domain("action-{cn}-chains-{cl}-length-{da}-dacts{acg}".format(
 		cn = num_chains,
 		cl = chain_length,
-		ra = num_rand_actions,
+		da = num_distracting_actions,
 		acg = "" if not all_action_goals else "-aag"
 	))
 
@@ -213,7 +218,7 @@ def create_problem_instance(domain_file, problem_file, time_window, num_chains, 
 			time_window, 
 			chain_num, 
 			chain_length, 
-			num_rand_actions, 
+			num_distracting_actions, 
 			all_action_goals, 
 			namer)
 
@@ -223,7 +228,7 @@ def create_problem_instance(domain_file, problem_file, time_window, num_chains, 
 		#Add initial state and goals to problem
 
 		#Create the time window for goal action
-		time_window_start_time = time_window - round(time_window / (chain_length + 0.2), 2)
+		time_window_start_time = time_window - round((time_window * GOOD_CHAIN_DILATION) / chain_length, 2)
 		time_window_start = create_time_window_TIL(goal_pred, time_window_start_time)
 		time_window_end = create_time_window_TIL(goal_pred, time_window)
 		prob.init.append(time_window_start)
@@ -269,13 +274,13 @@ def main(args):
 						nargs="?",
 						default=1,
 		                help='the number of action chains in the domain')
-	parser.add_argument('--num-rand-actions',
+	parser.add_argument('--num_distracting_actions',
 						'-a',
 	                    metavar='1',
 						type=int,
 						nargs="?",
 						default=0,
-		                help='the number of extra random actions to make per action per action chain')
+		                help='the number of extra distracting actions to make per action per action chain')
 	parser.add_argument('--duration',
 						'-d',
 	                    metavar='5',
@@ -316,7 +321,7 @@ def main(args):
 	problem_file = args.problem
 
 	time_window = args.duration
-	num_rand_actions = args.num_rand_actions
+	num_distracting_actions = args.num_distracting_actions
 	chain_length = args.chain_length
 	num_chains = args.num_chains
 	all_action_goals = args.all_action_goals
@@ -327,7 +332,7 @@ def main(args):
 		time_window,
 		num_chains,
 		chain_length,
-		num_rand_actions,
+		num_distracting_actions,
 		all_action_goals,
 		namer
 	)
