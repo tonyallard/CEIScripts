@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/python3
 
 #Provides all the helper methods for creating MMCR Problems
 
@@ -25,7 +25,7 @@ def isint(x):
 
 def parseArgs(args, argsDesc):
 	if (len(args) != len(argsDesc)):
-		print "Error: Incorrect number of arguments. Requires %i given %i."%(len(argsDesc), len(args))
+		print("Error: Incorrect number of arguments. Requires %i given %i."%(len(argsDesc), len(args)))
 		raise SyntaxError
 	i = 0
 	params = dict()
@@ -38,7 +38,7 @@ def parseArgs(args, argsDesc):
 			else:
 				params[argsDesc[i]] = str(x)
 		except ValueError:
-			print "Error reading parameter %i with value of %s" %(i, argName[i])
+			print("Error reading parameter %i with value of %s" %(i, argName[i]))
 			raise SyntaxError
 		i+=1
 	return params
@@ -250,7 +250,7 @@ def determineTimeWindows(deliveryInfo, connectivityMap, vehicleOriginMap, travel
 def saveProblem(name, locations, vehicles, cargoes, pddl, goals):
 	probName = name.split("/")[-1]
 	fileName = "".join([name, ".pddl"])
-	print fileName
+	print (fileName)
 	f = open(fileName, 'w')
 	#Write header
 	f.write("(define (problem %s)\n"%probName)
