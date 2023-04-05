@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import json
+import csv
 import socket
 from multiprocessing import Queue
 import time
@@ -542,10 +543,7 @@ def getProblemFiles(path):
 					problems.append(file)
 	return problems
 
-def getProblemQueue(planners, problem_domains, iterations=1, start=0):
-	#The Queue
-	q = Queue()
-	planner_exec = {
+planner_exec = {
 		"Colin-RPG" : colinRPG,
 		"NoSD-Colin-RPG" : colinRPGNoSD,
 		"POPF-RPG" : popf,
@@ -626,6 +624,71 @@ def getProblemQueue(planners, problem_domains, iterations=1, start=0):
 		"tplanS7T1_FD" : tplanS7T1_FD,
 		"itsat" : itsat
 	}
+
+def getProblemQueueCSV(csv_reader):
+	#The Queue
+	q = Queue()
+
+	#Iterate through CSV File
+	for row in csv_reader:
+		planner = row["planner"]
+		problem_domain = row["problem domain"]
+		problem = row["problem"]
+		iteration = int(row["iteration"])
+
+		f = planner_exec[planner]
+		
+		problemSetsDir = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS)
+		problemDomainDir = os.path.join(problemSetsDir, problem_domain)
+		if not os.path.exists(problemDomainDir):
+			printMessage(f"Error: {problem_domain} is not a supported problem domain")
+			sys.exit(-1)
+		
+		plansdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, problem_domain, PLANS_FOLDER)
+		outputdir_fullpath = os.path.join(DEFAULT_ROOT_DIR, LOG_FOLDER, planner, problem_domain, OUTPUT_FOLDER)
+
+		setupFolderStructure(plansdir_fullpath, outputdir_fullpath)
+		#Problem file
+		probFile = os.path.join(problemDomainDir, problem)
+		#Domain file
+		domainFile = os.path.join(problemDomainDir, DOMAIN_FILE)
+		#Special case for problem domains that hava a unique file per problem
+		if problem_domain in list(PROBLEM_HAS_UNIQUE_DOMAIN.keys()):
+			domainFile = os.path.join(problemDomainDir, PROBLEM_HAS_UNIQUE_DOMAIN[problem_domain](prob))
+
+		#Plan file
+		planFileName = f"{problem}-{iteration}.plan"
+		planFile = os.path.join(plansdir_fullpath, planFileName)
+					
+		planner_command = ""
+		if (planner in PLANNERS_NEEDING_EXTRA_CONF):
+			if problem_domain not in CONF_FILE_NAMES:
+				printMessage(f"Could not schedule {problem_domain} - {problem} for {planner} as there was no associated conf file.")
+				break #Can't schedule up this problem
+
+			confFileName = CONF_FILE_NAMES[problem_domain]
+			confFile = os.path.join(DEFAULT_ROOT_DIR, PROBLEM_SETS, 
+				CONF_FILE_DIR, CONF_FILE_SUBDIR[planner], confFileName)
+			planner_command = f(domainFile, probFile, planFile, confFile)
+		else:
+			#Planner command
+			planner_command = f(domainFile, probFile, planFile)
+
+		#Validate command
+		validate_command = validate(domainFile, probFile, planFile)
+		#Log file
+		logFileName = f"{problem}-{iteration}.txt"
+		logFile = os.path.join(outputdir_fullpath, logFileName)
+		#Generate job
+		job = Job(planner, problem, iteration, planner_command, validate_command, logFile, planFile)
+		q.put(job)
+	return q
+
+
+def getProblemQueue(planners, problem_domains, iterations=1, start=0):
+	#The Queue
+	q = Queue()
+	
 	#iterate through planners
 	for planner in planners:
 		if planner not in planner_exec:
@@ -817,13 +880,30 @@ def main(args):
 						default=DEFAULT_PORT,
 						type=int,
 						help='The port that the experimentation server is listening on')
-	parser.add_argument('-c',
+	group = parser.add_mutually_exclusive_group(required=True)
+	group.add_argument('-c',
 						'--config',
-						required=True,
 						type=str,
 						metavar='/path/to/config/file.json',
 						help='Config file that defines the experiment')
-	parser.add_argument(	'-r',
+	csv_group = group.add_mutually_exclusive_group()
+	csv_group.add_argument('--csv',
+						type=str,
+						metavar='/path/to/file.csv',
+						help='CSV file that explicitly lists planner, problem, iteration jobs')
+	csv_group.add_argument('-t',
+						'--time-limit',
+						type=int,
+						metavar=30,
+						default=30,
+						help='Time limit for a single experiment in minutes (default: 30 mins).')
+	csv_group.add_argument('-m',
+						'--memory-limit',
+						type=int,
+						metavar=4,
+						default=4,
+						help='Memory limit for a single experiment in gigabytes (default: 4 gigabytes).')
+	parser.add_argument('-r',
 				'--ramdisk',
 	               	metavar='/path/to/ram/disk/dir',
 				required=False,
@@ -831,7 +911,7 @@ def main(args):
 				default=DEFAULT_RAM_DISK_DIR,
 				help='the mount point of ram disk for temp files')
 				
-	parser.add_argument(	'--clear-ramdisk',
+	parser.add_argument('--clear-ramdisk',
 				required=False,
 				type=bool,
 				default=True,
@@ -853,37 +933,49 @@ def main(args):
 		else:
 			printMessage("Error: Invalid direcory specified as experimentation directory: %s"%args.path)
 			sys.exit(-1)
-	
-	if not os.path.isfile(args.config):
-		print("Error: {c} is not a valid configuration file".format(
-			c = args.config
-		))
-		sys.exit(-2)
 
+	if args.config:
+		if not os.path.isfile(args.config):
+			print(f"Error: {args.config} is not a valid configuration file")
+			sys.exit(-2)
+
+		with open(args.config) as f:
+			config = json.load(f)
+
+		printMessage(f"Using experiment configuration from \"{args.config}\": {config['name']}")
+		time_limit = config["planning-time-limit"]
+		mem_limit = config["planning-mem-limit"]
+		planners = config["planners"]
+		problem_domains = config["problem-domains"]
+		iterations = config["iterations"]
+		startItr = config["start-itr"]
+	
+	elif args.csv:
+		if not os.path.isfile(args.csv):
+			print(f"Error: {args.csv} is not a valid CSV file")
+			sys.exit(-3)
+
+		printMessage(f"Running experiments defined in \"{args.csv}\"")		
+		time_limit = args.time_limit
+		mem_limit = args.memory_limit
+	
+	else:
+		print(f"Error: No configuration specified")
+		sys.exit(-4)
+	
+	
+
+	printMessage(f"Experimentation directory set to {DEFAULT_ROOT_DIR}")
+	if args.clear_ramdisk:
+		printMessage("Ram Disk directory set to %s"%args.ramdisk)
+	
 	ram_disk_dir = ""
 	if (args.clear_ramdisk):
 		if not os.path.isdir(args.ramdisk):
-			printMessage("Error: Invalid direcory specified as ram disk directory: %s"%args.ramdisk)
-			sys.exit(-3)
-
-	with open(args.config) as f:
-		config = json.load(f)
-
-	printMessage("Experimentation directory set to %s"%DEFAULT_ROOT_DIR)
-	printMessage("Using experiment configuration from \"{cf}\": {cn}".format(
-		cn = config["name"],
-		cf = args.config
-	))
-	if args.clear_ramdisk:
-		printMessage("Ram Disk directory set to %s"%args.ramdisk)
-
-	time_limit = config["planning-time-limit"]
-	mem_limit = config["planning-mem-limit"]
-	planners = config["planners"]
-	problem_domains = config["problem-domains"]
-	iterations = config["iterations"]
-	startItr = config["start-itr"]
-
+			printMessage(f"Error: Invalid direcory specified as ram disk directory: {args.ramdisk}")
+			sys.exit(-4)
+	
+	
 	#Set experimentation runtime parameters
 	global MEMLIMIT_CMD
 	MEMLIMIT_CMD = MEMLIMIT_CMD%(mem_limit * 1000000) #ulimit is in 1024-byte blocks
@@ -891,8 +983,13 @@ def main(args):
 	TIMEOUT_CMD = TIMEOUT_CMD%time_limit
 
 	#Get problems ready for computation
-	q = getProblemQueue(planners, problem_domains, iterations, startItr)
-	printMessage("Problem queue initialised with %i problems."%q.qsize())
+	if args.config:
+		q = getProblemQueue(planners, problem_domains, iterations, startItr)
+	elif args.csv:
+		with open(args.csv, mode='r') as csv_file:
+			csv_reader = csv.DictReader(csv_file, delimiter=',')
+			q = getProblemQueueCSV(csv_reader)
+	printMessage(f"Problem queue initialised with {q.qsize()} problems.")
 	#Current allocation data structure
 	#Indexed by id, then list. Elements:
 	#0: IP
