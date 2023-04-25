@@ -33,7 +33,7 @@ rm -f /mnt/ramdisk/*
 
 echo "Initialising experimentation server"
 source "$EXP_ROOT_DIR"/exp-scripts/bin/activate
-"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" --csv "$CONFIG_FILE" > "$EXP_ROOT_DIR"/logs/server.log 2>&1 &
+"$EXP_ROOT_DIR"/exp-scripts/bin/python3 "$EXP_ROOT_DIR"/exp-scripts/planning-problem-server.py "$EXP_ROOT_DIR" --csv "$CSV_FILE" > "$EXP_ROOT_DIR"/logs/server.log 2>&1 &
 
 echo "Waiting for server to start..."
 sleep 5
