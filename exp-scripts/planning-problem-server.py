@@ -654,7 +654,7 @@ def getProblemQueueCSV(csv_reader):
 		domainFile = os.path.join(problemDomainDir, DOMAIN_FILE)
 		#Special case for problem domains that hava a unique file per problem
 		if problem_domain in list(PROBLEM_HAS_UNIQUE_DOMAIN.keys()):
-			domainFile = os.path.join(problemDomainDir, PROBLEM_HAS_UNIQUE_DOMAIN[problem_domain](prob))
+			domainFile = os.path.join(problemDomainDir, PROBLEM_HAS_UNIQUE_DOMAIN[problem_domain](problem))
 
 		#Plan file
 		planFileName = f"{problem}-{iteration}.plan"
